@@ -14,6 +14,8 @@ var tests = []E2E{
 	&AttestationSigningAccountNotFound{},
 	&AttestationDoubleSigning{},
 	&AttestationConcurrentSigning{},
+	&ProposalConcurrentSigning{},
+	&ProposalSigningAccountNotFound{},
 }
 
 func TestE2E(t *testing.T) {

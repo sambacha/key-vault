@@ -86,6 +86,21 @@ func Setup(t *testing.T) *BaseSetup {
 
 // SignAttestation tests the sign attestation endpoint.
 func (setup *BaseSetup) SignAttestation(data map[string]interface{}) ([]byte, error) {
+	return setup.sign("sign-attestation", data)
+}
+
+// SignProposal tests the sign proposal endpoint.
+func (setup *BaseSetup) SignProposal(data map[string]interface{}) ([]byte, error) {
+	return setup.sign("sign-proposal", data)
+}
+
+// SignAggregation tests the sign aggregation endpoint.
+func (setup *BaseSetup) SignAggregation(data map[string]interface{}) ([]byte, error) {
+	return setup.sign("sign-aggregation", data)
+}
+
+// sign tests the sign endpoint.
+func (setup *BaseSetup) sign(endpoint string, data map[string]interface{}) ([]byte, error) {
 	// body
 	body, err := json.Marshal(data)
 	if err != nil {
@@ -93,7 +108,7 @@ func (setup *BaseSetup) SignAttestation(data map[string]interface{}) ([]byte, er
 	}
 
 	// build req
-	targetURL := fmt.Sprintf("%s/v1/ethereum/test/accounts/sign-attestation", setup.baseURL)
+	targetURL := fmt.Sprintf("%s/v1/ethereum/test/accounts/%s", setup.baseURL, endpoint)
 	req, err := http.NewRequest(http.MethodPost, targetURL, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, nil
