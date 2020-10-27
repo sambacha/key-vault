@@ -140,8 +140,6 @@ func (setup *BaseSetup) sign(endpoint string, data map[string]interface{}) ([]by
 		return nil, err
 	}
 
-	fmt.Printf("retObj %#v\n", retObj)
-
 	if resp.StatusCode != http.StatusOK {
 		return nil, NewServiceError(retObj)
 	}
