@@ -52,7 +52,7 @@ func (test *AttestationSigning) Run(t *testing.T) {
 	}
 
 	// Sign data
-	protector := slashing_protection.NewNormalProtection(in_memory.NewInMemStore(core.MainNetwork))
+	protector := slashing_protection.NewNormalProtection(in_memory.NewInMemStore(core.TestNetwork))
 	var signer validator_signer.ValidatorSigner = validator_signer.NewSimpleSigner(wallet, protector)
 
 	res, err := signer.SignBeaconAttestation(test.dataToAttestationRequest(t, pubKeyBytes, dataToSign))

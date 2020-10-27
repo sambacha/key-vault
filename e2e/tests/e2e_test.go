@@ -10,10 +10,21 @@ type E2E interface {
 }
 
 var tests = []E2E{
+	// Attestation signing
 	&AttestationSigning{},
 	&AttestationSigningAccountNotFound{},
 	&AttestationDoubleSigning{},
 	&AttestationConcurrentSigning{},
+
+	// Aggregation signing
+	&AggregationSigning{},
+	&AggregationDoubleSigning{},
+	&AggregationConcurrentSigning{},
+	&AggregationSigningAccountNotFound{},
+
+	// Proposal signing
+	&ProposalSigning{},
+	&ProposalDoubleSigning{},
 	&ProposalConcurrentSigning{},
 	&ProposalSigningAccountNotFound{},
 }

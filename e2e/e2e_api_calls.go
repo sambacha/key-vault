@@ -136,10 +136,11 @@ func (setup *BaseSetup) sign(endpoint string, data map[string]interface{}) ([]by
 
 	// parse to json
 	retObj := make(map[string]interface{})
-	err = json.Unmarshal(respBodyByts, &retObj)
-	if err != nil {
+	if err := json.Unmarshal(respBodyByts, &retObj); err != nil {
 		return nil, err
 	}
+
+	fmt.Printf("retObj %#v\n", retObj)
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, NewServiceError(retObj)
