@@ -152,6 +152,90 @@ func (setup *BaseSetup) sign(endpoint string, data map[string]interface{}) ([]by
 	return ret, nil
 }
 
+// ListAccounts lists accounts.
+func (setup *BaseSetup) ListAccounts(t *testing.T) ([]byte, int) {
+	// build req
+	targetURL := fmt.Sprintf("%s/v1/ethereum/test/accounts/", setup.baseURL)
+	req, err := http.NewRequest("LIST", targetURL, nil)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", "Bearer "+setup.RootKey)
+
+	// Do request
+	httpClient := http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+	resp, err := httpClient.Do(req)
+	require.NoError(t, err)
+
+	// Read response body
+	respBodyByts, err := ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	return respBodyByts, resp.StatusCode
+}
+
+// ReadConfig reads config.
+func (setup *BaseSetup) ReadConfig(t *testing.T, network core.Network) ([]byte, int) {
+	// build req
+	targetURL := fmt.Sprintf("%s/v1/ethereum/%s/config", setup.baseURL, network)
+	req, err := http.NewRequest("GET", targetURL, nil)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", "Bearer "+setup.RootKey)
+
+	// Do request
+	httpClient := http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+	resp, err := httpClient.Do(req)
+	require.NoError(t, err)
+
+	// Read response body
+	respBodyByts, err := ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	return respBodyByts, resp.StatusCode
+}
+
+// ReadSlashingStorage reads slashing storage.
+func (setup *BaseSetup) ReadSlashingStorage(t *testing.T, network core.Network) ([]byte, int) {
+	// build req
+	targetURL := fmt.Sprintf("%s/v1/ethereum/%s/storage/slashing", setup.baseURL, network)
+	req, err := http.NewRequest("GET", targetURL, nil)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", "Bearer "+setup.RootKey)
+
+	// Do request
+	httpClient := http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+	resp, err := httpClient.Do(req)
+	require.NoError(t, err)
+
+	// Read response body
+	respBodyByts, err := ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	return respBodyByts, resp.StatusCode
+}
+
 // UpdateStorage updates the storage.
 func (setup *BaseSetup) UpdateStorage(t *testing.T) core.Storage {
 	// get store
