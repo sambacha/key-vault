@@ -11,7 +11,7 @@ type E2E interface {
 
 var tests = []E2E{
 	// Attestation signing
-	/*&AttestationSigning{},
+	&AttestationSigning{},
 	&AttestationSigningAccountNotFound{},
 	&AttestationDoubleSigning{},
 	&AttestationConcurrentSigning{},
@@ -29,10 +29,10 @@ var tests = []E2E{
 	&ProposalSigningAccountNotFound{},
 
 	// Accounts tests
-	&AccountsList{},*/
+	&AccountsList{},
 
 	// Config tests
-	// &ConfigRead{},
+	&ConfigRead{},
 
 	// Storage tests
 	&SlashingStorageRead{},
