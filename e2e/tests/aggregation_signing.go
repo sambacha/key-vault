@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/bloxapp/eth2-key-manager/core"
-
 	"github.com/bloxapp/eth2-key-manager/slashing_protection"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 	"github.com/bloxapp/eth2-key-manager/validator_signer"
@@ -30,7 +29,7 @@ func (test *AggregationSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	storage := setup.UpdateStorage(t)
+	storage := setup.UpdateStorage(t, core.TestNetwork)
 	account := shared.RetrieveAccount(t, storage)
 	require.NotNil(t, account)
 	pubKeyBytes := account.ValidatorPublicKey().Marshal()
@@ -53,7 +52,7 @@ func (test *AggregationSigning) Run(t *testing.T) {
 	require.NoError(t, err)
 
 	// Send sign attestation request
-	sig, err := setup.SignAggregation(dataToSign)
+	sig, err := setup.SignAggregation(dataToSign, core.TestNetwork)
 	require.NoError(t, err)
 
 	require.Equal(t, res.GetSignature(), sig)

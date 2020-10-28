@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/e2e"
@@ -23,7 +24,7 @@ func (test *AttestationSigningAccountNotFound) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	setup.UpdateStorage(t)
+	setup.UpdateStorage(t, core.TestNetwork)
 
 	// sign
 	_, err := setup.SignAttestation(
@@ -38,6 +39,7 @@ func (test *AttestationSigningAccountNotFound) Run(t *testing.T) {
 			"targetEpoch":     8878,
 			"targetRoot":      "17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0",
 		},
+		core.TestNetwork,
 	)
 	require.Error(t, err)
 	require.IsType(t, &e2e.ServiceError{}, err)

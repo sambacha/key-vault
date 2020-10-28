@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/e2e"
@@ -25,7 +26,7 @@ func (test *ProposalDoubleSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	store := setup.UpdateStorage(t)
+	store := setup.UpdateStorage(t, core.TestNetwork)
 	account := shared.RetrieveAccount(t, store)
 	pubKey := hex.EncodeToString(account.ValidatorPublicKey().Marshal())
 
@@ -40,6 +41,7 @@ func (test *ProposalDoubleSigning) Run(t *testing.T) {
 			"stateRoot":     "7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d",
 			"bodyRoot":      "17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0",
 		},
+		core.TestNetwork,
 	)
 	require.NoError(t, err)
 
@@ -54,6 +56,7 @@ func (test *ProposalDoubleSigning) Run(t *testing.T) {
 			"stateRoot":     "7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d",
 			"bodyRoot":      "17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0",
 		},
+		core.TestNetwork,
 	)
 	require.Error(t, err, "did not slash")
 	require.IsType(t, &e2e.ServiceError{}, err)
