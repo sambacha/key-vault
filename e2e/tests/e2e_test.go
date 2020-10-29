@@ -10,10 +10,32 @@ type E2E interface {
 }
 
 var tests = []E2E{
+	// Attestation signing
 	&AttestationSigning{},
 	&AttestationSigningAccountNotFound{},
 	&AttestationDoubleSigning{},
 	&AttestationConcurrentSigning{},
+
+	// Aggregation signing
+	&AggregationSigning{},
+	&AggregationDoubleSigning{},
+	&AggregationConcurrentSigning{},
+	&AggregationSigningAccountNotFound{},
+
+	// Proposal signing
+	&ProposalSigning{},
+	&ProposalDoubleSigning{},
+	&ProposalConcurrentSigning{},
+	&ProposalSigningAccountNotFound{},
+
+	// Accounts tests
+	&AccountsList{},
+
+	// Config tests
+	&ConfigRead{},
+
+	// Storage tests
+	&SlashingStorageRead{},
 }
 
 func TestE2E(t *testing.T) {

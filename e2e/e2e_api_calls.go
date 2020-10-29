@@ -85,7 +85,22 @@ func Setup(t *testing.T) *BaseSetup {
 }
 
 // SignAttestation tests the sign attestation endpoint.
-func (setup *BaseSetup) SignAttestation(data map[string]interface{}) ([]byte, error) {
+func (setup *BaseSetup) SignAttestation(data map[string]interface{}, network core.Network) ([]byte, error) {
+	return setup.sign("sign-attestation", data, network)
+}
+
+// SignProposal tests the sign proposal endpoint.
+func (setup *BaseSetup) SignProposal(data map[string]interface{}, network core.Network) ([]byte, error) {
+	return setup.sign("sign-proposal", data, network)
+}
+
+// SignAggregation tests the sign aggregation endpoint.
+func (setup *BaseSetup) SignAggregation(data map[string]interface{}, network core.Network) ([]byte, error) {
+	return setup.sign("sign-aggregation", data, network)
+}
+
+// sign tests the sign endpoint.
+func (setup *BaseSetup) sign(endpoint string, data map[string]interface{}, network core.Network) ([]byte, error) {
 	// body
 	body, err := json.Marshal(data)
 	if err != nil {
@@ -93,7 +108,7 @@ func (setup *BaseSetup) SignAttestation(data map[string]interface{}) ([]byte, er
 	}
 
 	// build req
-	targetURL := fmt.Sprintf("%s/v1/ethereum/test/accounts/sign-attestation", setup.baseURL)
+	targetURL := fmt.Sprintf("%s/v1/ethereum/%s/accounts/%s", setup.baseURL, network, endpoint)
 	req, err := http.NewRequest(http.MethodPost, targetURL, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, nil
@@ -121,8 +136,7 @@ func (setup *BaseSetup) SignAttestation(data map[string]interface{}) ([]byte, er
 
 	// parse to json
 	retObj := make(map[string]interface{})
-	err = json.Unmarshal(respBodyByts, &retObj)
-	if err != nil {
+	if err := json.Unmarshal(respBodyByts, &retObj); err != nil {
 		return nil, err
 	}
 
@@ -138,8 +152,92 @@ func (setup *BaseSetup) SignAttestation(data map[string]interface{}) ([]byte, er
 	return ret, nil
 }
 
+// ListAccounts lists accounts.
+func (setup *BaseSetup) ListAccounts(t *testing.T, network core.Network) ([]byte, int) {
+	// build req
+	targetURL := fmt.Sprintf("%s/v1/ethereum/%s/accounts/", setup.baseURL, network)
+	req, err := http.NewRequest("LIST", targetURL, nil)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", "Bearer "+setup.RootKey)
+
+	// Do request
+	httpClient := http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+	resp, err := httpClient.Do(req)
+	require.NoError(t, err)
+
+	// Read response body
+	respBodyByts, err := ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	return respBodyByts, resp.StatusCode
+}
+
+// ReadConfig reads config.
+func (setup *BaseSetup) ReadConfig(t *testing.T, network core.Network) ([]byte, int) {
+	// build req
+	targetURL := fmt.Sprintf("%s/v1/ethereum/%s/config", setup.baseURL, network)
+	req, err := http.NewRequest("GET", targetURL, nil)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", "Bearer "+setup.RootKey)
+
+	// Do request
+	httpClient := http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+	resp, err := httpClient.Do(req)
+	require.NoError(t, err)
+
+	// Read response body
+	respBodyByts, err := ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	return respBodyByts, resp.StatusCode
+}
+
+// ReadSlashingStorage reads slashing storage.
+func (setup *BaseSetup) ReadSlashingStorage(t *testing.T, network core.Network) ([]byte, int) {
+	// build req
+	targetURL := fmt.Sprintf("%s/v1/ethereum/%s/storage/slashing", setup.baseURL, network)
+	req, err := http.NewRequest("GET", targetURL, nil)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", "Bearer "+setup.RootKey)
+
+	// Do request
+	httpClient := http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+	resp, err := httpClient.Do(req)
+	require.NoError(t, err)
+
+	// Read response body
+	respBodyByts, err := ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	return respBodyByts, resp.StatusCode
+}
+
 // UpdateStorage updates the storage.
-func (setup *BaseSetup) UpdateStorage(t *testing.T) core.Storage {
+func (setup *BaseSetup) UpdateStorage(t *testing.T, network core.Network) core.Storage {
 	// get store
 	store, err := shared.BaseInmemStorage(t)
 	require.NoError(t, err)
@@ -157,7 +255,7 @@ func (setup *BaseSetup) UpdateStorage(t *testing.T) core.Storage {
 	require.NoError(t, err)
 
 	// build req
-	targetURL := fmt.Sprintf("%s/v1/ethereum/test/storage", setup.baseURL)
+	targetURL := fmt.Sprintf("%s/v1/ethereum/%s/storage", setup.baseURL, network)
 	req, err := http.NewRequest(http.MethodPost, targetURL, bytes.NewBuffer(body))
 	require.NoError(t, err)
 

@@ -128,10 +128,8 @@ func (b *backend) readConfig(ctx context.Context, s logical.Storage) (*Config, e
 	}
 
 	var result Config
-	if entry != nil {
-		if err := entry.DecodeJSON(&result); err != nil {
-			return nil, errors.Wrap(err, "error reading configuration")
-		}
+	if err := entry.DecodeJSON(&result); err != nil {
+		return nil, errors.Wrap(err, "error reading configuration")
 	}
 
 	return &result, nil
