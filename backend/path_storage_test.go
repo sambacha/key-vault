@@ -83,7 +83,7 @@ func TestStorage(t *testing.T) {
 		// get wallet and account
 		wallet, err := inMemStore.OpenWallet()
 		require.NoError(t, err)
-		acc, err := wallet.AccountByPublicKey("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")
+		acc, err := wallet.AccountByPublicKey("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")
 		require.NoError(t, err)
 
 		vault := store.NewHashicorpVaultStore(context.Background(), logicalStorage, core.MainNetwork)
@@ -91,7 +91,7 @@ func TestStorage(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, wallet.ID().String(), wallet2.ID().String())
 
-		acc2, err := wallet2.AccountByPublicKey("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")
+		acc2, err := wallet2.AccountByPublicKey("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")
 		require.NoError(t, err)
 		require.Equal(t, acc.ID().String(), acc2.ID().String())
 	})

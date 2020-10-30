@@ -26,6 +26,12 @@ func NewHTTPRequestError(url string, statusCode int, responseBody []byte, messag
 	}
 }
 
+// IsHTTPRequestError returns true if the given error is HTTPRequestError
+func IsHTTPRequestError(err error) bool {
+	_, ok := errors.Cause(err).(*HTTPRequestError)
+	return ok
+}
+
 // Error implements error interface
 func (e *HTTPRequestError) Error() string {
 	return e.String()
@@ -68,6 +74,12 @@ func NewGenericErrorWithMessage(msg string) *GenericError {
 	return &GenericError{
 		ErrorMsg: msg,
 	}
+}
+
+// IsGenericError returns true if the given error is GenericError
+func IsGenericError(err error) bool {
+	_, ok := errors.Cause(err).(*GenericError)
+	return ok
 }
 
 // Error implements error interface.
