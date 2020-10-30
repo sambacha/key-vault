@@ -80,19 +80,19 @@ func TestImportAndDeleteFromInMem(t *testing.T) {
 	hashiWallet, err := hashi.OpenWallet()
 	require.NoError(t, err)
 	require.NotNil(t, hashiWallet)
-	hashiAcc3, err := hashiWallet.AccountByPublicKey("90c7ad0b421a767b6d03c5b06fe57a6b9826dd5658dfccc069d85122451433b45014f0f4f7a6afc8bbe3b24c2344019b")
+	hashiAcc3, err := hashiWallet.AccountByPublicKey("800ab4ff899fd668cb9ea4712cc6414d61cb41cdca0a302bf5a1829f35bbdf3277a9e9a09693529b4e8175d6a7e0d5cb")
 	require.NoError(t, err)
 	require.NotNil(t, hashiAcc3)
-	hashiAcc4, err := hashiWallet.AccountByPublicKey("813e00d6d7fae79275ca1552383dfbfc6a7db09baa9d981d797b2338e205e00bf2d8a7f9038b0d8e3d8e316ec555ecf6")
+	hashiAcc4, err := hashiWallet.AccountByPublicKey("b0c8e53f65c3e0ec8dc3b929f0d664481a905fa976c1022d6d1f3c8be8594fb3d42ed1edafe3da642efe7d76819598a1")
 	require.NoError(t, err)
 	require.NotNil(t, hashiAcc4)
 
 	// compare
 	require.Equal(t, inMemWallet.ID().String(), hashiWallet.ID().String())
-	require.Equal(t, inMemAccounts[0].ID().String(), hashiAcc3.ID().String())
-	require.Equal(t, inMemAccounts[0].ValidatorPublicKey().Marshal(), hashiAcc3.ValidatorPublicKey().Marshal())
-	require.Equal(t, inMemAccounts[1].ID().String(), hashiAcc4.ID().String())
-	require.Equal(t, inMemAccounts[1].ValidatorPublicKey().Marshal(), hashiAcc4.ValidatorPublicKey().Marshal())
+	require.Equal(t, inMemAccounts[1].ID().String(), hashiAcc3.ID().String())
+	require.Equal(t, inMemAccounts[1].ValidatorPublicKey().Marshal(), hashiAcc3.ValidatorPublicKey().Marshal())
+	require.Equal(t, inMemAccounts[0].ID().String(), hashiAcc4.ID().String())
+	require.Equal(t, inMemAccounts[0].ValidatorPublicKey().Marshal(), hashiAcc4.ValidatorPublicKey().Marshal())
 }
 
 func TestImportFromInMem(t *testing.T) {
@@ -109,17 +109,17 @@ func TestImportFromInMem(t *testing.T) {
 	hashiWallet, err := hashi.OpenWallet()
 	require.NoError(t, err)
 	require.NotNil(t, hashiWallet)
-	hashiAcc1, err := hashiWallet.AccountByPublicKey("ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279")
+	hashiAcc1, err := hashiWallet.AccountByPublicKey("b41df3c322a6fd305fc9425df52501f7f8067dbba551466d82d506c83c6ab287580202aa1a3449f54b9bc464a04b70e6")
 	require.NoError(t, err)
 	require.NotNil(t, hashiAcc1)
-	hashiAcc2, err := hashiWallet.AccountByPublicKey("aedfb8f364cba8951565cf275d939a008a1bc8b8a26cff18681091da165cf7478a6bd71bbac87a6eae70d68fab384efd")
+	hashiAcc2, err := hashiWallet.AccountByPublicKey("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")
 	require.NoError(t, err)
 	require.NotNil(t, hashiAcc2)
 
 	// compare
 	require.Equal(t, inMemWallet.ID().String(), hashiWallet.ID().String())
-	require.Equal(t, inMemAccounts[0].ID().String(), hashiAcc1.ID().String())
-	require.Equal(t, inMemAccounts[0].ValidatorPublicKey().Marshal(), hashiAcc1.ValidatorPublicKey().Marshal())
-	require.Equal(t, inMemAccounts[1].ID().String(), hashiAcc2.ID().String())
-	require.Equal(t, inMemAccounts[1].ValidatorPublicKey().Marshal(), hashiAcc2.ValidatorPublicKey().Marshal())
+	require.Equal(t, inMemAccounts[1].ID().String(), hashiAcc1.ID().String())
+	require.Equal(t, inMemAccounts[1].ValidatorPublicKey().Marshal(), hashiAcc1.ValidatorPublicKey().Marshal())
+	require.Equal(t, inMemAccounts[0].ID().String(), hashiAcc2.ID().String())
+	require.Equal(t, inMemAccounts[0].ValidatorPublicKey().Marshal(), hashiAcc2.ValidatorPublicKey().Marshal())
 }
