@@ -7,11 +7,11 @@ import (
 	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 	"github.com/prysmaticlabs/prysm/shared/bls"
 	"github.com/prysmaticlabs/prysm/shared/bytesutil"
-	v2keymanager "github.com/prysmaticlabs/prysm/validator/keymanager/v2"
+	"github.com/prysmaticlabs/prysm/validator/keymanager"
 )
 
-// To make sure V2 implements v2keymanager.IKeymanager interface
-var _ v2keymanager.IKeymanager = &V2{}
+// To make sure V2 implements keymanager.IKeymanager interface
+var _ keymanager.IKeymanager = &V2{}
 
 // V2 implements prysm keymanager-v2 interface.
 type V2 struct {

@@ -14,7 +14,6 @@ import (
 	"github.com/prysmaticlabs/prysm/shared/bls"
 	"github.com/prysmaticlabs/prysm/shared/bytesutil"
 	"github.com/prysmaticlabs/prysm/shared/testutil"
-	basekeymanager "github.com/prysmaticlabs/prysm/validator/keymanager/v1"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
@@ -104,7 +103,7 @@ func TestSignGeneric(t *testing.T) {
 
 		runTest(t, http.StatusOK, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
 			actualSignature, err := wallet.SignGeneric(bytesutil.ToBytes48(undefinedAccount), bytesutil.ToBytes32(data), bytesutil.ToBytes32(domain))
-			require.Error(t, err, basekeymanager.ErrNoSuchKey.Error())
+			require.Error(t, err, keymanager.ErrNoSuchKey.Error())
 			require.Nil(t, actualSignature)
 		})
 	})
@@ -112,7 +111,7 @@ func TestSignGeneric(t *testing.T) {
 	t.Run("rejects with denied", func(t *testing.T) {
 		runTest(t, http.StatusUnauthorized, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
 			actualSignature, err := wallet.SignGeneric(bytesutil.ToBytes48(accountPubKey), bytesutil.ToBytes32(data), bytesutil.ToBytes32(domain))
-			require.Error(t, err, basekeymanager.ErrDenied.Error())
+			require.True(t, keymanager.IsGenericError(err))
 			require.Nil(t, actualSignature)
 		})
 	})
@@ -120,7 +119,7 @@ func TestSignGeneric(t *testing.T) {
 	t.Run("rejects with failed", func(t *testing.T) {
 		runTest(t, http.StatusInternalServerError, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
 			actualSignature, err := wallet.SignGeneric(bytesutil.ToBytes48(accountPubKey), bytesutil.ToBytes32(data), bytesutil.ToBytes32(domain))
-			require.Error(t, err, basekeymanager.ErrCannotSign.Error())
+			require.True(t, keymanager.IsGenericError(err))
 			require.Nil(t, actualSignature)
 		})
 	})
@@ -212,7 +211,7 @@ func TestSignProposal(t *testing.T) {
 
 		runTest(t, http.StatusOK, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
 			actualSignature, err := wallet.SignProposal(bytesutil.ToBytes48(undefinedAccount), bytesutil.ToBytes32(domain), data)
-			require.Error(t, err, basekeymanager.ErrNoSuchKey.Error())
+			require.Error(t, err, keymanager.ErrNoSuchKey.Error())
 			require.Nil(t, actualSignature)
 		})
 	})
@@ -220,7 +219,7 @@ func TestSignProposal(t *testing.T) {
 	t.Run("rejects with denied", func(t *testing.T) {
 		runTest(t, http.StatusUnauthorized, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
 			actualSignature, err := wallet.SignProposal(bytesutil.ToBytes48(accountPubKey), bytesutil.ToBytes32(domain), data)
-			require.Error(t, err, basekeymanager.ErrDenied.Error())
+			require.True(t, keymanager.IsGenericError(err))
 			require.Nil(t, actualSignature)
 		})
 	})
@@ -228,7 +227,7 @@ func TestSignProposal(t *testing.T) {
 	t.Run("rejects with failed", func(t *testing.T) {
 		runTest(t, http.StatusInternalServerError, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
 			actualSignature, err := wallet.SignProposal(bytesutil.ToBytes48(accountPubKey), bytesutil.ToBytes32(domain), data)
-			require.Error(t, err, basekeymanager.ErrCannotSign.Error())
+			require.True(t, keymanager.IsGenericError(err))
 			require.Nil(t, actualSignature)
 		})
 	})
@@ -328,7 +327,7 @@ func TestSignAttestation(t *testing.T) {
 
 		runTest(t, http.StatusOK, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
 			actualSignature, err := wallet.SignAttestation(bytesutil.ToBytes48(undefinedAccount), bytesutil.ToBytes32(domain), data)
-			require.Error(t, err, basekeymanager.ErrNoSuchKey.Error())
+			require.Error(t, err, keymanager.ErrNoSuchKey.Error())
 			require.Nil(t, actualSignature)
 		})
 	})
@@ -336,7 +335,7 @@ func TestSignAttestation(t *testing.T) {
 	t.Run("rejects with denied", func(t *testing.T) {
 		runTest(t, http.StatusUnauthorized, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
 			actualSignature, err := wallet.SignAttestation(bytesutil.ToBytes48(accountPubKey), bytesutil.ToBytes32(domain), data)
-			require.Error(t, err, basekeymanager.ErrDenied.Error())
+			require.True(t, keymanager.IsGenericError(err))
 			require.Nil(t, actualSignature)
 		})
 	})
@@ -344,7 +343,7 @@ func TestSignAttestation(t *testing.T) {
 	t.Run("rejects with failed", func(t *testing.T) {
 		runTest(t, http.StatusInternalServerError, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
 			actualSignature, err := wallet.SignAttestation(bytesutil.ToBytes48(accountPubKey), bytesutil.ToBytes32(domain), data)
-			require.Error(t, err, basekeymanager.ErrCannotSign.Error())
+			require.True(t, keymanager.IsGenericError(err))
 			require.Nil(t, actualSignature)
 		})
 	})

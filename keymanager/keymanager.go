@@ -11,17 +11,12 @@ import (
 	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/prysmaticlabs/prysm/shared/bls"
 	"github.com/prysmaticlabs/prysm/shared/bytesutil"
-	v1keymanager "github.com/prysmaticlabs/prysm/validator/keymanager/v1"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bloxapp/key-vault/backend"
 	"github.com/bloxapp/key-vault/utils/endpoint"
 	"github.com/bloxapp/key-vault/utils/httpex"
 )
-
-// To make sure KeyManager implements v1keymanager.ProtectingKeyManager interface
-var _ v1keymanager.KeyManager = &KeyManager{}
-var _ v1keymanager.ProtectingKeyManager = &KeyManager{}
 
 // Predefined errors
 var (
