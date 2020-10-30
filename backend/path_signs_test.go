@@ -49,7 +49,7 @@ func TestSignAttestation(t *testing.T) {
 		require.NoError(t, err)
 
 		data := map[string]interface{}{
-			"public_key": "95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
+			"public_key": "ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3270",
 		}
 		req.Data = data
 		resp, err := b.HandleRequest(context.Background(), req)
@@ -94,7 +94,7 @@ func TestSignProposal(t *testing.T) {
 		require.NoError(t, err)
 
 		data := map[string]interface{}{
-			"public_key": "95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
+			"public_key": "ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3270",
 		}
 		req.Data = data
 		resp, err := b.HandleRequest(context.Background(), req)
@@ -138,7 +138,7 @@ func TestSignAggregation(t *testing.T) {
 		require.NoError(t, err)
 
 		data := map[string]interface{}{
-			"public_key": "95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
+			"public_key": "ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3270",
 		}
 		req.Data = data
 		resp, err := b.HandleRequest(context.Background(), req)
