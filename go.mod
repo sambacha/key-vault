@@ -14,8 +14,6 @@ require (
 	github.com/getsentry/sentry-go v0.7.0
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
-	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/hashicorp/go-hclog v0.14.1
 	github.com/hashicorp/go-retryablehttp v0.6.7
 	github.com/hashicorp/vault/api v1.0.4
@@ -35,8 +33,6 @@ require (
 	github.com/wealdtech/go-eth2-types/v2 v2.5.0
 	github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.1.1
 	github.com/wealdtech/go-eth2-wallet-types/v2 v2.6.0
-	go.opencensus.io v0.22.4
-	google.golang.org/grpc v1.29.1
 )
 
 replace gopkg.in/urfave/cli.v2 => github.com/urfave/cli/v2 v2.1.1
