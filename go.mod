@@ -46,4 +46,3 @@ replace github.com/ethereum/go-ethereum => github.com/prysmaticlabs/bazel-go-eth
 replace github.com/herumi/bls-eth-go-binary => github.com/herumi/bls-eth-go-binary v0.0.0-20200605082007-3a76b4c6c599
 
 replace github.com/prysmaticlabs/prysm => github.com/prysmaticlabs/prysm v1.0.0-beta.0
-

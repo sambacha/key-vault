@@ -6,8 +6,9 @@ import (
 	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 	"github.com/prysmaticlabs/prysm/shared/bls"
-	"github.com/prysmaticlabs/prysm/shared/bytesutil"
 	"github.com/prysmaticlabs/prysm/validator/keymanager"
+
+	"github.com/bloxapp/key-vault/utils/bytex"
 )
 
 // To make sure V2 implements keymanager.IKeymanager interface
@@ -27,11 +28,11 @@ func NewKeyManagerV2(km *KeyManager) *V2 {
 
 // Sign implements KeyManager-v2 interface.
 func (km *V2) Sign(ctx context.Context, req *validatorpb.SignRequest) (bls.Signature, error) {
-	if bytesutil.ToBytes48(req.GetPublicKey()) != km.km.pubKey {
+	if bytex.ToBytes48(req.GetPublicKey()) != km.km.pubKey {
 		return nil, ErrNoSuchKey
 	}
 
-	domain := bytesutil.ToBytes32(req.GetSignatureDomain())
+	domain := bytex.ToBytes32(req.GetSignatureDomain())
 	switch data := req.GetObject().(type) {
 	case *validatorpb.SignRequest_Block:
 		return km.km.SignProposal(km.km.pubKey, domain, &ethpb.BeaconBlockHeader{
@@ -44,9 +45,9 @@ func (km *V2) Sign(ctx context.Context, req *validatorpb.SignRequest) (bls.Signa
 	case *validatorpb.SignRequest_AttestationData:
 		return km.km.SignAttestation(km.km.pubKey, domain, data.AttestationData)
 	case *validatorpb.SignRequest_AggregateAttestationAndProof:
-		return km.km.SignGeneric(km.km.pubKey, bytesutil.ToBytes32(req.GetSigningRoot()), domain)
+		return km.km.SignGeneric(km.km.pubKey, bytex.ToBytes32(req.GetSigningRoot()), domain)
 	case *validatorpb.SignRequest_Slot:
-		return km.km.SignGeneric(km.km.pubKey, bytesutil.ToBytes32(req.GetSigningRoot()), domain)
+		return km.km.SignGeneric(km.km.pubKey, bytex.ToBytes32(req.GetSigningRoot()), domain)
 	default:
 		return nil, ErrUnsupportedSigning
 	}
