@@ -12,12 +12,12 @@ import (
 	"github.com/hashicorp/vault/sdk/logical"
 	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/prysmaticlabs/prysm/shared/bls"
-	"github.com/prysmaticlabs/prysm/shared/bytesutil"
 	"github.com/prysmaticlabs/prysm/shared/testutil"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/keymanager"
+	"github.com/bloxapp/key-vault/utils/bytex"
 )
 
 const (
@@ -90,7 +90,7 @@ func TestSignGeneric(t *testing.T) {
 
 	t.Run("successfully signed data", func(t *testing.T) {
 		runTest(t, http.StatusOK, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignGeneric(bytesutil.ToBytes48(accountPubKey), bytesutil.ToBytes32(data), bytesutil.ToBytes32(domain))
+			actualSignature, err := wallet.SignGeneric(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(data), bytex.ToBytes32(domain))
 			require.NoError(t, err)
 			require.NotNil(t, actualSignature)
 			require.Equal(t, expectedSignature, actualSignature)
@@ -102,7 +102,7 @@ func TestSignGeneric(t *testing.T) {
 		rand.Read(undefinedAccount)
 
 		runTest(t, http.StatusOK, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignGeneric(bytesutil.ToBytes48(undefinedAccount), bytesutil.ToBytes32(data), bytesutil.ToBytes32(domain))
+			actualSignature, err := wallet.SignGeneric(bytex.ToBytes48(undefinedAccount), bytex.ToBytes32(data), bytex.ToBytes32(domain))
 			require.Error(t, err, keymanager.ErrNoSuchKey.Error())
 			require.Nil(t, actualSignature)
 		})
@@ -110,7 +110,7 @@ func TestSignGeneric(t *testing.T) {
 
 	t.Run("rejects with denied", func(t *testing.T) {
 		runTest(t, http.StatusUnauthorized, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignGeneric(bytesutil.ToBytes48(accountPubKey), bytesutil.ToBytes32(data), bytesutil.ToBytes32(domain))
+			actualSignature, err := wallet.SignGeneric(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(data), bytex.ToBytes32(domain))
 			require.True(t, keymanager.IsGenericError(err))
 			require.Nil(t, actualSignature)
 		})
@@ -118,7 +118,7 @@ func TestSignGeneric(t *testing.T) {
 
 	t.Run("rejects with failed", func(t *testing.T) {
 		runTest(t, http.StatusInternalServerError, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignGeneric(bytesutil.ToBytes48(accountPubKey), bytesutil.ToBytes32(data), bytesutil.ToBytes32(domain))
+			actualSignature, err := wallet.SignGeneric(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(data), bytex.ToBytes32(domain))
 			require.True(t, keymanager.IsGenericError(err))
 			require.Nil(t, actualSignature)
 		})
@@ -198,7 +198,7 @@ func TestSignProposal(t *testing.T) {
 
 	t.Run("successfully signed data", func(t *testing.T) {
 		runTest(t, http.StatusOK, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignProposal(bytesutil.ToBytes48(accountPubKey), bytesutil.ToBytes32(domain), data)
+			actualSignature, err := wallet.SignProposal(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(domain), data)
 			require.NoError(t, err)
 			require.NotNil(t, actualSignature)
 			require.Equal(t, expectedSignature, actualSignature)
@@ -210,7 +210,7 @@ func TestSignProposal(t *testing.T) {
 		rand.Read(undefinedAccount)
 
 		runTest(t, http.StatusOK, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignProposal(bytesutil.ToBytes48(undefinedAccount), bytesutil.ToBytes32(domain), data)
+			actualSignature, err := wallet.SignProposal(bytex.ToBytes48(undefinedAccount), bytex.ToBytes32(domain), data)
 			require.Error(t, err, keymanager.ErrNoSuchKey.Error())
 			require.Nil(t, actualSignature)
 		})
@@ -218,7 +218,7 @@ func TestSignProposal(t *testing.T) {
 
 	t.Run("rejects with denied", func(t *testing.T) {
 		runTest(t, http.StatusUnauthorized, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignProposal(bytesutil.ToBytes48(accountPubKey), bytesutil.ToBytes32(domain), data)
+			actualSignature, err := wallet.SignProposal(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(domain), data)
 			require.True(t, keymanager.IsGenericError(err))
 			require.Nil(t, actualSignature)
 		})
@@ -226,7 +226,7 @@ func TestSignProposal(t *testing.T) {
 
 	t.Run("rejects with failed", func(t *testing.T) {
 		runTest(t, http.StatusInternalServerError, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignProposal(bytesutil.ToBytes48(accountPubKey), bytesutil.ToBytes32(domain), data)
+			actualSignature, err := wallet.SignProposal(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(domain), data)
 			require.True(t, keymanager.IsGenericError(err))
 			require.Nil(t, actualSignature)
 		})
@@ -314,7 +314,7 @@ func TestSignAttestation(t *testing.T) {
 
 	t.Run("successfully signed data", func(t *testing.T) {
 		runTest(t, http.StatusOK, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignAttestation(bytesutil.ToBytes48(accountPubKey), bytesutil.ToBytes32(domain), data)
+			actualSignature, err := wallet.SignAttestation(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(domain), data)
 			require.NoError(t, err)
 			require.NotNil(t, actualSignature)
 			require.Equal(t, expectedSignature, actualSignature)
@@ -326,7 +326,7 @@ func TestSignAttestation(t *testing.T) {
 		rand.Read(undefinedAccount)
 
 		runTest(t, http.StatusOK, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignAttestation(bytesutil.ToBytes48(undefinedAccount), bytesutil.ToBytes32(domain), data)
+			actualSignature, err := wallet.SignAttestation(bytex.ToBytes48(undefinedAccount), bytex.ToBytes32(domain), data)
 			require.Error(t, err, keymanager.ErrNoSuchKey.Error())
 			require.Nil(t, actualSignature)
 		})
@@ -334,7 +334,7 @@ func TestSignAttestation(t *testing.T) {
 
 	t.Run("rejects with denied", func(t *testing.T) {
 		runTest(t, http.StatusUnauthorized, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignAttestation(bytesutil.ToBytes48(accountPubKey), bytesutil.ToBytes32(domain), data)
+			actualSignature, err := wallet.SignAttestation(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(domain), data)
 			require.True(t, keymanager.IsGenericError(err))
 			require.Nil(t, actualSignature)
 		})
@@ -342,7 +342,7 @@ func TestSignAttestation(t *testing.T) {
 
 	t.Run("rejects with failed", func(t *testing.T) {
 		runTest(t, http.StatusInternalServerError, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignAttestation(bytesutil.ToBytes48(accountPubKey), bytesutil.ToBytes32(domain), data)
+			actualSignature, err := wallet.SignAttestation(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(domain), data)
 			require.True(t, keymanager.IsGenericError(err))
 			require.Nil(t, actualSignature)
 		})

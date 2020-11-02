@@ -10,10 +10,10 @@ import (
 
 	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/prysmaticlabs/prysm/shared/bls"
-	"github.com/prysmaticlabs/prysm/shared/bytesutil"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bloxapp/key-vault/backend"
+	"github.com/bloxapp/key-vault/utils/bytex"
 	"github.com/bloxapp/key-vault/utils/endpoint"
 	"github.com/bloxapp/key-vault/utils/httpex"
 )
@@ -59,7 +59,7 @@ func NewKeyManager(log *logrus.Entry, opts *Config) (*KeyManager, error) {
 		remoteAddress: opts.Location,
 		accessToken:   opts.AccessToken,
 		originPubKey:  opts.PubKey,
-		pubKey:        bytesutil.ToBytes48(decodedPubKey),
+		pubKey:        bytex.ToBytes48(decodedPubKey),
 		network:       opts.Network,
 		httpClient:    httpex.CreateClient(),
 		log:           log,
