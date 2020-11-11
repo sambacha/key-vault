@@ -61,20 +61,43 @@ func (store *HashicorpVaultStore) RetrieveAttestation(key e2types.PublicKey, epo
 
 // ListAttestations both epochStart and epochEnd reflect saved attestations by their target epoch
 func (store *HashicorpVaultStore) ListAttestations(key e2types.PublicKey, epochStart uint64, epochEnd uint64) ([]*core.BeaconAttestation, error) {
-	ret := make([]*core.BeaconAttestation, 0)
+	length := epochEnd - epochStart + 1
+	ret := make([]*core.BeaconAttestation, length)
+	errs := make([]error, length)
 
+	var wg sync.WaitGroup
+	var i int
 	for epoch := epochStart; epoch <= epochEnd; epoch++ {
-		att, err := store.RetrieveAttestation(key, epoch)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to retrieve attestation with epoch %d", epoch)
-		}
+		wg.Add(1)
+		go func(i int, epoch uint64) {
+			defer wg.Done()
 
-		if att != nil {
-			ret = append(ret, att)
+			att, err := store.RetrieveAttestation(key, epoch)
+			if err != nil {
+				errs[i] = errors.Wrapf(err, "failed to retrieve attestation with epoch %d", epoch)
+				return
+			}
+
+			ret[i] = att
+		}(i, epoch)
+		i++
+	}
+	wg.Wait()
+
+	for _, err := range errs {
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	return ret, nil
+	preparedRes := make([]*core.BeaconAttestation, 0)
+	for _, r := range ret {
+		if r != nil {
+			preparedRes = append(preparedRes, r)
+		}
+	}
+
+	return preparedRes, nil
 }
 
 // ListAllAttestations returns all attestation data from the DB
@@ -126,7 +149,7 @@ func (store *HashicorpVaultStore) ListAllAttestations(key e2types.PublicKey) ([]
 		}
 	}
 
-	var clearedAttestations []*core.BeaconAttestation
+	clearedAttestations := make([]*core.BeaconAttestation, 0)
 	for _, attestation := range attestations {
 		if attestation != nil {
 			clearedAttestations = append(clearedAttestations, attestation)
@@ -222,7 +245,7 @@ func (store *HashicorpVaultStore) ListAllProposals(key e2types.PublicKey) ([]*co
 		}
 	}
 
-	var clearedProposals []*core.BeaconBlockHeader
+	clearedProposals := make([]*core.BeaconBlockHeader, 0)
 	for _, proposal := range proposals {
 		if proposal != nil {
 			clearedProposals = append(clearedProposals, proposal)
