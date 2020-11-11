@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
+	types "github.com/wealdtech/go-eth2-types/v2"
 
 	"github.com/bloxapp/key-vault/backend/store"
 	"github.com/bloxapp/key-vault/utils/errorex"
@@ -83,7 +84,7 @@ func (b *backend) pathSlashingStorageBatchUpdate(ctx context.Context, req *logic
 			}
 
 			// Store slashing data
-			if err := storeAccountSlashingHistory(storage, account, data); err != nil {
+			if err := storeAccountSlashingHistory(storage, account.ValidatorPublicKey(), data); err != nil {
 				errs[i] = err
 				return
 			}
@@ -139,20 +140,20 @@ func (b *backend) pathSlashingStorageBatchRead(ctx context.Context, req *logical
 	var wg sync.WaitGroup
 	for i, account := range accounts {
 		wg.Add(1)
-		go func(i int, account core.ValidatorAccount) {
+		go func(i int, pubKey types.PublicKey) {
 			defer wg.Done()
 
 			// Load slashing history
-			slashingHistory, err := loadAccountSlashingHistory(storage, account)
+			slashingHistory, err := loadAccountSlashingHistory(storage, pubKey)
 			if err != nil {
 				errs[i] = errors.Wrap(err, "failed to load slashing history")
 				return
 			}
 
 			responseData[i] = map[string]interface{}{
-				hex.EncodeToString(account.ValidatorPublicKey().Marshal()): slashingHistory,
+				hex.EncodeToString(pubKey.Marshal()): slashingHistory,
 			}
-		}(i, account)
+		}(i, account.ValidatorPublicKey())
 	}
 	wg.Wait()
 
@@ -174,7 +175,7 @@ func (b *backend) pathSlashingStorageBatchRead(ctx context.Context, req *logical
 	}, nil
 }
 
-func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, account core.ValidatorAccount) (string, error) {
+func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey types.PublicKey) (string, error) {
 	errs := make([]error, 2)
 	var wg sync.WaitGroup
 
@@ -184,7 +185,7 @@ func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, account core
 	go func() {
 		defer wg.Done()
 
-		latestAttestation, err := storage.RetrieveLatestAttestation(account.ValidatorPublicKey())
+		latestAttestation, err := storage.RetrieveLatestAttestation(pubKey)
 		if err != nil {
 			errs[0] = errors.Wrap(err, "failed to retrieve latest attestation")
 			return
@@ -193,14 +194,14 @@ func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, account core
 		if latestAttestation != nil && latestAttestation.Target != nil && latestAttestation.Target.Epoch > 1000 {
 			from := latestAttestation.Target.Epoch - 1000
 			to := latestAttestation.Target.Epoch
-			if attestation, err = storage.ListAttestations(account.ValidatorPublicKey(), from, to); err != nil {
+			if attestation, err = storage.ListAttestations(pubKey, from, to); err != nil {
 				errs[0] = errors.Wrap(err, "failed to list attestations data by epochs limit")
 				return
 			}
 
 			attestation = append(attestation, latestAttestation)
 		} else {
-			if attestation, err = storage.ListAllAttestations(account.ValidatorPublicKey()); err != nil {
+			if attestation, err = storage.ListAllAttestations(pubKey); err != nil {
 				errs[0] = errors.Wrap(err, "failed to list all attestations data")
 				return
 			}
@@ -214,7 +215,7 @@ func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, account core
 		defer wg.Done()
 
 		var err error
-		if proposals, err = storage.ListAllProposals(account.ValidatorPublicKey()); err != nil {
+		if proposals, err = storage.ListAllProposals(pubKey); err != nil {
 			errs[1] = errors.Wrap(err, "failed to list proposals data")
 		}
 	}()
@@ -238,7 +239,7 @@ func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, account core
 	return hex.EncodeToString(slashingHistoryEncoded), nil
 }
 
-func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, account core.ValidatorAccount, slashingData string) error {
+func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey types.PublicKey, slashingData string) error {
 	// HEX decode slashing history
 	slashingHistoryBytes, err := hex.DecodeString(slashingData)
 	if err != nil {
@@ -267,7 +268,7 @@ func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, account cor
 			go func(i int, attestation *core.BeaconAttestation) {
 				defer attWg.Done()
 
-				if err := storage.SaveAttestation(account.ValidatorPublicKey(), attestation); err != nil {
+				if err := storage.SaveAttestation(pubKey, attestation); err != nil {
 					attErrs[i] = errors.Wrapf(err, "failed to save attestation for slot %d", attestation.Slot)
 				}
 			}(i, attestation)
@@ -286,7 +287,7 @@ func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, account cor
 			go func(i int, proposal *core.BeaconBlockHeader) {
 				defer propWg.Done()
 
-				if err := storage.SaveProposal(account.ValidatorPublicKey(), proposal); err != nil {
+				if err := storage.SaveProposal(pubKey, proposal); err != nil {
 					propErrs[i] = errors.Wrapf(err, "failed to save proposal for slot %d", proposal.Slot)
 				}
 			}(i, proposal)
