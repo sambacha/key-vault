@@ -30,12 +30,11 @@ func (store *HashicorpVaultStore) SaveAttestation(key e2types.PublicKey, req *co
 		return errors.Wrap(err, "failed to marshal attestation request")
 	}
 
-	entry := &logical.StorageEntry{
+	return store.storage.Put(store.ctx, &logical.StorageEntry{
 		Key:      path,
 		Value:    data,
 		SealWrap: false,
-	}
-	return store.storage.Put(store.ctx, entry)
+	})
 }
 
 // RetrieveAttestation implements Storage interface.
@@ -51,12 +50,12 @@ func (store *HashicorpVaultStore) RetrieveAttestation(key e2types.PublicKey, epo
 		return nil, nil
 	}
 
-	var ret *core.BeaconAttestation
+	var ret core.BeaconAttestation
 	if err := json.Unmarshal(entry.Value, &ret); err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal beacon attestation object")
 	}
 
-	return ret, nil
+	return &ret, nil
 }
 
 // ListAttestations both epochStart and epochEnd reflect saved attestations by their target epoch
@@ -167,12 +166,11 @@ func (store *HashicorpVaultStore) SaveProposal(key e2types.PublicKey, req *core.
 		return errors.Wrap(err, "failed to marshal proposal request")
 	}
 
-	entry := &logical.StorageEntry{
+	return store.storage.Put(store.ctx, &logical.StorageEntry{
 		Key:      path,
 		Value:    data,
 		SealWrap: false,
-	}
-	return store.storage.Put(store.ctx, entry)
+	})
 }
 
 // RetrieveProposal implements Storage interface.
@@ -188,12 +186,12 @@ func (store *HashicorpVaultStore) RetrieveProposal(key e2types.PublicKey, slot u
 		return nil, nil
 	}
 
-	var ret *core.BeaconBlockHeader
+	var ret core.BeaconBlockHeader
 	if err = json.Unmarshal(entry.Value, &ret); err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal beacon block header object")
 	}
 
-	return ret, nil
+	return &ret, nil
 }
 
 // ListAllProposals returns all proposal data from the DB
@@ -263,15 +261,14 @@ func (store *HashicorpVaultStore) SaveLatestAttestation(key e2types.PublicKey, r
 		return errors.Wrap(err, "failed to marshal beacon attestation object")
 	}
 
-	entry := &logical.StorageEntry{
+	return store.storage.Put(store.ctx, &logical.StorageEntry{
 		Key:      path,
 		Value:    data,
 		SealWrap: false,
-	}
-	return store.storage.Put(store.ctx, entry)
+	})
 }
 
-// RetrieveLatestAttestation implements Storage imterface.
+// RetrieveLatestAttestation implements Storage interface.
 func (store *HashicorpVaultStore) RetrieveLatestAttestation(key e2types.PublicKey) (*core.BeaconAttestation, error) {
 	path := fmt.Sprintf(WalletLatestAttestationPath, store.identifierFromKey(key))
 	entry, err := store.storage.Get(store.ctx, path)
@@ -284,12 +281,12 @@ func (store *HashicorpVaultStore) RetrieveLatestAttestation(key e2types.PublicKe
 		return nil, nil
 	}
 
-	var ret *core.BeaconAttestation
+	var ret core.BeaconAttestation
 	if err := json.Unmarshal(entry.Value, &ret); err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal beacon attestation object")
 	}
 
-	return ret, nil
+	return &ret, nil
 }
 
 func (store *HashicorpVaultStore) identifierFromKey(key e2types.PublicKey) string {
