@@ -2,7 +2,7 @@
 path "ethereum/test/accounts" {
   capabilities = ["list"]
 }
-path "ethereum/zinken/accounts" {
+path "ethereum/mainnet/accounts" {
   capabilities = ["list"]
 }
 
@@ -10,7 +10,7 @@ path "ethereum/zinken/accounts" {
 path "ethereum/test/accounts/sign-*" {
   capabilities = ["create"]
 }
-path "ethereum/zinken/accounts/sign-*" {
+path "ethereum/mainnet/accounts/sign-*" {
   capabilities = ["create"]
 }
 
@@ -18,6 +18,6 @@ path "ethereum/zinken/accounts/sign-*" {
 path "ethereum/test/storage" {
   capabilities = ["create"]
 }
-path "ethereum/zinken/storage" {
+path "ethereum/mainnet/storage" {
   capabilities = ["create"]
 }

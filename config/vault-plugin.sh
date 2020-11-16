@@ -22,17 +22,17 @@ vault write ethereum/test/config \
     network="test" \
     genesis_time="$TESTNET_GENESIS_TIME"
 
-# Enable zinken network
-echo "Enabling Zinken Test network"
+# Enable mainnet network
+echo "Enabling MainNet network"
 vault secrets enable \
-    -path=ethereum/zinken \
-    -description="Eth Signing Wallet - Zinken Test Network" \
+    -path=ethereum/mainnet \
+    -description="Eth Signing Wallet - MainNet Network" \
     -plugin-name=ethsign plugin > /dev/null 2>&1
 
-echo "Configuring Zinken Test network..."
-vault write ethereum/zinken/config \
-    network="zinken" \
-    genesis_time="$ZINKEN_GENESIS_TIME"
+echo "Configuring MainNet network..."
+vault write ethereum/mainnet/config \
+    network="mainnet" \
+    genesis_time="$MAINNET_GENESIS_TIME"
 
 # Reload plugin
 curl --insecure --header "X-Vault-Token: $(cat /data/keys/vault.root.token)" \

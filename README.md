@@ -202,7 +202,7 @@ This endpoint will sign attestation for specific account at a path.
 
 | Method  | Path | Produces |
 | ------------- | ------------- | ------------- |
-| `POST`  | `:mount-path/<test|zinken>/accounts/sign-proposal`  | `200 application/json` |
+| `POST`  | `:mount-path/<test|mainnet>/accounts/sign-proposal`  | `200 application/json` |
 
 #### Parameters
 
@@ -277,7 +277,7 @@ Use the following policy to assign to a signer level access token, with the abil
 path "ethereum/test/accounts" {
   capabilities = ["list"]
 }
-path "ethereum/zinken/accounts" {
+path "ethereum/mainnet/accounts" {
   capabilities = ["list"]
 }
 
@@ -285,7 +285,7 @@ path "ethereum/zinken/accounts" {
 path "ethereum/test/accounts/sign-*" {
   capabilities = ["create"]
 }
-path "ethereum/zinken/accounts/sign-*" {
+path "ethereum/mainnet/accounts/sign-*" {
   capabilities = ["create"]
 }
 ```
@@ -298,7 +298,7 @@ Use the following policy to assign to a admin level access token, with the full 
 path "ethereum/test/accounts" {
   capabilities = ["list"]
 }
-path "ethereum/zinken/accounts" {
+path "ethereum/mainnet/accounts" {
   capabilities = ["list"]
 }
 
@@ -306,7 +306,7 @@ path "ethereum/zinken/accounts" {
 path "ethereum/test/accounts/sign-*" {
   capabilities = ["create"]
 }
-path "ethereum/zinken/accounts/sign-*" {
+path "ethereum/mainnet/accounts/sign-*" {
   capabilities = ["create"]
 }
 
@@ -314,7 +314,7 @@ path "ethereum/zinken/accounts/sign-*" {
 path "ethereum/test/storage" {
   capabilities = ["create"]
 }
-path "ethereum/zinken/storage" {
+path "ethereum/mainnet/storage" {
   capabilities = ["create"]
 }
 ```
