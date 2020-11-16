@@ -101,6 +101,7 @@ github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6r
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
 github.com/bloxapp/eth2-key-manager v0.2.15 h1:FlfeLvhLiWzZ6p7vleBF77pWdo8WCtUzl2HcIodOF/s=
 github.com/bloxapp/eth2-key-manager v0.2.15/go.mod h1:SZYbDwu4VYcFzelaLIyj2MoxH7cJ9jo7GYrbdDa/sJQ=
+github.com/bloxapp/eth2-key-manager v0.2.16/go.mod h1:AE5Caha4lh2/7Q/44eNTqFm6pSkVBx+MLin9y5EmOoA=
 github.com/bmizerany/pat v0.0.0-20170815010413-6226ea591a40/go.mod h1:8rLXio+WjiTceGBHIoTvn60HIbs7Hm7bcHjyrSqYB9c=
 github.com/boltdb/bolt v1.3.1/go.mod h1:clJnj/oiGkjum5o1McbSZDSLxVThjynRyGBgiAx27Ps=
 github.com/bradfitz/gomemcache v0.0.0-20170208213004-1952afaa557d/go.mod h1:PmM6Mmwb0LSuEubjR8N7PtNe1KxZLtOUHtbeikc5h60=
@@ -230,6 +231,7 @@ github.com/ferranbt/fastssz v0.0.0-20200514094935-99fccaf93472/go.mod h1:LlFXPmg
 github.com/ferranbt/fastssz v0.0.0-20200728110133-0b6e349af87a/go.mod h1:DyEu2iuLBnb/T51BlsiO3yLYdJC6UbGMrIkqK1KmQxM=
 github.com/ferranbt/fastssz v0.0.0-20200826142241-3a913c5a1313 h1:8DS7uDmUkGF6UKNU1HivEsjrTusxLPb05KUr/D8ONWQ=
 github.com/ferranbt/fastssz v0.0.0-20200826142241-3a913c5a1313/go.mod h1:DyEu2iuLBnb/T51BlsiO3yLYdJC6UbGMrIkqK1KmQxM=
+github.com/ferranbt/fastssz v0.0.0-20201020132831-68dc48984fd3/go.mod h1:DyEu2iuLBnb/T51BlsiO3yLYdJC6UbGMrIkqK1KmQxM=
 github.com/fjl/memsize v0.0.0-20180418122429-ca190fb6ffbc/go.mod h1:VvhXpOYNQvB+uIk2RvXzuaQtkQJzzIx6lSBe1xv7hi0=
 github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5 h1:FtmdgXiUlNeRsoNMFlKLDt+S+6hbjVMEW6RGQ7aUf7c=
 github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5/go.mod h1:VvhXpOYNQvB+uIk2RvXzuaQtkQJzzIx6lSBe1xv7hi0=
@@ -1097,10 +1099,12 @@ github.com/wealdtech/go-bytesutil v1.1.1 h1:ocEg3Ke2GkZ4vQw5lp46rmO+pfqCCTgq35gq
 github.com/wealdtech/go-bytesutil v1.1.1/go.mod h1:jENeMqeTEU8FNZyDFRVc7KqBdRKSnJ9CCh26TcuNb9s=
 github.com/wealdtech/go-eth2-types/v2 v2.5.0 h1:L8sl3yoICAbn3134CBLNUt0o5h2voe0Es2KD5O9r8YQ=
 github.com/wealdtech/go-eth2-types/v2 v2.5.0/go.mod h1:321w9X26lAnNa/lQJi2A6Lap5IsNORoLwFPoJ1i8QvY=
+github.com/wealdtech/go-eth2-types/v2 v2.5.1/go.mod h1:UUtEgRum8HkPvImpu5+hFYRanMUjP0k6KWqHlYkOGbk=
 github.com/wealdtech/go-eth2-util v1.5.0 h1:b3fgyvoq/WocW9LkWT7zcO5VCKzKLCc97rPrk/B9oIc=
 github.com/wealdtech/go-eth2-util v1.5.0/go.mod h1:0PGWeWWc6qjky/aNjdPdguJdZ2HSEHHCA+3cTjvT+Hk=
 github.com/wealdtech/go-eth2-util v1.6.0 h1:l2OR0SqfYdEnb1I1Ggnk0w+B9/LA5aHdQ2KK2FPnGkY=
 github.com/wealdtech/go-eth2-util v1.6.0/go.mod h1:0PGWeWWc6qjky/aNjdPdguJdZ2HSEHHCA+3cTjvT+Hk=
+github.com/wealdtech/go-eth2-util v1.6.2/go.mod h1:0hCjncDU0yi6dzGgrCgWAj6grdvJ6loEKCGpCMfxo9c=
 github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.1.1 h1:PYwMOCt92iWEHXdnsBaAk1/xygPfuBMkrXEgO8WtFdw=
 github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.1.1/go.mod h1:JelKMM10UzDJNXdIcojMj6SCIsHC8NYn4c1S2FFk7OQ=
 github.com/wealdtech/go-eth2-wallet-types/v2 v2.6.0 h1:vBrH5icPPSeb14cdShA7/P2PBZOgZscJ2IhBlTIaFrA=
@@ -1180,6 +1184,7 @@ golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899/go.mod h1:LzIPMQfyMNhhGPh
 golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.0.0-20201012173705-84dcc777aaee h1:4yd7jl+vXjalO5ztz6Vc1VADv+S/80LGJmyl1ROJ2AI=
 golang.org/x/crypto v0.0.0-20201012173705-84dcc777aaee/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
+golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/exp v0.0.0-20180321215751-8460e604b9de/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20180807140117-3d87b88a115f/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
@@ -1322,6 +1327,7 @@ golang.org/x/sys v0.0.0-20200814200057-3d37ad5750ed/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20200824131525-c12d262b63d8/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20201013132646-2da7054afaeb h1:HS9IzC4UFbpMBLQUDSQcU+ViVT1vdFCQVjdPVpTlZrs=
 golang.org/x/sys v0.0.0-20201013132646-2da7054afaeb/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20201024232916-9f70ab9862d5/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.0.0-20160726164857-2910a502d2bf/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
@@ -1330,6 +1336,7 @@ golang.org/x/text v0.3.1-0.20181227161524-e6919f6577db/go.mod h1:bEr9sfX3Q8Zfm5f
 golang.org/x/text v0.3.2/go.mod h1:bEr9sfX3Q8Zfm5fL9x+3itogRgK3+ptLWKqgva+5dAk=
 golang.org/x/text v0.3.3 h1:cokOdA+Jmi5PJGXLlLllQSgYigAEfHXJAERHVMaCc2k=
 golang.org/x/text v0.3.3/go.mod h1:5Zoc/QRtKVWzQhOtBMvqHzDpF6irO9z98xDceosuGiQ=
+golang.org/x/text v0.3.4/go.mod h1:5Zoc/QRtKVWzQhOtBMvqHzDpF6irO9z98xDceosuGiQ=
 golang.org/x/time v0.0.0-20170424234030-8be79e1e0910/go.mod h1:tRJNPiyCQ0inRvYxbN9jk5I+vvW/OXSQhTDSoE431IQ=
 golang.org/x/time v0.0.0-20181108054448-85acf8d2951c/go.mod h1:tRJNPiyCQ0inRvYxbN9jk5I+vvW/OXSQhTDSoE431IQ=
 golang.org/x/time v0.0.0-20190308202827-9d24e82272b4/go.mod h1:tRJNPiyCQ0inRvYxbN9jk5I+vvW/OXSQhTDSoE431IQ=

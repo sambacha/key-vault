@@ -5,7 +5,7 @@ go 1.14
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Microsoft/hcsshim v0.8.9 // indirect
-	github.com/bloxapp/eth2-key-manager v0.2.15
+	github.com/bloxapp/eth2-key-manager v0.2.16
 	github.com/containerd/containerd v1.4.0 // indirect
 	github.com/containerd/continuity v0.0.0-20200710164510-efbc4488d8fe // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
@@ -26,11 +26,11 @@ require (
 	github.com/pborman/uuid v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/prysmaticlabs/ethereumapis v0.0.0-20201003171600-a72e5f77d233
-	github.com/prysmaticlabs/prysm v1.0.0-beta.0
+	github.com/prysmaticlabs/prysm v1.0.0-beta.2
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.6.1
 	github.com/wealdtech/eth2-signer-api v1.5.2
-	github.com/wealdtech/go-eth2-types/v2 v2.5.0
+	github.com/wealdtech/go-eth2-types/v2 v2.5.1
 	github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.1.1
 	github.com/wealdtech/go-eth2-wallet-types/v2 v2.6.0
 )
