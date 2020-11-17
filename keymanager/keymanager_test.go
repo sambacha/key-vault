@@ -55,7 +55,7 @@ func TestSignGeneric(t *testing.T) {
 		Location:    s.URL,
 		AccessToken: defaultAccessToken,
 		PubKey:      defaultAccountPublicKey,
-		Network:     "test",
+		Network:     "pyrmont",
 	})
 	require.NoError(t, err)
 
@@ -63,7 +63,7 @@ func TestSignGeneric(t *testing.T) {
 		protect.Lock()
 		currentMethod = func(writer http.ResponseWriter, request *http.Request) {
 			require.Equal(t, http.MethodPost, request.Method)
-			require.Equal(t, "/v1/ethereum/test/accounts/sign-aggregation", request.URL.Path)
+			require.Equal(t, "/v1/ethereum/pyrmont/accounts/sign-aggregation", request.URL.Path)
 
 			var req keymanager.SignAggregationRequest
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&req))
@@ -159,7 +159,7 @@ func TestSignProposal(t *testing.T) {
 		Location:    s.URL,
 		AccessToken: defaultAccessToken,
 		PubKey:      defaultAccountPublicKey,
-		Network:     "test",
+		Network:     "pyrmont",
 	})
 	require.NoError(t, err)
 
@@ -167,7 +167,7 @@ func TestSignProposal(t *testing.T) {
 		protect.Lock()
 		currentMethod = func(writer http.ResponseWriter, request *http.Request) {
 			require.Equal(t, http.MethodPost, request.Method)
-			require.Equal(t, "/v1/ethereum/test/accounts/sign-proposal", request.URL.Path)
+			require.Equal(t, "/v1/ethereum/pyrmont/accounts/sign-proposal", request.URL.Path)
 
 			var req keymanager.SignProposalRequest
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&req))
@@ -273,7 +273,7 @@ func TestSignAttestation(t *testing.T) {
 		Location:    s.URL,
 		AccessToken: defaultAccessToken,
 		PubKey:      defaultAccountPublicKey,
-		Network:     "test",
+		Network:     "pyrmont",
 	})
 	require.NoError(t, err)
 
@@ -281,7 +281,7 @@ func TestSignAttestation(t *testing.T) {
 		protect.Lock()
 		currentMethod = func(writer http.ResponseWriter, request *http.Request) {
 			require.Equal(t, http.MethodPost, request.Method)
-			require.Equal(t, "/v1/ethereum/test/accounts/sign-attestation", request.URL.Path)
+			require.Equal(t, "/v1/ethereum/pyrmont/accounts/sign-attestation", request.URL.Path)
 
 			var req keymanager.SignAttestationRequest
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&req))

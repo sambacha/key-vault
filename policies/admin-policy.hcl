@@ -1,5 +1,5 @@
 # Ability to list existing wallet accounts ("list")
-path "ethereum/test/accounts" {
+path "ethereum/pyrmont/accounts" {
   capabilities = ["list"]
 }
 path "ethereum/mainnet/accounts" {
@@ -7,7 +7,7 @@ path "ethereum/mainnet/accounts" {
 }
 
 # Ability to sign data ("create")
-path "ethereum/test/accounts/sign-*" {
+path "ethereum/pyrmont/accounts/sign-*" {
   capabilities = ["create"]
 }
 path "ethereum/mainnet/accounts/sign-*" {
@@ -15,7 +15,7 @@ path "ethereum/mainnet/accounts/sign-*" {
 }
 
 # Ability to update storage ("create")
-path "ethereum/test/storage" {
+path "ethereum/pyrmont/storage" {
   capabilities = ["create"]
 }
 path "ethereum/mainnet/storage" {

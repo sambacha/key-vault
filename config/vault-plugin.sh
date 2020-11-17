@@ -10,17 +10,17 @@ vault plugin register \
     -args=--log-levels=${LOG_LEVELS} \
     secret ethsign
 
-# Enable test network
+# Enable pyrmont network
 echo "Enabling Test network..."
 vault secrets enable \
-    -path=ethereum/test \
-    -description="Eth Signing Wallet - Test Network" \
+    -path=ethereum/pyrmont \
+    -description="Eth Signing Wallet - Pyrmont Test Network" \
     -plugin-name=ethsign plugin > /dev/null 2>&1
 
-echo "Configuring Test network..."
-vault write ethereum/test/config \
-    network="test" \
-    genesis_time="$TESTNET_GENESIS_TIME"
+echo "Configuring Pyrmont Test network..."
+vault write ethereum/pyrmont/config \
+    network="pyrmont" \
+    genesis_time="$PYRMONT_GENESIS_TIME"
 
 # Enable mainnet network
 echo "Enabling MainNet network"

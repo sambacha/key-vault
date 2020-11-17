@@ -202,7 +202,7 @@ This endpoint will sign attestation for specific account at a path.
 
 | Method  | Path | Produces |
 | ------------- | ------------- | ------------- |
-| `POST`  | `:mount-path/<test|mainnet>/accounts/sign-proposal`  | `200 application/json` |
+| `POST`  | `:mount-path/<pyrmont|mainnet>/accounts/sign-proposal`  | `200 application/json` |
 
 #### Parameters
 
@@ -274,7 +274,7 @@ Use the following policy to assign to a signer level access token, with the abil
 
 ```
 # Ability to list existing wallet accounts ("list")
-path "ethereum/test/accounts" {
+path "ethereum/pyrmont/accounts" {
   capabilities = ["list"]
 }
 path "ethereum/mainnet/accounts" {
@@ -282,7 +282,7 @@ path "ethereum/mainnet/accounts" {
 }
 
 # Ability to sign data ("create")
-path "ethereum/test/accounts/sign-*" {
+path "ethereum/pyrmont/accounts/sign-*" {
   capabilities = ["create"]
 }
 path "ethereum/mainnet/accounts/sign-*" {
@@ -295,7 +295,7 @@ Use the following policy to assign to a admin level access token, with the full 
 
 ```
 # Ability to list existing wallet accounts ("list")
-path "ethereum/test/accounts" {
+path "ethereum/pyrmont/accounts" {
   capabilities = ["list"]
 }
 path "ethereum/mainnet/accounts" {
@@ -303,7 +303,7 @@ path "ethereum/mainnet/accounts" {
 }
 
 # Ability to sign data ("create")
-path "ethereum/test/accounts/sign-*" {
+path "ethereum/pyrmont/accounts/sign-*" {
   capabilities = ["create"]
 }
 path "ethereum/mainnet/accounts/sign-*" {
@@ -311,7 +311,7 @@ path "ethereum/mainnet/accounts/sign-*" {
 }
 
 # Ability to update storage ("create")
-path "ethereum/test/storage" {
+path "ethereum/pyrmont/storage" {
   capabilities = ["create"]
 }
 path "ethereum/mainnet/storage" {
@@ -371,8 +371,8 @@ New networks could be defined by the following steps:
     Example
     ```bash
     $ vault secrets enable \
-        -path=ethereum/test \
-        -description="Eth Signing Wallet - Test Network" \
+        -path=ethereum/pyrmont \
+        -description="Eth Signing Wallet - Pyrmont Test Network" \
         -plugin-name=ethsign plugin > /dev/null 2>&1
     ```
 
