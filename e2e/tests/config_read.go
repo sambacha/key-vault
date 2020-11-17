@@ -37,7 +37,7 @@ func (test *ConfigRead) Run(t *testing.T) {
 	configBytes, statusCode := setup.ReadConfig(t, core.TestNetwork)
 	require.Equal(t, http.StatusOK, statusCode)
 
-	expectedGenesisTime, err := time.Parse("2006-01-02 15:04:05 MST", "2020-08-04 13:00:08 UTC")
+	expectedGenesisTime, err := time.Parse("2006-01-02 15:04:05 MST", "2020-11-18 12:00:07 UTC")
 	require.NoError(t, err)
 
 	// parse to json
