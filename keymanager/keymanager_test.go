@@ -1,6 +1,7 @@
 package keymanager_test
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
@@ -123,6 +124,14 @@ func TestSignGeneric(t *testing.T) {
 			require.Nil(t, actualSignature)
 		})
 	})
+
+	t.Run("rejects with invalid signature", func(t *testing.T) {
+		runTest(t, http.StatusOK, []byte("invalid"), func(wallet *keymanager.KeyManager) {
+			actualSignature, err := wallet.SignGeneric(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(data), bytex.ToBytes32(domain))
+			require.True(t, keymanager.IsGenericError(err))
+			require.Nil(t, actualSignature)
+		})
+	})
 }
 
 func TestSignProposal(t *testing.T) {
@@ -226,6 +235,14 @@ func TestSignProposal(t *testing.T) {
 
 	t.Run("rejects with failed", func(t *testing.T) {
 		runTest(t, http.StatusInternalServerError, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
+			actualSignature, err := wallet.SignProposal(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(domain), data)
+			require.True(t, keymanager.IsGenericError(err))
+			require.Nil(t, actualSignature)
+		})
+	})
+
+	t.Run("rejects with invalid signature", func(t *testing.T) {
+		runTest(t, http.StatusOK, []byte("invalid"), func(wallet *keymanager.KeyManager) {
 			actualSignature, err := wallet.SignProposal(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(domain), data)
 			require.True(t, keymanager.IsGenericError(err))
 			require.Nil(t, actualSignature)
@@ -347,6 +364,169 @@ func TestSignAttestation(t *testing.T) {
 			require.Nil(t, actualSignature)
 		})
 	})
+
+	t.Run("rejects with invalid signature", func(t *testing.T) {
+		runTest(t, http.StatusOK, []byte("invalid"), func(wallet *keymanager.KeyManager) {
+			actualSignature, err := wallet.SignAttestation(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(domain), data)
+			require.True(t, keymanager.IsGenericError(err))
+			require.Nil(t, actualSignature)
+		})
+	})
+}
+
+func TestNewKeyManager(t *testing.T) {
+	entry := logrus.NewEntry(logrus.New())
+	type args struct {
+		log  *logrus.Entry
+		opts *keymanager.Config
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *keymanager.KeyManager
+		wantErr bool
+	}{
+		{
+			name: "empty location",
+			args: args{
+				log: entry,
+				opts: &keymanager.Config{
+					AccessToken: "AccessToken",
+					PubKey:      defaultAccountPublicKey,
+					Network:     "Network",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty access token",
+			args: args{
+				log: entry,
+				opts: &keymanager.Config{
+					Location: "Location",
+					PubKey:   defaultAccountPublicKey,
+					Network:  "Network",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty public key",
+			args: args{
+				log: entry,
+				opts: &keymanager.Config{
+					Location:    "Location",
+					AccessToken: "AccessToken",
+					Network:     "Network",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid public key",
+			args: args{
+				log: entry,
+				opts: &keymanager.Config{
+					Location:    "Location",
+					AccessToken: "AccessToken",
+					PubKey:      "invalid",
+					Network:     "Network",
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := keymanager.NewKeyManager(tt.args.log, tt.args.opts)
+			require.Equal(t, tt.want, got)
+			require.Equal(t, tt.wantErr, err != nil)
+		})
+	}
+}
+
+func TestKeyManager_FetchValidatingPublicKeys(t *testing.T) {
+	entry := logrus.NewEntry(logrus.New())
+
+	pubKey, err := hex.DecodeString(defaultAccountPublicKey)
+	require.NoError(t, err)
+
+	type args struct {
+		log  *logrus.Entry
+		opts *keymanager.Config
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    [][48]byte
+		wantErr bool
+	}{
+		{
+			name: "fetch all public keys",
+			args: args{
+				log: entry,
+				opts: &keymanager.Config{
+					Location:    "Location",
+					AccessToken: defaultAccessToken,
+					PubKey:      defaultAccountPublicKey,
+					Network:     "Network",
+				},
+			},
+			want: [][48]byte{bytex.ToBytes48(pubKey)},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			km, err := keymanager.NewKeyManager(tt.args.log, tt.args.opts)
+			require.NoError(t, err)
+
+			got, err := km.FetchValidatingPublicKeys(context.Background())
+			require.Equal(t, tt.want, got)
+			require.Equal(t, tt.wantErr, err != nil)
+		})
+	}
+}
+
+func TestKeyManager_FetchAllValidatingPublicKeys(t *testing.T) {
+	entry := logrus.NewEntry(logrus.New())
+
+	pubKey, err := hex.DecodeString(defaultAccountPublicKey)
+	require.NoError(t, err)
+
+	type args struct {
+		log  *logrus.Entry
+		opts *keymanager.Config
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    [][48]byte
+		wantErr bool
+	}{
+		{
+			name: "fetch all public keys",
+			args: args{
+				log: entry,
+				opts: &keymanager.Config{
+					Location:    "Location",
+					AccessToken: defaultAccessToken,
+					PubKey:      defaultAccountPublicKey,
+					Network:     "Network",
+				},
+			},
+			want: [][48]byte{bytex.ToBytes48(pubKey)},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			km, err := keymanager.NewKeyManager(tt.args.log, tt.args.opts)
+			require.NoError(t, err)
+
+			got, err := km.FetchAllValidatingPublicKeys(context.Background())
+			require.Equal(t, tt.want, got)
+			require.Equal(t, tt.wantErr, err != nil)
+		})
+	}
 }
 
 func newTestRemoteWallet(handler http.HandlerFunc) *httptest.Server {
