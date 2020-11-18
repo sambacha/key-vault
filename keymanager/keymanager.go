@@ -9,23 +9,25 @@ import (
 	"net/http"
 
 	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 	"github.com/prysmaticlabs/prysm/shared/bls"
-	"github.com/prysmaticlabs/prysm/shared/bytesutil"
-	v1keymanager "github.com/prysmaticlabs/prysm/validator/keymanager/v1"
+	"github.com/prysmaticlabs/prysm/validator/keymanager"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bloxapp/key-vault/backend"
+	"github.com/bloxapp/key-vault/utils/bytex"
 	"github.com/bloxapp/key-vault/utils/endpoint"
 	"github.com/bloxapp/key-vault/utils/httpex"
 )
 
-// To make sure KeyManager implements v1keymanager.ProtectingKeyManager interface
-var _ v1keymanager.KeyManager = &KeyManager{}
-var _ v1keymanager.ProtectingKeyManager = &KeyManager{}
+// To make sure V2 implements keymanager.IKeymanager interface
+var _ keymanager.IKeymanager = &KeyManager{}
 
 // Predefined errors
 var (
-	ErrUnprotectedSigning = NewGenericErrorWithMessage("remote HTTP key manager does not support unprotected signing method")
+	ErrLocationMissing    = NewGenericErrorMessage("wallet location is required")
+	ErrTokenMissing       = NewGenericErrorMessage("wallet access token is required")
+	ErrPubKeyMissing      = NewGenericErrorMessage("wallet public key is required")
 	ErrUnsupportedSigning = NewGenericErrorWithMessage("remote HTTP key manager does not support such signing method")
 	ErrNoSuchKey          = NewGenericErrorWithMessage("no such key")
 )
@@ -45,13 +47,13 @@ type KeyManager struct {
 // NewKeyManager is the constructor of KeyManager.
 func NewKeyManager(log *logrus.Entry, opts *Config) (*KeyManager, error) {
 	if len(opts.Location) == 0 {
-		return nil, NewGenericErrorMessage("wallet location is required")
+		return nil, ErrLocationMissing
 	}
 	if len(opts.AccessToken) == 0 {
-		return nil, NewGenericErrorMessage("wallet access token is required")
+		return nil, ErrTokenMissing
 	}
 	if len(opts.PubKey) == 0 {
-		return nil, NewGenericErrorMessage("wallet public key is required")
+		return nil, ErrPubKeyMissing
 	}
 
 	// Decode public key
@@ -64,21 +66,48 @@ func NewKeyManager(log *logrus.Entry, opts *Config) (*KeyManager, error) {
 		remoteAddress: opts.Location,
 		accessToken:   opts.AccessToken,
 		originPubKey:  opts.PubKey,
-		pubKey:        bytesutil.ToBytes48(decodedPubKey),
+		pubKey:        bytex.ToBytes48(decodedPubKey),
 		network:       opts.Network,
 		httpClient:    httpex.CreateClient(),
 		log:           log,
 	}, nil
 }
 
-// FetchValidatingKeys implements KeyManager interface.
-func (km *KeyManager) FetchValidatingKeys() ([][48]byte, error) {
+// FetchValidatingPublicKeys implements KeyManager-v2 interface.
+func (km *KeyManager) FetchValidatingPublicKeys(_ context.Context) ([][48]byte, error) {
 	return [][48]byte{km.pubKey}, nil
 }
 
-// Sign implements KeyManager interface.
-func (km *KeyManager) Sign(ctx context.Context, pubKey [48]byte, root [32]byte) (bls.Signature, error) {
-	return nil, ErrUnprotectedSigning
+// FetchAllValidatingPublicKeys implements KeyManager-v2 interface.
+func (km *KeyManager) FetchAllValidatingPublicKeys(_ context.Context) ([][48]byte, error) {
+	return [][48]byte{km.pubKey}, nil
+}
+
+// Sign implements IKeymanager interface.
+func (km *KeyManager) Sign(_ context.Context, req *validatorpb.SignRequest) (bls.Signature, error) {
+	if bytex.ToBytes48(req.GetPublicKey()) != km.pubKey {
+		return nil, ErrNoSuchKey
+	}
+
+	domain := bytex.ToBytes32(req.GetSignatureDomain())
+	switch data := req.GetObject().(type) {
+	case *validatorpb.SignRequest_Block:
+		return km.SignProposal(km.pubKey, domain, &ethpb.BeaconBlockHeader{
+			Slot:          data.Block.GetSlot(),
+			ProposerIndex: data.Block.GetProposerIndex(),
+			StateRoot:     data.Block.GetStateRoot(),
+			ParentRoot:    data.Block.GetParentRoot(),
+			BodyRoot:      req.GetSigningRoot(),
+		})
+	case *validatorpb.SignRequest_AttestationData:
+		return km.SignAttestation(km.pubKey, domain, data.AttestationData)
+	case *validatorpb.SignRequest_AggregateAttestationAndProof:
+		return km.SignGeneric(km.pubKey, bytex.ToBytes32(req.GetSigningRoot()), domain)
+	case *validatorpb.SignRequest_Slot:
+		return km.SignGeneric(km.pubKey, bytex.ToBytes32(req.GetSigningRoot()), domain)
+	default:
+		return nil, ErrUnsupportedSigning
+	}
 }
 
 // SignGeneric implements ProtectingKeyManager interface.
@@ -149,7 +178,7 @@ func (km *KeyManager) SignProposal(pubKey [48]byte, domain [32]byte, data *ethpb
 	var resp SignResponse
 	if err := km.sendRequest(http.MethodPost, backend.SignProposalPattern, reqBody, &resp); err != nil {
 		km.log.WithError(err).Error("failed to send sign proposal request")
-		return nil, NewGenericError(err, "failed to send SignAttestation request to remote vault wallet")
+		return nil, NewGenericError(err, "failed to send SignProposal request to remote vault wallet")
 	}
 
 	// Signature is base64 encoded, so we have to decode that.

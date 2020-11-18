@@ -1,5 +1,6 @@
 stages:
   - lint
+  - gosec
   - test
   - build
   - deploy
@@ -30,7 +31,7 @@ variables:
 #blox-infra-stage
 Run linter:
   stage: lint
-  image: golang:1.14-stretch
+  image: golang:1.15
   tags:
     - blox-infra-stage
   script:
@@ -38,15 +39,24 @@ Run linter:
     - go get -u golang.org/x/tools/cmd/goimports
     - ./scripts/lint.sh .
 
+Security check:
+  stage: gosec
+  image: golang:1.15
+  tags:
+    - blox-infra-stage
+  script:
+    - curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s v2.5.0
+    - ./bin/gosec -exclude-dir e2e ./...
+
 Run tests of the application:
   stage: test
-  image: golang:1.14-stretch
+  image: golang:1.15
   services:
     - docker:dind
   tags:
     - blox-infra-stage
   script:
-    - DOCKER_API_VERSION=1.39 go test -cover -race -p 1 ./...
+    - DOCKER_API_VERSION=1.39 go test -tags blst_enabled -timeout 20m -cover -race -p 1 ./...
 
 Build stage Docker image:
   stage: build
@@ -78,7 +88,7 @@ Deploy to blox-infra-stage cluster:
 #blox-infra-prod
 Run prod linter:
   stage: lint
-  image: golang:1.14-stretch
+  image: golang:1.15
   tags:
     - blox-infra-prod
   script:
@@ -88,15 +98,26 @@ Run prod linter:
   only:
     - master
 
+Prod security check:
+  stage: gosec
+  image: golang:1.15
+  tags:
+    - blox-infra-stage
+  script:
+    - curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s v2.5.0
+    - ./bin/gosec -exclude-dir e2e ./...
+  only:
+    - master
+
 Run prod tests of the application:
   stage: test
-  image: golang:1.14-stretch
+  image: golang:1.15
   services:
     - docker:dind
   tags:
     - blox-infra-prod
   script:
-    - DOCKER_API_VERSION=1.39 go test -cover -race -p 1 ./...
+    - DOCKER_API_VERSION=1.39 go test -tags blst_enabled -timeout 20m -cover -race -p 1 ./...
   only:
     - master
 

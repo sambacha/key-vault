@@ -6,9 +6,15 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/vault/sdk/logical"
+	"github.com/pkg/errors"
 )
 
-// DBLock implements DB slocking mechanism.
+var (
+	// ErrLocked represents the locked error.
+	ErrLocked = errors.New("locked")
+)
+
+// DBLock implements DB locking mechanism.
 type DBLock struct {
 	id      uuid.UUID
 	storage logical.Storage
@@ -27,27 +33,25 @@ func (lock *DBLock) Lock() error {
 	// if locked return error
 	locked, err := lock.IsLocked()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to check if it is locked")
 	}
 	if locked {
-		return fmt.Errorf("locked")
+		return ErrLocked
 	}
 
 	// add lock to db
-	entry := &logical.StorageEntry{
+	return lock.storage.Put(context.Background(), &logical.StorageEntry{
 		Key:      lock.key(),
 		Value:    []byte("1"),
 		SealWrap: false,
-	}
-	return lock.storage.Put(context.Background(), entry)
+	})
 }
 
 // UnLock unlocks the DB.
 func (lock *DBLock) UnLock() error {
-	// check if locked
 	locked, err := lock.IsLocked()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to check if it is locked")
 	}
 	if !locked {
 		return nil
@@ -61,10 +65,10 @@ func (lock *DBLock) UnLock() error {
 func (lock *DBLock) IsLocked() (bool, error) {
 	entry, err := lock.storage.Get(context.Background(), lock.key())
 	if err != nil {
-		return true, err
+		return false, err
 	}
 
-	return entry != nil, err
+	return entry != nil, nil
 }
 
 func (lock *DBLock) key() string {

@@ -2,19 +2,16 @@ package backend
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/stretchr/testify/require"
 )
 
-func ignoreError(val interface{}, err error) interface{} {
-	return val
-}
-
 func basicAttestationData() map[string]interface{} {
 	return map[string]interface{}{
-		"public_key":      "ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279",
+		"public_key":      "95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
 		"domain":          "01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac",
 		"slot":            284115,
 		"committeeIndex":  2,
@@ -39,10 +36,11 @@ func TestAttestationSlashing(t *testing.T) {
 
 		req.Data = basicAttestationData()
 		res, err := b.HandleRequest(context.Background(), req)
+		fmt.Printf("res %#v\n", res)
 		require.NoError(t, err)
 		require.NotNil(t, res.Data)
 		require.Equal(t,
-			"a53b6728fc2cc52abb0059da9b2e7cb01f33cd95fd6c9db7f2b821fa58a58d5ef2bc5dda058d570a7f240bf24b335eee066b2ab8dbf5a989157dd51b647733665f7c1be0d1c285b02efdbb37cd4e0ace0529b8e02c944386e3b110c32b019c63",
+			"b162e5ee4ee141738518f36707c6891ae33f929d12f5cb51ad989774ccb4b04d6aeabc2d4f68e8624b1743ef863cc72b10e090a0ae8d2d7f2abaf08372b9ab5c3312b31537bfebb858c41b41ebbe8dfffa1354185c6b4b881326b1bc7554f04d",
 			res.Data["signature"],
 		)
 	})
@@ -67,7 +65,7 @@ func TestAttestationSlashing(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, res.Data)
 		require.Equal(t,
-			"a53b6728fc2cc52abb0059da9b2e7cb01f33cd95fd6c9db7f2b821fa58a58d5ef2bc5dda058d570a7f240bf24b335eee066b2ab8dbf5a989157dd51b647733665f7c1be0d1c285b02efdbb37cd4e0ace0529b8e02c944386e3b110c32b019c63",
+			"b162e5ee4ee141738518f36707c6891ae33f929d12f5cb51ad989774ccb4b04d6aeabc2d4f68e8624b1743ef863cc72b10e090a0ae8d2d7f2abaf08372b9ab5c3312b31537bfebb858c41b41ebbe8dfffa1354185c6b4b881326b1bc7554f04d",
 			res.Data["signature"],
 		)
 	})
@@ -166,7 +164,7 @@ func TestAttestationSlashing(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, res.Data)
 		require.Equal(t,
-			"918b8b0128d263a8a7f42b8c19e57c92844cd826ef6c8c7eb78b789591a934b0a89dd615ad381808cac4ae464066fb85067b806bf359321c4600b1390e037de31ad54151fbc63dc18c1e6bcec7f56e18100cc1430091e0eb28a42c4787ce5f86",
+			"8cabc3f514695d46de7d5ae37a34ad07dd4de10f56272da0b14ded2178d49bb5e8d5b3698f077c947fca9bc26b9f9aa8198e7cbc569d7edb93e8813afee02319347530b7377c64f92d1293d21a4dc039442129f5b28e117d7efb16e3a3b413c7",
 			res.Data["signature"],
 		)
 	})
@@ -187,7 +185,7 @@ func TestAttestationSlashing(t *testing.T) {
 		// add another attestation building on the base
 		// 8877 <- 8878 <- 8879
 		req.Data = map[string]interface{}{
-			"public_key":      "ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279",
+			"public_key":      "95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
 			"domain":          "01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac",
 			"slot":            284116,
 			"committeeIndex":  2,
@@ -205,7 +203,7 @@ func TestAttestationSlashing(t *testing.T) {
 		// 	<- 8880
 		// slashable
 		req.Data = map[string]interface{}{
-			"public_key":      "ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279",
+			"public_key":      "95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
 			"domain":          "01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac",
 			"slot":            284117,
 			"committeeIndex":  2,
@@ -237,7 +235,7 @@ func TestAttestationSlashing(t *testing.T) {
 		// add another attestation building on the base
 		// 8877 <- 8878 <- 8879 <----------------------9000
 		req.Data = map[string]interface{}{
-			"public_key":      "ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279",
+			"public_key":      "95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
 			"domain":          "01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac",
 			"slot":            284116,
 			"committeeIndex":  2,
@@ -255,7 +253,7 @@ func TestAttestationSlashing(t *testing.T) {
 		// 								8900 <- 8901
 		// slashable
 		req.Data = map[string]interface{}{
-			"public_key":      "ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3279",
+			"public_key":      "95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
 			"domain":          "01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac",
 			"slot":            284117,
 			"committeeIndex":  2,

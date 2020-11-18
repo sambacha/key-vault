@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/e2e"
@@ -27,8 +28,7 @@ func (test *AttestationConcurrentSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	setup.UpdateConfig(t)
-	store := setup.UpdateStorage(t)
+	store := setup.UpdateStorage(t, core.TestNetwork)
 	account := shared.RetrieveAccount(t, store)
 	pubKey := hex.EncodeToString(account.ValidatorPublicKey().Marshal())
 
@@ -45,6 +45,7 @@ func (test *AttestationConcurrentSigning) Run(t *testing.T) {
 			"targetEpoch":     8878,
 			"targetRoot":      "17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0",
 		},
+		core.TestNetwork,
 	)
 	require.NoError(t, err)
 
@@ -80,6 +81,7 @@ func runSlashableAttestation(t *testing.T, setup *e2e.BaseSetup, pubKey string) 
 			"targetEpoch":     8878,
 			"targetRoot":      "17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0",
 		},
+		core.TestNetwork,
 	)
 	require.Error(t, err, "did not slash")
 	require.IsType(t, &e2e.ServiceError{}, err)

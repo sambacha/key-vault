@@ -6,12 +6,12 @@ import (
 	"fmt"
 
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/encryptor"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 	"github.com/bloxapp/eth2-key-manager/wallet_hd"
 	"github.com/google/uuid"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
 )
 
 // Paths
@@ -28,7 +28,7 @@ type HashicorpVaultStore struct {
 	ctx     context.Context
 	network core.Network
 
-	encryptor          types.Encryptor
+	encryptor          encryptor.Encryptor
 	encryptionPassword []byte
 }
 
@@ -49,19 +49,19 @@ func FromInMemoryStore(ctx context.Context, inMem *in_memory.InMemStore, storage
 	if err != nil {
 		return nil, err
 	}
+
 	for _, accountID := range res {
 		path := fmt.Sprintf(AccountPath, accountID)
-		err = storage.Delete(ctx, path)
-		if err != nil {
+		if err := storage.Delete(ctx, path); err != nil {
 			return nil, err
 		}
 	}
-	err = storage.Delete(ctx, WalletDataPath)
-	if err != nil {
+
+	if err := storage.Delete(ctx, WalletDataPath); err != nil {
 		return nil, err
 	}
-	err = storage.Delete(ctx, AccountBase)
-	if err != nil {
+
+	if err := storage.Delete(ctx, AccountBase); err != nil {
 		return nil, err
 	}
 
@@ -80,8 +80,7 @@ func FromInMemoryStore(ctx context.Context, inMem *in_memory.InMemStore, storage
 
 	// Save accounts
 	for _, acc := range wallet.Accounts() {
-		err = newStore.SaveAccount(acc)
-		if err != nil {
+		if err := newStore.SaveAccount(acc); err != nil {
 			return nil, err
 		}
 	}
@@ -101,21 +100,16 @@ func (store *HashicorpVaultStore) Network() core.Network {
 
 // SaveWallet implements Storage interface.
 func (store *HashicorpVaultStore) SaveWallet(wallet core.Wallet) error {
-	// data
 	data, err := json.Marshal(wallet)
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal wallet")
 	}
 
-	// put wallet data
-	path := WalletDataPath
-	entry := &logical.StorageEntry{
-		Key:      path,
+	return store.storage.Put(store.ctx, &logical.StorageEntry{
+		Key:      WalletDataPath,
 		Value:    data,
 		SealWrap: false,
-	}
-
-	return store.storage.Put(store.ctx, entry)
+	})
 }
 
 // OpenWallet returns nil,nil if no wallet was found
@@ -131,14 +125,13 @@ func (store *HashicorpVaultStore) OpenWallet() (core.Wallet, error) {
 		return nil, fmt.Errorf("wallet not found")
 	}
 
-	// un-marshal
-	ret := &wallet_hd.HDWallet{} // not hardcode HDWallet
+	var ret wallet_hd.HDWallet
 	ret.SetContext(store.freshContext())
 	if err := json.Unmarshal(entry.Value, &ret); err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal HD Wallet object")
 	}
 
-	return ret, nil
+	return &ret, nil
 }
 
 // ListAccounts returns an empty array for no accounts
@@ -153,20 +146,16 @@ func (store *HashicorpVaultStore) ListAccounts() ([]core.ValidatorAccount, error
 
 // SaveAccount stores the given account in DB.
 func (store *HashicorpVaultStore) SaveAccount(account core.ValidatorAccount) error {
-	// data
 	data, err := json.Marshal(account)
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal account object")
 	}
 
-	// put wallet data
-	path := fmt.Sprintf(AccountPath, account.ID().String())
-	entry := &logical.StorageEntry{
-		Key:      path,
+	return store.storage.Put(store.ctx, &logical.StorageEntry{
+		Key:      fmt.Sprintf(AccountPath, account.ID().String()),
 		Value:    data,
 		SealWrap: false,
-	}
-	return store.storage.Put(store.ctx, entry)
+	})
 }
 
 // OpenAccount opens an account by the given ID. Returns nil,nil if no account was found.
@@ -183,12 +172,12 @@ func (store *HashicorpVaultStore) OpenAccount(accountID uuid.UUID) (core.Validat
 	}
 
 	// un-marshal
-	ret := &wallet_hd.HDAccount{} // not hardcode HDAccount
+	var ret wallet_hd.HDAccount
 	ret.SetContext(store.freshContext())
 	if err := json.Unmarshal(entry.Value, &ret); err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal HD account object")
 	}
-	return ret, nil
+	return &ret, nil
 }
 
 // DeleteAccount deletes the given account
@@ -201,7 +190,7 @@ func (store *HashicorpVaultStore) DeleteAccount(accountID uuid.UUID) error {
 }
 
 // SetEncryptor sets the given encryptor. Could be nil value.
-func (store *HashicorpVaultStore) SetEncryptor(encryptor types.Encryptor, password []byte) {
+func (store *HashicorpVaultStore) SetEncryptor(encryptor encryptor.Encryptor, password []byte) {
 	store.encryptor = encryptor
 	store.encryptionPassword = password
 }
@@ -213,11 +202,5 @@ func (store *HashicorpVaultStore) freshContext() *core.WalletContext {
 }
 
 func (store *HashicorpVaultStore) canEncrypt() bool {
-	if store.encryptor != nil {
-		if store.encryptionPassword == nil {
-			return false
-		}
-		return true
-	}
-	return false
+	return store.encryptor != nil && store.encryptionPassword != nil
 }
