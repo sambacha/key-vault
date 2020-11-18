@@ -1,15 +1,15 @@
 # Ability to list existing wallet accounts ("list")
-path "ethereum/test/accounts" {
+path "ethereum/pyrmont/accounts" {
   capabilities = ["list"]
 }
-path "ethereum/zinken/accounts" {
+path "ethereum/mainnet/accounts" {
   capabilities = ["list"]
 }
 
 # Ability to sign data ("create")
-path "ethereum/test/accounts/sign-*" {
+path "ethereum/pyrmont/accounts/sign-*" {
   capabilities = ["create"]
 }
-path "ethereum/zinken/accounts/sign-*" {
+path "ethereum/mainnet/accounts/sign-*" {
   capabilities = ["create"]
 }

@@ -25,6 +25,9 @@ var _ keymanager.IKeymanager = &KeyManager{}
 
 // Predefined errors
 var (
+	ErrLocationMissing    = NewGenericErrorMessage("wallet location is required")
+	ErrTokenMissing       = NewGenericErrorMessage("wallet access token is required")
+	ErrPubKeyMissing      = NewGenericErrorMessage("wallet public key is required")
 	ErrUnsupportedSigning = NewGenericErrorWithMessage("remote HTTP key manager does not support such signing method")
 	ErrNoSuchKey          = NewGenericErrorWithMessage("no such key")
 )
@@ -44,13 +47,13 @@ type KeyManager struct {
 // NewKeyManager is the constructor of KeyManager.
 func NewKeyManager(log *logrus.Entry, opts *Config) (*KeyManager, error) {
 	if len(opts.Location) == 0 {
-		return nil, NewGenericErrorMessage("wallet location is required")
+		return nil, ErrLocationMissing
 	}
 	if len(opts.AccessToken) == 0 {
-		return nil, NewGenericErrorMessage("wallet access token is required")
+		return nil, ErrTokenMissing
 	}
 	if len(opts.PubKey) == 0 {
-		return nil, NewGenericErrorMessage("wallet public key is required")
+		return nil, ErrPubKeyMissing
 	}
 
 	// Decode public key
@@ -72,6 +75,11 @@ func NewKeyManager(log *logrus.Entry, opts *Config) (*KeyManager, error) {
 
 // FetchValidatingPublicKeys implements KeyManager-v2 interface.
 func (km *KeyManager) FetchValidatingPublicKeys(_ context.Context) ([][48]byte, error) {
+	return [][48]byte{km.pubKey}, nil
+}
+
+// FetchAllValidatingPublicKeys implements KeyManager-v2 interface.
+func (km *KeyManager) FetchAllValidatingPublicKeys(_ context.Context) ([][48]byte, error) {
 	return [][48]byte{km.pubKey}, nil
 }
 
