@@ -31,7 +31,7 @@ variables:
 #blox-infra-stage
 Run linter:
   stage: lint
-  image: golang:1.14-stretch
+  image: golang:1.15-stretch
   tags:
     - blox-infra-stage
   script:
@@ -41,7 +41,7 @@ Run linter:
 
 Security check:
   stage: gosec
-  image: golang:1.14-stretch
+  image: golang:1.15-stretch
   tags:
     - blox-infra-stage
   script:
@@ -50,7 +50,7 @@ Security check:
 
 Run tests of the application:
   stage: test
-  image: golang:1.14-stretch
+  image: golang:1.15-stretch
   services:
     - docker:dind
   tags:
@@ -88,7 +88,7 @@ Deploy to blox-infra-stage cluster:
 #blox-infra-prod
 Run prod linter:
   stage: lint
-  image: golang:1.14-stretch
+  image: golang:1.15-stretch
   tags:
     - blox-infra-prod
   script:
@@ -100,7 +100,7 @@ Run prod linter:
 
 Prod security check:
   stage: gosec
-  image: golang:1.14-stretch
+  image: golang:1.15-stretch
   tags:
     - blox-infra-stage
   script:
@@ -111,7 +111,7 @@ Prod security check:
 
 Run prod tests of the application:
   stage: test
-  image: golang:1.14-stretch
+  image: golang:1.15-stretch
   services:
     - docker:dind
   tags:
