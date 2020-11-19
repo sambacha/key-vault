@@ -116,9 +116,8 @@ github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+Ce
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
-github.com/bloxapp/eth2-key-manager v0.2.18 h1:vozqCjxzLZnyj1aKVZei1yMAT5uABRRWVoJEnc3xSHk=
-github.com/bloxapp/eth2-key-manager v0.2.18/go.mod h1:AE5Caha4lh2/7Q/44eNTqFm6pSkVBx+MLin9y5EmOoA=
-github.com/bloxapp/eth2-key-manager v0.2.19/go.mod h1:TX1cW2YKo/DRMKvDVlUk2vzB1tPvnnrrFEAfoQATj4o=
+github.com/bloxapp/eth2-key-manager v0.2.20 h1:qwBm43B8S/3XdD+hULBnyTUPID3vl82hX6ccp5hDH54=
+github.com/bloxapp/eth2-key-manager v0.2.20/go.mod h1:Y94WryV/zcyr33u8sxNvoA3MnV1A9pH0w0M+OZv2d1c=
 github.com/bmizerany/pat v0.0.0-20170815010413-6226ea591a40/go.mod h1:8rLXio+WjiTceGBHIoTvn60HIbs7Hm7bcHjyrSqYB9c=
 github.com/boltdb/bolt v1.3.1/go.mod h1:clJnj/oiGkjum5o1McbSZDSLxVThjynRyGBgiAx27Ps=
 github.com/bradfitz/gomemcache v0.0.0-20170208213004-1952afaa557d/go.mod h1:PmM6Mmwb0LSuEubjR8N7PtNe1KxZLtOUHtbeikc5h60=
@@ -1030,8 +1029,8 @@ github.com/prometheus/tsdb v0.10.0 h1:If5rVCMTp6W2SiRAQFlbpJNgVlgMEd+U2GZckwK38i
 github.com/prometheus/tsdb v0.10.0/go.mod h1:oi49uRhEe9dPUTlS3JRZOwJuVi6tmh10QSgwXEyGCt4=
 github.com/protolambda/zssz v0.1.5 h1:7fjJjissZIIaa2QcvmhS/pZISMX21zVITt49sW1ouek=
 github.com/protolambda/zssz v0.1.5/go.mod h1:a4iwOX5FE7/JkKA+J/PH0Mjo9oXftN6P8NZyL28gpag=
-github.com/prysmaticlabs/bazel-go-ethereum v0.0.0-20201016095414-974cbc1dd92e h1:+AspXGWVJzMtcy24DkGEJqut1grik397nnb7JybNBy8=
-github.com/prysmaticlabs/bazel-go-ethereum v0.0.0-20201016095414-974cbc1dd92e/go.mod h1:JIfVb6esrqALTExdz9hRYvrP0xBDf6wCncIu1hNwHpM=
+github.com/prysmaticlabs/bazel-go-ethereum v0.0.0-20201113091623-013fd65b3791 h1:6C+VhYdUuy784LPc9t/FuAptmlYcrf5pYjXKPj93ko8=
+github.com/prysmaticlabs/bazel-go-ethereum v0.0.0-20201113091623-013fd65b3791/go.mod h1:JIfVb6esrqALTExdz9hRYvrP0xBDf6wCncIu1hNwHpM=
 github.com/prysmaticlabs/ethereumapis v0.0.0-20201003171600-a72e5f77d233 h1:dGeuKeaXxCepTbwsz7kYSfP1yazw1uRMn58CqNCcPP4=
 github.com/prysmaticlabs/ethereumapis v0.0.0-20201003171600-a72e5f77d233/go.mod h1:k7b2dxy6RppCG6kmOJkNOXzRpEoTdsPygc2aQhsUsZk=
 github.com/prysmaticlabs/go-bitfield v0.0.0-20200322041314-62c2aee71669/go.mod h1:hCwmef+4qXWjv0jLDbQdWnL0Ol7cS7/lCSS26WR+u6s=
