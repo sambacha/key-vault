@@ -105,6 +105,8 @@ func (km *KeyManager) Sign(_ context.Context, req *validatorpb.SignRequest) (bls
 		return km.SignGeneric(km.pubKey, bytex.ToBytes32(req.GetSigningRoot()), domain)
 	case *validatorpb.SignRequest_Slot:
 		return km.SignGeneric(km.pubKey, bytex.ToBytes32(req.GetSigningRoot()), domain)
+	case *validatorpb.SignRequest_Epoch:
+		return km.SignGeneric(km.pubKey, bytex.ToBytes32(req.GetSigningRoot()), domain)
 	default:
 		return nil, ErrUnsupportedSigning
 	}
