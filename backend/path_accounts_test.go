@@ -9,9 +9,8 @@ import (
 	"github.com/bloxapp/eth2-key-manager/core"
 	log "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/vault/sdk/helper/logging"
-	"github.com/sirupsen/logrus"
-
 	"github.com/hashicorp/vault/sdk/logical"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
 
@@ -36,8 +35,7 @@ func getBackend(t *testing.T) (logical.Backend, logical.Storage) {
 
 func setupBaseStorage(t *testing.T, req *logical.Request) {
 	entry, err := logical.StorageEntryJSON("config", Config{
-		Network:     core.MainNetwork,
-		GenesisTime: time.Now(),
+		Network: core.MainNetwork,
 	})
 	require.NoError(t, err)
 	req.Storage.Put(context.Background(), entry)
