@@ -3,10 +3,8 @@ package backend
 import (
 	"context"
 	"encoding/hex"
-	"time"
 
 	vault "github.com/bloxapp/eth2-key-manager"
-	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/slashing_protection"
 	"github.com/bloxapp/eth2-key-manager/validator_signer"
 	"github.com/bloxapp/eth2-key-manager/wallet_hd"
@@ -243,13 +241,8 @@ func (b *backend) pathSignAttestation(ctx context.Context, req *logical.Request,
 		return nil, errors.Wrap(err, "failed to HEX decode target root")
 	}
 
-	// Check if the given slot came in time
-	if !b.isSlotTime(storage.Network(), slot) {
-		return nil, errors.Wrap(err, "it's not a slot time")
-	}
-
 	protector := slashing_protection.NewNormalProtection(storage)
-	var signer validator_signer.ValidatorSigner = validator_signer.NewSimpleSigner(wallet, protector)
+	var signer validator_signer.ValidatorSigner = validator_signer.NewSimpleSigner(wallet, protector, storage.Network())
 
 	res, err := signer.SignBeaconAttestation(&v1.SignBeaconAttestationRequest{
 		Id:     &v1.SignBeaconAttestationRequest_PublicKey{PublicKey: publicKeyBytes},
@@ -357,13 +350,8 @@ func (b *backend) pathSignProposal(ctx context.Context, req *logical.Request, da
 		return nil, errors.Wrap(err, "failed to HEX decode body root")
 	}
 
-	// Check if the given slot came in time
-	if !b.isSlotTime(storage.Network(), slot) {
-		return nil, errors.Wrap(err, "it's not a slot time")
-	}
-
 	protector := slashing_protection.NewNormalProtection(storage)
-	var signer validator_signer.ValidatorSigner = validator_signer.NewSimpleSigner(wallet, protector)
+	var signer validator_signer.ValidatorSigner = validator_signer.NewSimpleSigner(wallet, protector, storage.Network())
 
 	res, err := signer.SignBeaconProposal(&v1.SignBeaconProposalRequest{
 		Id:     &v1.SignBeaconProposalRequest_PublicKey{PublicKey: publicKeyBytes},
@@ -450,7 +438,7 @@ func (b *backend) pathSignAggregation(ctx context.Context, req *logical.Request,
 	}
 
 	protector := slashing_protection.NewNormalProtection(storage)
-	var signer validator_signer.ValidatorSigner = validator_signer.NewSimpleSigner(wallet, protector)
+	var signer validator_signer.ValidatorSigner = validator_signer.NewSimpleSigner(wallet, protector, storage.Network())
 
 	res, err := signer.Sign(&v1.SignRequest{
 		Id:     &v1.SignRequest_PublicKey{PublicKey: publicKeyBytes},
@@ -466,15 +454,4 @@ func (b *backend) pathSignAggregation(ctx context.Context, req *logical.Request,
 			"signature": hex.EncodeToString(res.GetSignature()),
 		},
 	}, nil
-}
-
-func (b *backend) isSlotTime(network core.Network, slot int) bool {
-	timeSinceGenesisStart := uint64(slot) * 12
-	start := network.GenesisTime().Add(time.Duration(timeSinceGenesisStart) * time.Second)
-	left := start.Sub(time.Now().UTC())
-
-	// Deviation = seconds per one slot, that's should be enough
-	deviation := time.Minute
-
-	return left < deviation || left > -deviation
 }

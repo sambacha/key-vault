@@ -376,4 +376,4 @@ New networks could be defined by the following steps:
         -plugin-name=ethsign plugin > /dev/null 2>&1
     ```
 
-2. Update policies `./policies/admin-policy.hcl` and `./policies/signer-policy.hcl` by adding a definition with a new network in the path. 
+2. Update policies `./policies/admin-policy.hcl` and `./policies/signer-policy.hcl` by adding a definition with a new network in the path.

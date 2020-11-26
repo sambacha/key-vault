@@ -2,11 +2,10 @@ package tests
 
 import (
 	"encoding/hex"
+	"fmt"
 	"testing"
 
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/slashing_protection"
-	"github.com/bloxapp/eth2-key-manager/validator_signer"
 	"github.com/stretchr/testify/require"
 	v1 "github.com/wealdtech/eth2-signer-api/pb/v1"
 
@@ -14,28 +13,24 @@ import (
 	"github.com/bloxapp/key-vault/e2e/shared"
 )
 
-// AttestationSigning tests sign attestation endpoint.
-type AttestationSigning struct {
+// AttestationNoSlashingDataSigning tests sign attestation endpoint.
+type AttestationNoSlashingDataSigning struct {
 }
 
 // Name returns the name of the test.
-func (test *AttestationSigning) Name() string {
-	return "Test attestation signing"
+func (test *AttestationNoSlashingDataSigning) Name() string {
+	return "Test attestation no slashing data signing"
 }
 
 // Run run the test.
-func (test *AttestationSigning) Run(t *testing.T) {
+func (test *AttestationNoSlashingDataSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	storage := setup.UpdateStorage(t, core.PyrmontNetwork, true)
+	storage := setup.UpdateStorage(t, core.PyrmontNetwork, false)
 	account := shared.RetrieveAccount(t, storage)
 	require.NotNil(t, account)
 	pubKeyBytes := account.ValidatorPublicKey().Marshal()
-
-	// Get wallet
-	wallet, err := storage.OpenWallet()
-	require.NoError(t, err)
 
 	dataToSign := map[string]interface{}{
 		"public_key":      hex.EncodeToString(pubKeyBytes),
@@ -49,21 +44,13 @@ func (test *AttestationSigning) Run(t *testing.T) {
 		"targetRoot":      "17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0",
 	}
 
-	// Sign data
-	protector := slashing_protection.NewNormalProtection(storage)
-	var signer validator_signer.ValidatorSigner = validator_signer.NewSimpleSigner(wallet, protector, storage.Network())
-
-	res, err := signer.SignBeaconAttestation(test.dataToAttestationRequest(t, pubKeyBytes, dataToSign))
-	require.NoError(t, err)
-
 	// Send sign attestation request
-	sig, err := setup.SignAttestation(dataToSign, core.PyrmontNetwork)
-	require.NoError(t, err)
-
-	require.EqualValues(t, res.GetSignature(), sig)
+	_, err := setup.SignAttestation(dataToSign, core.PyrmontNetwork)
+	expectedErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign attestation: highest attestation data is nil, can't determine if attestation is slashable\\n\\n\"}}")
+	require.EqualError(t, err, expectedErr, fmt.Sprintf("actual: %s\n", err.Error()))
 }
 
-func (test *AttestationSigning) dataToAttestationRequest(t *testing.T, pubKey []byte, data map[string]interface{}) *v1.SignBeaconAttestationRequest {
+func (test *AttestationNoSlashingDataSigning) dataToAttestationRequest(t *testing.T, pubKey []byte, data map[string]interface{}) *v1.SignBeaconAttestationRequest {
 	// Decode domain
 	domainBytes, err := hex.DecodeString(data["domain"].(string))
 	require.NoError(t, err)

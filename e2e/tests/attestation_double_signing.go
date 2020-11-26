@@ -26,7 +26,7 @@ func (test *AttestationDoubleSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	storage := setup.UpdateStorage(t, core.TestNetwork)
+	storage := setup.UpdateStorage(t, core.PyrmontNetwork, true)
 	account := shared.RetrieveAccount(t, storage)
 	pubKey := hex.EncodeToString(account.ValidatorPublicKey().Marshal())
 
@@ -38,12 +38,12 @@ func (test *AttestationDoubleSigning) Run(t *testing.T) {
 			"slot":            284115,
 			"committeeIndex":  2,
 			"beaconBlockRoot": "7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e",
-			"sourceEpoch":     8877,
+			"sourceEpoch":     77,
 			"sourceRoot":      "7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d",
-			"targetEpoch":     8878,
+			"targetEpoch":     78,
 			"targetRoot":      "17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0",
 		},
-		core.TestNetwork,
+		core.PyrmontNetwork,
 	)
 	require.NoError(t, err)
 
@@ -55,14 +55,14 @@ func (test *AttestationDoubleSigning) Run(t *testing.T) {
 			"slot":            284115,
 			"committeeIndex":  2,
 			"beaconBlockRoot": "7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0f",
-			"sourceEpoch":     8877,
+			"sourceEpoch":     77,
 			"sourceRoot":      "7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d",
-			"targetEpoch":     8878,
+			"targetEpoch":     78,
 			"targetRoot":      "17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0",
 		},
-		core.TestNetwork,
+		core.PyrmontNetwork,
 	)
-	expectedErr := fmt.Sprintf("1 error occurred:\n\t* failed to sign attestation: slashable attestation (DoubleVote), not signing\n\n")
+	expectedErr := fmt.Sprintf("1 error occurred:\n\t* failed to sign attestation: slashable attestation (HighestAttestationVote), not signing\n\n")
 	require.Error(t, err)
 	require.IsType(t, &e2e.ServiceError{}, err)
 	require.EqualValues(t, expectedErr, err.(*e2e.ServiceError).ErrorValue())

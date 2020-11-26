@@ -15,11 +15,11 @@ import (
 const AccountIndex = 0
 
 // BaseInmemStorage creates the in-memory storage and creates the base account.
-func BaseInmemStorage(t *testing.T) (*in_memory.InMemStore, error) {
+func BaseInmemStorage(t *testing.T, minimalSlashingData bool) (*in_memory.InMemStore, error) {
 	err := types.InitBLS()
 	require.NoError(t, err)
 
-	store := in_memory.NewInMemStore(core.MainNetwork)
+	store := in_memory.NewInMemStore(core.PyrmontNetwork)
 
 	entropy, err := core.GenerateNewEntropy()
 	require.NoError(t, err)
@@ -41,6 +41,23 @@ func BaseInmemStorage(t *testing.T) (*in_memory.InMemStore, error) {
 	err = store.SaveAccount(acc)
 	if err != nil {
 		return nil, err
+	}
+
+	// base highest att.
+	if minimalSlashingData {
+		err = store.SaveHighestAttestation(acc.ValidatorPublicKey(), &core.BeaconAttestation{
+			Source: &core.Checkpoint{
+				Epoch: 0,
+				Root:  nil,
+			},
+			Target: &core.Checkpoint{
+				Epoch: 0,
+				Root:  nil,
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return store, nil
