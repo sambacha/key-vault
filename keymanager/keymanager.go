@@ -113,10 +113,9 @@ func (km *KeyManager) Sign(_ context.Context, req *validatorpb.SignRequest) (bls
 		return nil, ErrNoSuchKey
 	}
 
-	domain := bytex.ToBytes32(req.GetSignatureDomain())
 	switch data := req.GetObject().(type) {
 	case *validatorpb.SignRequest_Block:
-		return km.SignProposal(km.pubKey, domain, &ethpb.BeaconBlockHeader{
+		return km.SignProposal(req.GetSignatureDomain(), &ethpb.BeaconBlockHeader{
 			Slot:          data.Block.GetSlot(),
 			ProposerIndex: data.Block.GetProposerIndex(),
 			StateRoot:     data.Block.GetStateRoot(),
@@ -124,24 +123,20 @@ func (km *KeyManager) Sign(_ context.Context, req *validatorpb.SignRequest) (bls
 			BodyRoot:      req.GetSigningRoot(),
 		})
 	case *validatorpb.SignRequest_AttestationData:
-		return km.SignAttestation(km.pubKey, domain, data.AttestationData)
+		return km.SignAttestation(req.GetSignatureDomain(), data.AttestationData)
 	case *validatorpb.SignRequest_AggregateAttestationAndProof:
-		return km.SignGeneric(km.pubKey, bytex.ToBytes32(req.GetSigningRoot()), domain)
+		return km.SignGeneric(req.GetSigningRoot(), req.GetSignatureDomain())
 	case *validatorpb.SignRequest_Slot:
-		return km.SignGeneric(km.pubKey, bytex.ToBytes32(req.GetSigningRoot()), domain)
+		return km.SignGeneric(req.GetSigningRoot(), req.GetSignatureDomain())
 	case *validatorpb.SignRequest_Epoch:
-		return km.SignGeneric(km.pubKey, bytex.ToBytes32(req.GetSigningRoot()), domain)
+		return km.SignGeneric(req.GetSigningRoot(), req.GetSignatureDomain())
 	default:
 		return nil, ErrUnsupportedSigning
 	}
 }
 
 // SignGeneric implements ProtectingKeyManager interface.
-func (km *KeyManager) SignGeneric(pubKey [48]byte, root [32]byte, domain [32]byte) (bls.Signature, error) {
-	if pubKey != km.pubKey {
-		return nil, ErrNoSuchKey
-	}
-
+func (km *KeyManager) SignGeneric(root, domain []byte) (bls.Signature, error) {
 	// Prepare request body.
 	req := SignAggregationRequest{
 		PubKey:     km.originPubKey,
@@ -178,11 +173,7 @@ func (km *KeyManager) SignGeneric(pubKey [48]byte, root [32]byte, domain [32]byt
 }
 
 // SignProposal implements ProtectingKeyManager interface.
-func (km *KeyManager) SignProposal(pubKey [48]byte, domain [32]byte, data *ethpb.BeaconBlockHeader) (bls.Signature, error) {
-	if pubKey != km.pubKey {
-		return nil, ErrNoSuchKey
-	}
-
+func (km *KeyManager) SignProposal(domain []byte, data *ethpb.BeaconBlockHeader) (bls.Signature, error) {
 	// Prepare request body.
 	req := SignProposalRequest{
 		PubKey:        km.originPubKey,
@@ -223,11 +214,7 @@ func (km *KeyManager) SignProposal(pubKey [48]byte, domain [32]byte, data *ethpb
 }
 
 // SignAttestation implements ProtectingKeyManager interface.
-func (km *KeyManager) SignAttestation(pubKey [48]byte, domain [32]byte, data *ethpb.AttestationData) (bls.Signature, error) {
-	if pubKey != km.pubKey {
-		return nil, ErrNoSuchKey
-	}
-
+func (km *KeyManager) SignAttestation(domain []byte, data *ethpb.AttestationData) (bls.Signature, error) {
 	// Prepare request body.
 	req := SignAttestationRequest{
 		PubKey:          km.originPubKey,
