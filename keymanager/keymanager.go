@@ -73,17 +73,23 @@ func NewKeyManager(log *logrus.Entry, opts *Config) (*KeyManager, error) {
 			if err == nil {
 				return resp, nil
 			}
-			defer resp.Body.Close()
 
-			respBody, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				return resp, err
+			fields := logrus.Fields{}
+			if resp != nil {
+				fields["status_code"] = resp.StatusCode
+
+				if resp.Body != nil {
+					defer resp.Body.Close()
+
+					respBody, err := ioutil.ReadAll(resp.Body)
+					if err != nil {
+						return resp, err
+					}
+					fields["response_body"] = string(respBody)
+				}
 			}
 
-			log.WithError(err).WithFields(logrus.Fields{
-				"status_code":   resp.StatusCode,
-				"response_body": string(respBody),
-			}).Error("failed to send request to key manager")
+			log.WithError(err).WithFields(fields).Error("failed to send request to key manager")
 
 			return resp, fmt.Errorf("giving up after %d attempt(s): %s", numTries, err)
 		}),
