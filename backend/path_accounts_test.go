@@ -49,7 +49,7 @@ func TestAccountsList(t *testing.T) {
 		setupBaseStorage(t, req)
 
 		// setup logical storage
-		_, err := baseHashicorpStorage(req.Storage, context.Background())
+		_, err := baseHashicorpStorage(context.Background(), req.Storage)
 		require.NoError(t, err)
 
 		res, err := b.HandleRequest(context.Background(), req)

@@ -9,7 +9,7 @@ import (
 )
 
 func setupStorageWithWalletAndAccounts(storage logical.Storage) error {
-	_, err := baseHashicorpStorage(storage, context.Background())
+	_, err := baseHashicorpStorage(context.Background(), storage)
 	return err
 }
 

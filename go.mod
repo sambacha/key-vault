@@ -40,6 +40,7 @@ require (
 	github.com/wealdtech/go-eth2-types/v2 v2.5.1
 	golang.org/x/crypto v0.0.0-20201112155050-0c6587e931a9 // indirect
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect
+	golang.org/x/tools v0.0.0-20201125231158-b5590deeca9b // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 )
 
