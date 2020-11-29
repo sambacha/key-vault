@@ -11,11 +11,7 @@ import (
 )
 
 // SignAttestation implements ProtectingKeyManager interface.
-func (km *KeyManager) SignAttestation(pubKey [48]byte, domain [32]byte, data *ethpb.AttestationData) (bls.Signature, error) {
-	if pubKey != km.pubKey {
-		return nil, ErrNoSuchKey
-	}
-
+func (km *KeyManager) SignAttestation(domain []byte, data *ethpb.AttestationData) (bls.Signature, error) {
 	// Prepare request body.
 	req := SignAttestationRequest{
 		PubKey:          km.originPubKey,

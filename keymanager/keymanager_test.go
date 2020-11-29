@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
@@ -172,10 +174,32 @@ func TestKeyManager_FetchAllValidatingPublicKeys(t *testing.T) {
 	}
 }
 
+func TestUnknownAccount(t *testing.T) {
+	km, err := keymanager.NewKeyManager(logrus.NewEntry(logrus.New()), &keymanager.Config{
+		Location:    "location",
+		AccessToken: "access token",
+		PubKey:      "a3862121db5914d7272b0b705e6e3c5336b79e316735661873566245207329c30f9a33d4fb5f5857fc6fd0a368186972",
+		Network:     "pyrmont",
+	})
+	require.NoError(t, err)
+
+	undefinedPk := _byteArray("a3862121db5914d7272b0b705e6e3c5336b79e316735661873566245207329c30f9a33d4fb5f5857fc6fd0a368186971")
+
+	_, err = km.Sign(context.Background(), &validatorpb.SignRequest{
+		PublicKey: undefinedPk,
+	})
+	require.EqualError(t, err, "{\"error\":\"no such key\"}")
+}
+
 func newTestRemoteWallet(handler http.HandlerFunc) *httptest.Server {
 	s := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		handler(writer, request)
 	}))
 
 	return s
+}
+
+func _byteArray(input string) []byte {
+	res, _ := hex.DecodeString(input)
+	return res
 }

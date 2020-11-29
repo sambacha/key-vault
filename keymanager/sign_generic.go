@@ -10,11 +10,7 @@ import (
 )
 
 // SignGeneric implements ProtectingKeyManager interface.
-func (km *KeyManager) SignGeneric(pubKey [48]byte, root [32]byte, domain [32]byte) (bls.Signature, error) {
-	if pubKey != km.pubKey {
-		return nil, ErrNoSuchKey
-	}
-
+func (km *KeyManager) SignGeneric(root []byte, domain [32]byte) (bls.Signature, error) {
 	// Prepare request body.
 	req := SignAggregationRequest{
 		PubKey:     km.originPubKey,

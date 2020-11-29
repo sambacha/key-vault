@@ -11,11 +11,7 @@ import (
 )
 
 // SignProposal implements ProtectingKeyManager interface.
-func (km *KeyManager) SignProposal(pubKey [48]byte, domain [32]byte, data *ethpb.BeaconBlockHeader) (bls.Signature, error) {
-	if pubKey != km.pubKey {
-		return nil, ErrNoSuchKey
-	}
-
+func (km *KeyManager) SignProposal(domain []byte, data *ethpb.BeaconBlockHeader) (bls.Signature, error) {
 	// Prepare request body.
 	req := SignProposalRequest{
 		PubKey:        km.originPubKey,

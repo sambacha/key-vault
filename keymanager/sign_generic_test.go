@@ -18,9 +18,6 @@ import (
 )
 
 func TestSignGeneric(t *testing.T) {
-	accountPubKey, err := hex.DecodeString(DefaultAccountPublicKey)
-	require.NoError(t, err)
-
 	domain := make([]byte, 32)
 	rand.Read(domain)
 
@@ -82,27 +79,16 @@ func TestSignGeneric(t *testing.T) {
 
 	t.Run("successfully signed data", func(t *testing.T) {
 		runTest(t, http.StatusOK, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignGeneric(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(data), bytex.ToBytes32(domain))
+			actualSignature, err := wallet.SignGeneric(data, bytex.ToBytes32(domain))
 			require.NoError(t, err)
 			require.NotNil(t, actualSignature)
 			require.Equal(t, expectedSignature, actualSignature)
 		})
 	})
 
-	t.Run("rejects with undefined account", func(t *testing.T) {
-		undefinedAccount := make([]byte, 48)
-		rand.Read(undefinedAccount)
-
-		runTest(t, http.StatusOK, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignGeneric(bytex.ToBytes48(undefinedAccount), bytex.ToBytes32(data), bytex.ToBytes32(domain))
-			require.Error(t, err, keymanager.ErrNoSuchKey.Error())
-			require.Nil(t, actualSignature)
-		})
-	})
-
 	t.Run("rejects with denied", func(t *testing.T) {
 		runTest(t, http.StatusUnauthorized, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignGeneric(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(data), bytex.ToBytes32(domain))
+			actualSignature, err := wallet.SignGeneric(data, bytex.ToBytes32(domain))
 			require.True(t, keymanager.IsGenericError(err))
 			require.Nil(t, actualSignature)
 		})
@@ -110,7 +96,7 @@ func TestSignGeneric(t *testing.T) {
 
 	t.Run("rejects with failed", func(t *testing.T) {
 		runTest(t, http.StatusInternalServerError, []byte(actualSignature), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignGeneric(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(data), bytex.ToBytes32(domain))
+			actualSignature, err := wallet.SignGeneric(data, bytex.ToBytes32(domain))
 			require.True(t, keymanager.IsGenericError(err))
 			require.Nil(t, actualSignature)
 		})
@@ -118,7 +104,7 @@ func TestSignGeneric(t *testing.T) {
 
 	t.Run("rejects with invalid signature", func(t *testing.T) {
 		runTest(t, http.StatusOK, []byte("invalid"), func(wallet *keymanager.KeyManager) {
-			actualSignature, err := wallet.SignGeneric(bytex.ToBytes48(accountPubKey), bytex.ToBytes32(data), bytex.ToBytes32(domain))
+			actualSignature, err := wallet.SignGeneric(data, bytex.ToBytes32(domain))
 			require.True(t, keymanager.IsGenericError(err))
 			require.Nil(t, actualSignature)
 		})

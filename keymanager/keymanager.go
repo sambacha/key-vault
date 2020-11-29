@@ -109,7 +109,7 @@ func (km *KeyManager) Sign(_ context.Context, req *validatorpb.SignRequest) (bls
 	domain := bytex.ToBytes32(req.GetSignatureDomain())
 	switch data := req.GetObject().(type) {
 	case *validatorpb.SignRequest_Block:
-		return km.SignProposal(km.pubKey, domain, &ethpb.BeaconBlockHeader{
+		return km.SignProposal(req.GetSignatureDomain(), &ethpb.BeaconBlockHeader{
 			Slot:          data.Block.GetSlot(),
 			ProposerIndex: data.Block.GetProposerIndex(),
 			StateRoot:     data.Block.GetStateRoot(),
@@ -117,13 +117,13 @@ func (km *KeyManager) Sign(_ context.Context, req *validatorpb.SignRequest) (bls
 			BodyRoot:      req.GetSigningRoot(),
 		})
 	case *validatorpb.SignRequest_AttestationData:
-		return km.SignAttestation(km.pubKey, domain, data.AttestationData)
+		return km.SignAttestation(req.GetSignatureDomain(), data.AttestationData)
 	case *validatorpb.SignRequest_AggregateAttestationAndProof:
-		return km.SignGeneric(km.pubKey, bytex.ToBytes32(req.GetSigningRoot()), domain)
+		return km.SignGeneric(req.GetSigningRoot(), domain)
 	case *validatorpb.SignRequest_Slot:
-		return km.SignGeneric(km.pubKey, bytex.ToBytes32(req.GetSigningRoot()), domain)
+		return km.SignGeneric(req.GetSigningRoot(), domain)
 	case *validatorpb.SignRequest_Epoch:
-		return km.SignGeneric(km.pubKey, bytex.ToBytes32(req.GetSigningRoot()), domain)
+		return km.SignGeneric(req.GetSigningRoot(), domain)
 	default:
 		return nil, ErrUnsupportedSigning
 	}
