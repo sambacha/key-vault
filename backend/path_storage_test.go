@@ -62,7 +62,7 @@ func baseInmemStorage() (*in_memory.InMemStore, uuid.UUID, error) {
 	return inMemStore, acc.ID(), nil
 }
 
-func baseHashicorpStorage(logicalStorage logical.Storage, ctx context.Context) (*store.HashicorpVaultStore, error) {
+func baseHashicorpStorage(ctx context.Context, logicalStorage logical.Storage) (*store.HashicorpVaultStore, error) {
 	inMem, _, err := baseInmemStorage()
 	if err != nil {
 		return nil, err
