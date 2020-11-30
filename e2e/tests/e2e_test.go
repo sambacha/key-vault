@@ -23,13 +23,15 @@ var tests = []E2E{
 	&AggregationDoubleSigning{},
 	&AggregationConcurrentSigning{},
 	&AggregationSigningAccountNotFound{},
+	&RandaoReferenceSigning{},
 
-	//Proposal signing
+	// Proposal signing
 	&ProposalSigning{},
 	&ProposalDoubleSigning{},
 	&ProposalConcurrentSigning{},
 	&ProposalSigningAccountNotFound{},
 	&ProposalFarFutureSigning{},
+	&ProposalReferenceSigning{},
 
 	// Accounts tests
 	&AccountsList{},
