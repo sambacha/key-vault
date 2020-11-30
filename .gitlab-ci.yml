@@ -20,6 +20,7 @@ variables:
   DOCKER_REPO_INFRA_STAGE: $ACCOUNT_ID_INFRA_STAGE.dkr.ecr.$AWS_REGION_INFRA_STAGE.amazonaws.com/$IMAGE_NAME
   APP_REPLICAS_INFRA_STAGE: "1"
   ECRLOGIN_INFRA_STAGE: "aws ecr get-login --registry-ids $ACCOUNT_ID_INFRA_STAGE --region $AWS_REGION_INFRA_STAGE --no-include-email"
+  STAGE_GO_IMAGE: 121827225315.dkr.ecr.us-west-2.amazonaws.com/infra-stage-repo:golang-1.15
 
   #PRODUCTION
   ACCOUNT_ID_INFRA_PROD: 764289642555
@@ -27,11 +28,12 @@ variables:
   DOCKER_REPO_INFRA_PROD: $ACCOUNT_ID_INFRA_PROD.dkr.ecr.$AWS_REGION_INFRA_PROD.amazonaws.com/$IMAGE_NAME
   APP_REPLICAS_INFRA_PROD: "1"
   ECRLOGIN_INFRA_PROD: "aws ecr get-login --registry-ids $ACCOUNT_ID_INFRA_PROD --region $AWS_REGION_INFRA_PROD --no-include-email"
+  PROD_GO_IMAGE: 764289642555.dkr.ecr.us-west-2.amazonaws.com/infra-prod-repo:golang-1.15
 
 #blox-infra-stage
 Run linter:
   stage: lint
-  image: golang:1.15
+  image: $STAGE_GO_IMAGE
   tags:
     - blox-infra-stage
   script:
@@ -41,7 +43,7 @@ Run linter:
 
 Security check:
   stage: gosec
-  image: golang:1.15
+  image: $STAGE_GO_IMAGE
   tags:
     - blox-infra-stage
   script:
@@ -50,7 +52,7 @@ Security check:
 
 Run tests of the application:
   stage: test
-  image: golang:1.15
+  image: $STAGE_GO_IMAGE
   services:
     - docker:dind
   tags:
@@ -88,7 +90,7 @@ Deploy to blox-infra-stage cluster:
 #blox-infra-prod
 Run prod linter:
   stage: lint
-  image: golang:1.15
+  image: $PROD_GO_IMAGE
   tags:
     - blox-infra-prod
   script:
@@ -100,7 +102,7 @@ Run prod linter:
 
 Prod security check:
   stage: gosec
-  image: golang:1.15
+  image: $PROD_GO_IMAGE
   tags:
     - blox-infra-stage
   script:
