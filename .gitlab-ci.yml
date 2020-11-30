@@ -6,7 +6,8 @@ stages:
   - deploy
 
 services:
-  - docker:dind
+   - name: docker-dind
+     command: ["--registry-mirror", "121827225315.dkr.ecr.us-west-2.amazonaws.com/infra-stage-repo"] 
 
 variables:
 
