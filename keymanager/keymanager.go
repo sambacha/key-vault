@@ -74,6 +74,21 @@ func NewKeyManager(log *logrus.Entry, opts *Config) (*KeyManager, error) {
 			}
 			defer resp.Body.Close()
 
+			fields := logrus.Fields{}
+			if resp != nil {
+				fields["status_code"] = resp.StatusCode
+
+				if resp.Body != nil {
+					defer resp.Body.Close()
+
+					respBody, err := ioutil.ReadAll(resp.Body)
+					if err != nil {
+						return resp, err
+					}
+					fields["response_body"] = string(respBody)
+				}
+			}
+
 			respBody, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
 				return resp, err
