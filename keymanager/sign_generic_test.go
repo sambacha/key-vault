@@ -8,13 +8,14 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/bloxapp/key-vault/keymanager"
-	"github.com/bloxapp/key-vault/utils/bytex"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/prysmaticlabs/prysm/shared/bls"
 	"github.com/prysmaticlabs/prysm/shared/testutil"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
+
+	"github.com/bloxapp/key-vault/keymanager"
+	"github.com/bloxapp/key-vault/utils/bytex"
 )
 
 func TestSignGeneric(t *testing.T) {

@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/bloxapp/key-vault/backend"
 	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/prysmaticlabs/prysm/shared/bls"
+
+	"github.com/bloxapp/key-vault/backend"
 )
 
 // SignAttestation implements ProtectingKeyManager interface.

@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/bloxapp/key-vault/backend"
 	"github.com/prysmaticlabs/prysm/shared/bls"
+
+	"github.com/bloxapp/key-vault/backend"
 )
 
 // SignGeneric implements ProtectingKeyManager interface.

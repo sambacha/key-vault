@@ -8,13 +8,14 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/bloxapp/key-vault/keymanager"
 	"github.com/hashicorp/vault/sdk/logical"
 	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/prysmaticlabs/prysm/shared/bls"
 	"github.com/prysmaticlabs/prysm/shared/testutil"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
+
+	"github.com/bloxapp/key-vault/keymanager"
 )
 
 func TestSignProposal(t *testing.T) {
