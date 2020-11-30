@@ -6,8 +6,8 @@ stages:
   - deploy
 
 services:
-   - name: docker-dind
-     command: ["--registry-mirror", "121827225315.dkr.ecr.us-west-2.amazonaws.com/infra-stage-repo"] 
+   - name: infra-stage-repo:docker-dind
+     command: ["--registry-mirror", "121827225315.dkr.ecr.us-west-2.amazonaws.com"] 
 
 variables:
 
@@ -55,9 +55,8 @@ Run tests of the application:
   stage: test
   image: $STAGE_GO_IMAGE
   services:
-    - name: docker-dind
-      command: ["--registry-mirror", "121827225315.dkr.ecr.us-west-2.amazonaws.com/infra-stage-repo"]
-
+    - name: infra-stage-repo:docker-dind
+      command: ["--registry-mirror", "121827225315.dkr.ecr.us-west-2.amazonaws.com"]
   tags:
     - blox-infra-stage
   script:
