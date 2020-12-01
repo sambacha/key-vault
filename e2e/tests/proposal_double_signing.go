@@ -34,13 +34,7 @@ func (test *ProposalDoubleSigning) Run(t *testing.T) {
 	pubKey := account.ValidatorPublicKey()
 
 	// Sign and save the valid proposal
-	blk := &eth.BeaconBlock{
-		Slot:          78,
-		ProposerIndex: 1,
-		ParentRoot:    _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
-		StateRoot:     _byteArray32("7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d"),
-		Body:          &eth.BeaconBlockBody{},
-	}
+	blk := referenceBlock(t)
 	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
 	req, err := test.serializedReq(pubKey, nil, domain, blk)
 	require.NoError(t, err)
@@ -49,12 +43,14 @@ func (test *ProposalDoubleSigning) Run(t *testing.T) {
 
 	// Sign and save the slashable proposal
 	blk.ParentRoot = _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0d")
+	req, err = test.serializedReq(pubKey, nil, domain, blk)
+	require.NoError(t, err)
 	_, err = setup.SignProposal(req, core.PyrmontNetwork)
 	require.Error(t, err, "did not slash")
 	require.IsType(t, &e2e.ServiceError{}, err)
 
 	errValue := err.(*e2e.ServiceError).ErrorValue()
-	protected := errValue == fmt.Sprintf("1 error occurred:\n\t* failed to sign data: err, slashable proposal: DoubleProposal\n\n")
+	protected := errValue == fmt.Sprintf("1 error occurred:\n\t* failed to sign: err, slashable proposal: DoubleProposal\n\n")
 	require.True(t, protected, err.Error())
 }
 

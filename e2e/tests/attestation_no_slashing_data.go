@@ -52,7 +52,7 @@ func (test *AttestationNoSlashingDataSigning) Run(t *testing.T) {
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, att)
 	require.NoError(t, err)
 	_, err = setup.SignAttestation(req, core.PyrmontNetwork)
-	expectedErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign attestation: highest attestation data is nil, can't determine if attestation is slashable\\n\\n\"}}")
+	expectedErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: highest attestation data is nil, can't determine if attestation is slashable\\n\\n\"}}")
 	require.EqualError(t, err, expectedErr, fmt.Sprintf("actual: %s\n", err.Error()))
 }
 

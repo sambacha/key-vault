@@ -98,7 +98,7 @@ func (test *AttestationConcurrentSigning) runSlashableAttestation(t *testing.T, 
 	require.IsType(t, &e2e.ServiceError{}, err)
 
 	errValue := err.(*e2e.ServiceError).ErrorValue()
-	protected := errValue == fmt.Sprintf("1 error occurred:\n\t* failed to sign attestation: slashable attestation (HighestAttestationVote), not signing\n\n") ||
+	protected := errValue == fmt.Sprintf("1 error occurred:\n\t* failed to sign: slashable attestation (HighestAttestationVote), not signing\n\n") ||
 		errValue == fmt.Sprintf("1 error occurred:\n\t* locked\n\n")
 	require.True(t, protected, err.Error())
 }

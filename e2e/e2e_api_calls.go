@@ -88,17 +88,17 @@ func Setup(t *testing.T) *BaseSetup {
 
 // SignAttestation tests the sign attestation endpoint.
 func (setup *BaseSetup) SignAttestation(data map[string]interface{}, network core.Network) ([]byte, error) {
-	return setup.sign("sign-attestation", data, network)
+	return setup.sign("sign", data, network)
 }
 
 // SignProposal tests the sign proposal endpoint.
 func (setup *BaseSetup) SignProposal(data map[string]interface{}, network core.Network) ([]byte, error) {
-	return setup.sign("sign-proposal", data, network)
+	return setup.sign("sign", data, network)
 }
 
 // SignAggregation tests the sign aggregation endpoint.
 func (setup *BaseSetup) SignAggregation(data map[string]interface{}, network core.Network) ([]byte, error) {
-	return setup.sign("sign-aggregation", data, network)
+	return setup.sign("sign", data, network)
 }
 
 // sign tests the sign endpoint.

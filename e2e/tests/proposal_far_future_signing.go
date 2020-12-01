@@ -34,19 +34,14 @@ func (test *ProposalFarFutureSigning) Run(t *testing.T) {
 	require.NotNil(t, account)
 	pubKeyBytes := account.ValidatorPublicKey()
 
-	blk := &eth.BeaconBlock{
-		Slot:          88878,
-		ProposerIndex: 1010,
-		ParentRoot:    _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
-		StateRoot:     _byteArray32("7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d"),
-		Body:          &eth.BeaconBlockBody{},
-	}
+	blk := referenceBlock(t)
+	blk.Slot = 888878
 	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, blk)
 	require.NoError(t, err)
 	_, err = setup.SignProposal(req, core.PyrmontNetwork)
 	require.NotNil(t, err)
-	expectedErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign data: proposed block slot too far into the future\\n\\n\"}}")
+	expectedErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: proposed block slot too far into the future\\n\\n\"}}")
 	require.EqualError(t, err, expectedErr, fmt.Sprintf("actual: %s\n", err.Error()))
 }
 

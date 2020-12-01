@@ -59,11 +59,11 @@ func (test *AttestationSigning) Run(t *testing.T) {
 		CommitteeIndex:  2,
 		BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
 		Source: &eth.Checkpoint{
-			Epoch: 0,
+			Epoch: 5,
 			Root:  _byteArray32("7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d"),
 		},
 		Target: &eth.Checkpoint{
-			Epoch: 0,
+			Epoch: 6,
 			Root:  _byteArray32("17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0"),
 		},
 	}
@@ -80,7 +80,7 @@ func (test *AttestationSigning) Run(t *testing.T) {
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, att)
 	require.NoError(t, err)
 	sig, err := setup.SignAttestation(req, core.PyrmontNetwork)
-
+	require.NoError(t, err)
 	require.EqualValues(t, res, sig)
 }
 

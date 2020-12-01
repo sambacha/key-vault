@@ -55,7 +55,7 @@ func (test *AggregationSigning) Run(t *testing.T) {
 		SelectionProof: make([]byte, 96),
 	}
 	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
-	req, err := test.serializedReq(pubKeyBytes, domain, nil, agg)
+	req, err := test.serializedReq(pubKeyBytes, nil, domain, agg)
 
 	// Sign data
 	protector := slashing_protection.NewNormalProtection(in_memory.NewInMemStore(core.PyrmontNetwork))

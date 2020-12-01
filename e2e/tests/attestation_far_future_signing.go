@@ -34,8 +34,8 @@ func (test *AttestationFarFutureSigning) Run(t *testing.T) {
 	require.NotNil(t, account)
 	pubKeyBytes := account.ValidatorPublicKey()
 
-	expectedSourceErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign attestation: source epoch too far into the future\\n\\n\"}}")
-	expectedTargetErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign attestation: target epoch too far into the future\\n\\n\"}}")
+	expectedSourceErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: source epoch too far into the future\\n\\n\"}}")
+	expectedTargetErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: target epoch too far into the future\\n\\n\"}}")
 
 	test.testFarFuture(t, setup, pubKeyBytes, 8877, 78, expectedSourceErr)   // far future source
 	test.testFarFuture(t, setup, pubKeyBytes, 77, 8878, expectedTargetErr)   // far future target

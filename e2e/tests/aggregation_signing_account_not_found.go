@@ -2,7 +2,6 @@ package tests
 
 import (
 	"encoding/hex"
-	"net/http"
 	"testing"
 
 	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
@@ -44,12 +43,11 @@ func (test *AggregationSigningAccountNotFound) Run(t *testing.T) {
 		SelectionProof: make([]byte, 96),
 	}
 	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
-	req, err := test.serializedReq(make([]byte, 48), domain, nil, agg)
+	req, err := test.serializedReq(make([]byte, 48), nil, domain, agg)
 	_, err = setup.SignAggregation(req, core.PyrmontNetwork)
 	require.Error(t, err)
 	require.IsType(t, &e2e.ServiceError{}, err)
-	require.EqualValues(t, "account not found", err.(*e2e.ServiceError).DataValue("message"))
-	require.EqualValues(t, http.StatusNotFound, err.(*e2e.ServiceError).DataValue("status_code"))
+	require.EqualValues(t, "1 error occurred:\n\t* failed to sign: account not found\n\n", err.(*e2e.ServiceError).ErrorValue())
 }
 
 func (test *AggregationSigningAccountNotFound) serializedReq(pk, root, domain []byte, agg *ethpb.AggregateAttestationAndProof) (map[string]interface{}, error) {

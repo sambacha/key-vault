@@ -41,13 +41,7 @@ func (test *ProposalSigning) Run(t *testing.T) {
 	wallet, err := storage.OpenWallet()
 	require.NoError(t, err)
 
-	blk := &eth.BeaconBlock{
-		Slot:          78,
-		ProposerIndex: 1010,
-		ParentRoot:    _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
-		StateRoot:     _byteArray32("7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d"),
-		Body:          &eth.BeaconBlockBody{},
-	}
+	blk := referenceBlock(t)
 	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, blk)
 	require.NoError(t, err)
