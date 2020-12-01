@@ -1,8 +1,12 @@
 package tests
 
 import (
+	"encoding/hex"
 	"net/http"
 	"testing"
+
+	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/stretchr/testify/require"
@@ -26,16 +30,41 @@ func (test *AggregationSigningAccountNotFound) Run(t *testing.T) {
 	// setup vault with db
 	setup.UpdateStorage(t, core.PyrmontNetwork, true, core.HDWallet, nil)
 
-	_, err := setup.SignAggregation(
-		map[string]interface{}{
-			"public_key": "ab321d63b7b991107a5667bf4fe853a266c2baea87d33a41c7e39a5641bfd3b5434b76f1229d452acb45ba86284e3278",
-			"domain":     "17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0",
-			"dataToSign": "7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e",
+	agg := &ethpb.AggregateAttestationAndProof{
+		AggregatorIndex: 0,
+		Aggregate: &ethpb.Attestation{
+			Data: &ethpb.AttestationData{
+				BeaconBlockRoot: make([]byte, 32),
+				Target:          &ethpb.Checkpoint{Root: make([]byte, 32)},
+				Source:          &ethpb.Checkpoint{Root: make([]byte, 32)},
+			},
+			Signature:       make([]byte, 96),
+			AggregationBits: make([]byte, 1),
 		},
-		core.PyrmontNetwork,
-	)
+		SelectionProof: make([]byte, 96),
+	}
+	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
+	req, err := test.serializedReq(make([]byte, 48), domain, nil, agg)
+	_, err = setup.SignAggregation(req, core.PyrmontNetwork)
 	require.Error(t, err)
 	require.IsType(t, &e2e.ServiceError{}, err)
 	require.EqualValues(t, "account not found", err.(*e2e.ServiceError).DataValue("message"))
 	require.EqualValues(t, http.StatusNotFound, err.(*e2e.ServiceError).DataValue("status_code"))
+}
+
+func (test *AggregationSigningAccountNotFound) serializedReq(pk, root, domain []byte, agg *ethpb.AggregateAttestationAndProof) (map[string]interface{}, error) {
+	req := &validatorpb.SignRequest{
+		PublicKey:       pk,
+		SigningRoot:     root,
+		SignatureDomain: domain,
+		Object:          &validatorpb.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: agg},
+	}
+
+	byts, err := req.Marshal()
+	if err != nil {
+		return nil, err
+	}
+	return map[string]interface{}{
+		"sign_req": hex.EncodeToString(byts),
+	}, nil
 }

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"testing"
 
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 	"github.com/bloxapp/eth2-key-manager/wallets"
@@ -41,7 +43,7 @@ func BaseInmemStorage(t *testing.T, minimalSlashingData bool, walletType core.Wa
 		}
 		k, err := core.NewHDKeyFromPrivateKey(_byteArray("5470813f7deef638dc531188ca89e36976d536f680e89849cd9077fd096e20bc"), "")
 		require.NoError(t, err)
-		acc, err = wallets.NewValidatorAccount("", k, k.PublicKey(), "", walletCtx)
+		acc, err = wallets.NewValidatorAccount("", k, k.PublicKey().Serialize(), "", walletCtx)
 		require.NoError(t, err)
 		require.NoError(t, wallet.AddValidatorAccount(acc))
 	} else {
@@ -61,12 +63,12 @@ func BaseInmemStorage(t *testing.T, minimalSlashingData bool, walletType core.Wa
 
 	// base highest att.
 	if minimalSlashingData {
-		err = store.SaveHighestAttestation(acc.ValidatorPublicKey(), &core.BeaconAttestation{
-			Source: &core.Checkpoint{
+		err = store.SaveHighestAttestation(acc.ValidatorPublicKey(), &eth.AttestationData{
+			Source: &eth.Checkpoint{
 				Epoch: 0,
 				Root:  nil,
 			},
-			Target: &core.Checkpoint{
+			Target: &eth.Checkpoint{
 				Epoch: 0,
 				Root:  nil,
 			},

@@ -40,8 +40,8 @@ func (test *AccountsList) Run(t *testing.T) {
 	// setup vault with db
 	store := setup.UpdateStorage(t, core.PyrmontNetwork, true, core.HDWallet, nil)
 	account := shared.RetrieveAccount(t, store)
-	pubKey := hex.EncodeToString(account.ValidatorPublicKey().Marshal())
-	withdrawalKey := hex.EncodeToString(account.WithdrawalPublicKey().Marshal())
+	pubKey := hex.EncodeToString(account.ValidatorPublicKey())
+	withdrawalKey := hex.EncodeToString(account.WithdrawalPublicKey())
 
 	// sign and save the valid aggregation
 	accountsBytes, statusCode := setup.ListAccounts(t, core.PyrmontNetwork)

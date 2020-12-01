@@ -4,9 +4,10 @@ import (
 	"encoding/hex"
 	"testing"
 
+	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/stretchr/testify/require"
-	v1 "github.com/wealdtech/eth2-signer-api/pb/v1"
 
 	"github.com/bloxapp/key-vault/e2e"
 )
@@ -33,47 +34,31 @@ func (test *RandaoReferenceSigning) Run(t *testing.T) {
 	account, err := wallet.AccountByPublicKey("a3862121db5914d7272b0b705e6e3c5336b79e316735661873566245207329c30f9a33d4fb5f5857fc6fd0a368186972")
 	require.NoError(t, err)
 	require.NotNil(t, account)
-	pubKeyBytes := account.ValidatorPublicKey().Marshal()
+	pubKeyBytes := account.ValidatorPublicKey()
 
-	dataToSign := map[string]interface{}{
-		"public_key": hex.EncodeToString(pubKeyBytes),
-		"domain":     "0200000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459",
-		"dataToSign": "0000000000000000000000000000000000000000000000000000000000000000", //"db89df916cfb2b957b61752be4a366148d74eae5a2c75d6cb48969c673b506b6",
-	}
 	// Send sign attestation request
-	sig, err := setup.SignAggregation(dataToSign, core.PyrmontNetwork)
+	domain := _byteArray32("0200000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
+	req, err := test.serializedReq(pubKeyBytes, nil, domain, 0)
+	sig, err := setup.SignAggregation(req, core.PyrmontNetwork)
 	require.NoError(t, err)
 
 	expectedSig := _byteArray("a2c156a4bc9439f1d85f922f2abaa96e830f1c526101211bdb7d16f4ad9490a0302fc5adb089c05b5f16fd465962f47c04fc2b81a94d135a07c1613db61511c17284b51fafab984e56d3411e16e45f5068f146d9412f91d31ab0f237eac3d745")
 	require.Equal(t, expectedSig, sig)
 }
 
-func (test *RandaoReferenceSigning) dataToProposalRequest(t *testing.T, pubKey []byte, data map[string]interface{}) *v1.SignBeaconProposalRequest {
-	// Decode domain
-	domainBytes, err := hex.DecodeString(data["domain"].(string))
-	require.NoError(t, err)
-
-	// Decode parent root
-	parentRoot, err := hex.DecodeString(data["parentRoot"].(string))
-	require.NoError(t, err)
-
-	// Decode state root
-	stateRoot, err := hex.DecodeString(data["stateRoot"].(string))
-	require.NoError(t, err)
-
-	// Decode body root
-	bodyRoot, err := hex.DecodeString(data["bodyRoot"].(string))
-	require.NoError(t, err)
-
-	return &v1.SignBeaconProposalRequest{
-		Id:     &v1.SignBeaconProposalRequest_PublicKey{PublicKey: pubKey},
-		Domain: domainBytes,
-		Data: &v1.BeaconBlockHeader{
-			Slot:          uint64(data["slot"].(int)),
-			ProposerIndex: uint64(data["proposerIndex"].(int)),
-			ParentRoot:    parentRoot,
-			StateRoot:     stateRoot,
-			BodyRoot:      bodyRoot,
-		},
+func (test *RandaoReferenceSigning) serializedReq(pk, root, domain []byte, epoch uint64) (map[string]interface{}, error) {
+	req := &validatorpb.SignRequest{
+		PublicKey:       pk,
+		SigningRoot:     root,
+		SignatureDomain: domain,
+		Object:          &validatorpb.SignRequest_Epoch{Epoch: epoch},
 	}
+
+	byts, err := req.Marshal()
+	if err != nil {
+		return nil, err
+	}
+	return map[string]interface{}{
+		"sign_req": hex.EncodeToString(byts),
+	}, nil
 }

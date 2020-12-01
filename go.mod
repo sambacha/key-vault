@@ -46,4 +46,4 @@ require (
 
 replace github.com/ethereum/go-ethereum => github.com/prysmaticlabs/bazel-go-ethereum v0.0.0-20201113091623-013fd65b3791
 
-replace github.com/bloxapp/eth2-key-manager => github.com/bloxapp/eth2-key-manager v0.2.24-0.20201130064737-84c9b6a93f54
+replace github.com/bloxapp/eth2-key-manager => ../eth2-key-manager
