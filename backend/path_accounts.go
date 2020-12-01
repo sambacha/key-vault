@@ -59,8 +59,8 @@ func (b *backend) pathWalletAccountsList(ctx context.Context, req *logical.Reque
 		accObj := map[string]string{
 			"id":               a.ID().String(),
 			"name":             a.Name(),
-			"validationPubKey": hex.EncodeToString(a.ValidatorPublicKey().Marshal()),
-			"withdrawalPubKey": hex.EncodeToString(a.WithdrawalPublicKey().Marshal()),
+			"validationPubKey": hex.EncodeToString(a.ValidatorPublicKey()),
+			"withdrawalPubKey": hex.EncodeToString(a.WithdrawalPublicKey()),
 		}
 		accounts = append(accounts, accObj)
 	}
