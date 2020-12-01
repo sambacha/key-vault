@@ -4,10 +4,11 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/bloxapp/eth2-key-manager/signer"
+
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/slashing_protection"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
-	"github.com/bloxapp/eth2-key-manager/validator_signer"
 	"github.com/stretchr/testify/require"
 	v1 "github.com/wealdtech/eth2-signer-api/pb/v1"
 
@@ -32,7 +33,7 @@ func (test *AggregationSigning) Run(t *testing.T) {
 	storage := setup.UpdateStorage(t, core.PyrmontNetwork, true, core.HDWallet, nil)
 	account := shared.RetrieveAccount(t, storage)
 	require.NotNil(t, account)
-	pubKeyBytes := account.ValidatorPublicKey().Marshal()
+	pubKeyBytes := account.ValidatorPublicKey()
 
 	// Get wallet
 	wallet, err := storage.OpenWallet()
@@ -46,7 +47,7 @@ func (test *AggregationSigning) Run(t *testing.T) {
 
 	// Sign data
 	protector := slashing_protection.NewNormalProtection(in_memory.NewInMemStore(core.PyrmontNetwork))
-	var signer validator_signer.ValidatorSigner = validator_signer.NewSimpleSigner(wallet, protector, storage.Network())
+	var signer signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
 
 	res, err := signer.Sign(test.dataToSignRequest(t, pubKeyBytes, dataToSign))
 	require.NoError(t, err)

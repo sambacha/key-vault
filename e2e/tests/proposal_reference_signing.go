@@ -81,8 +81,3 @@ func (test *ProposalReferenceSigning) dataToProposalRequest(t *testing.T, pubKey
 		},
 	}
 }
-
-func _byteArray(input string) []byte {
-	res, _ := hex.DecodeString(input)
-	return res
-}
