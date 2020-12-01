@@ -6,6 +6,9 @@ import (
 	"encoding/json"
 	"testing"
 
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	"github.com/wealdtech/go-bytesutil"
+
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
@@ -19,6 +22,12 @@ import (
 func _byteArray(input string) []byte {
 	res, _ := hex.DecodeString(input)
 	return res
+}
+
+func _byteArray32(input string) []byte {
+	res, _ := hex.DecodeString(input)
+	ret := bytesutil.ToBytes32(res)
+	return ret[:]
 }
 
 func baseInmemStorage() (*in_memory.InMemStore, uuid.UUID, error) {
@@ -45,12 +54,12 @@ func baseInmemStorage() (*in_memory.InMemStore, uuid.UUID, error) {
 		return nil, uuid.UUID{}, err
 	}
 
-	err = inMemStore.SaveHighestAttestation(acc.ValidatorPublicKey(), &core.BeaconAttestation{
-		Source: &core.Checkpoint{
+	err = inMemStore.SaveHighestAttestation(acc.ValidatorPublicKey(), &eth.AttestationData{
+		Source: &eth.Checkpoint{
 			Epoch: 0,
 			Root:  nil,
 		},
-		Target: &core.Checkpoint{
+		Target: &eth.Checkpoint{
 			Epoch: 0,
 			Root:  nil,
 		},

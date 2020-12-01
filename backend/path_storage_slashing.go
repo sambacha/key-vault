@@ -245,7 +245,7 @@ func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey []by
 		defer wg.Done()
 
 		if err := storage.SaveHighestAttestation(pubKey, slashingHistory.HighestAttestation); err != nil {
-			attErrs[0] = errors.Wrapf(err, "failed to save attestation for slot %d", slashingHistory.HighestAttestation.Slot)
+			attErrs[0] = errors.Wrapf(err, "failed to save attestation")
 		}
 	}()
 
@@ -271,9 +271,7 @@ func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey []by
 	wg.Wait()
 
 	for _, err := range append(attErrs, propErrs...) {
-		if err != nil {
-			return err
-		}
+		return err
 	}
 
 	return nil

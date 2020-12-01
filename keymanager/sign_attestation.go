@@ -34,7 +34,7 @@ func (km *KeyManager) SignAttestation(domain []byte, data *ethpb.AttestationData
 
 	// Send request.
 	var resp SignResponse
-	if err := km.sendRequest(http.MethodPost, backend.SignAttestationPattern, reqBody, &resp); err != nil {
+	if err := km.sendRequest(http.MethodPost, backend.SignPattern, reqBody, &resp); err != nil {
 		km.log.WithError(err).Error("failed to send sign attestation request")
 		return nil, NewGenericError(err, "failed to send SignAttestation request to remote vault wallet")
 	}

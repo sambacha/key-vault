@@ -32,7 +32,7 @@ func (km *KeyManager) SignProposal(domain []byte, data *ethpb.BeaconBlockHeader)
 
 	// Send request.
 	var resp SignResponse
-	if err := km.sendRequest(http.MethodPost, backend.SignProposalPattern, reqBody, &resp); err != nil {
+	if err := km.sendRequest(http.MethodPost, backend.SignPattern, reqBody, &resp); err != nil {
 		km.log.WithError(err).Error("failed to send sign proposal request")
 		return nil, NewGenericError(err, "failed to send SignProposal request to remote vault wallet")
 	}

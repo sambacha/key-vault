@@ -21,6 +21,10 @@ const (
 
 // SaveHighestAttestation saves highest attestation
 func (store *HashicorpVaultStore) SaveHighestAttestation(pubKey []byte, attestation *eth.AttestationData) error {
+	if attestation == nil || pubKey == nil {
+		return errors.Errorf("pubKey and attestation must not be nil")
+	}
+
 	path := fmt.Sprintf(WalletHighestAttestationPath+"%s", store.identifierFromKey(pubKey))
 	data, err := attestation.Marshal()
 	if err != nil {
@@ -36,6 +40,10 @@ func (store *HashicorpVaultStore) SaveHighestAttestation(pubKey []byte, attestat
 
 // RetrieveHighestAttestation retrieves highest attestation
 func (store *HashicorpVaultStore) RetrieveHighestAttestation(pubKey []byte) *eth.AttestationData {
+	if pubKey == nil {
+		return nil
+	}
+
 	path := fmt.Sprintf(WalletHighestAttestationPath+"%s", store.identifierFromKey(pubKey))
 	entry, err := store.storage.Get(store.ctx, path)
 	if err != nil {
@@ -57,6 +65,10 @@ func (store *HashicorpVaultStore) RetrieveHighestAttestation(pubKey []byte) *eth
 
 // SaveProposal implements Storage interface.
 func (store *HashicorpVaultStore) SaveProposal(pubKey []byte, block *eth.BeaconBlock) error {
+	if block == nil || pubKey == nil {
+		return errors.Errorf("pubKey and block must not be nil")
+	}
+
 	path := fmt.Sprintf(WalletProposalsPath, store.identifierFromKey(pubKey), block.Slot)
 	data, err := block.Marshal()
 	if err != nil {
@@ -72,6 +84,10 @@ func (store *HashicorpVaultStore) SaveProposal(pubKey []byte, block *eth.BeaconB
 
 // RetrieveProposal implements Storage interface.
 func (store *HashicorpVaultStore) RetrieveProposal(pubKey []byte, slot uint64) (*eth.BeaconBlock, error) {
+	if pubKey == nil {
+		return nil, errors.Errorf("pubKey must not be nil")
+	}
+
 	path := fmt.Sprintf(WalletProposalsPath, store.identifierFromKey(pubKey), slot)
 	entry, err := store.storage.Get(store.ctx, path)
 	if err != nil {
@@ -93,6 +109,10 @@ func (store *HashicorpVaultStore) RetrieveProposal(pubKey []byte, slot uint64) (
 
 // ListAllProposals returns all proposal data from the DB
 func (store *HashicorpVaultStore) ListAllProposals(pubKey []byte) ([]*eth.BeaconBlock, error) {
+	if pubKey == nil {
+		return nil, errors.Errorf("pubKey must not be nil")
+	}
+
 	path := fmt.Sprintf(WalletProposalsBase, store.identifierFromKey(pubKey))
 	entries, err := store.storage.List(store.ctx, path)
 	if err != nil {

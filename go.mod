@@ -37,6 +37,7 @@ require (
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.6.1
 	github.com/wealdtech/eth2-signer-api v1.5.2
+	github.com/wealdtech/go-bytesutil v1.1.1
 	github.com/wealdtech/go-eth2-types/v2 v2.5.1
 	golang.org/x/crypto v0.0.0-20201112155050-0c6587e931a9 // indirect
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect

@@ -21,21 +21,12 @@ import (
 const (
 	// SignAttestationPattern is the path pattern for sign attestation endpoint
 	SignPattern = "accounts/sign"
-
-	// SignAttestationPattern is the path pattern for sign attestation endpoint
-	SignAttestationPattern = "accounts/sign-attestation"
-
-	// SignProposalPattern is the path pattern for sign proposal endpoint
-	SignProposalPattern = "accounts/sign-proposal"
-
-	// SignAggregationPattern is the path pattern for sign aggregation endpoint
-	SignAggregationPattern = "accounts/sign-aggregation"
 )
 
 func signsPaths(b *backend) []*framework.Path {
 	return []*framework.Path{
 		&framework.Path{
-			Pattern:         SignAttestationPattern,
+			Pattern:         SignPattern,
 			HelpSynopsis:    "Sign",
 			HelpDescription: `Sign`,
 			Fields: map[string]*framework.FieldSchema{
@@ -99,10 +90,15 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 		sig, err = signer.SignSlot(t.Slot, signReq.SignatureDomain, signReq.PublicKey)
 	case *v2.SignRequest_Epoch:
 		sig, err = signer.SignEpoch(t.Epoch, signReq.SignatureDomain, signReq.PublicKey)
+	case *v2.SignRequest_AggregateAttestationAndProof:
+		sig, err = signer.SignAggregateAndProof(t.AggregateAttestationAndProof, signReq.SignatureDomain, signReq.PublicKey)
+
+	default:
+		err = errors.Errorf("sign request: not supported")
 	}
 
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to sign attestation")
+		return nil, errors.Wrap(err, "failed to sign")
 	}
 
 	return &logical.Response{

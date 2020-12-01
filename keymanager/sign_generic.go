@@ -27,7 +27,7 @@ func (km *KeyManager) SignGeneric(root []byte, domain [32]byte) (bls.Signature, 
 
 	// Send request.
 	var resp SignResponse
-	if err := km.sendRequest(http.MethodPost, backend.SignAggregationPattern, reqBody, &resp); err != nil {
+	if err := km.sendRequest(http.MethodPost, backend.SignPattern, reqBody, &resp); err != nil {
 		km.log.WithError(err).Error("failed to send sign aggregation request")
 		return nil, NewGenericError(err, "failed to send SignGeneric request to remote vault wallet")
 	}
