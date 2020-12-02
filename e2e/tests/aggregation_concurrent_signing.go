@@ -6,6 +6,10 @@ import (
 	"strconv"
 	"testing"
 
+	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+
+	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/stretchr/testify/require"
 
@@ -29,17 +33,25 @@ func (test *AggregationConcurrentSigning) Run(t *testing.T) {
 	// setup vault with db
 	store := setup.UpdateStorage(t, core.PyrmontNetwork, true, core.HDWallet, nil)
 	account := shared.RetrieveAccount(t, store)
-	pubKey := hex.EncodeToString(account.ValidatorPublicKey().Marshal())
+	pubKey := account.ValidatorPublicKey()
 
 	// sign and save the valid aggregation
-	_, err := setup.SignAggregation(
-		map[string]interface{}{
-			"public_key": pubKey,
-			"domain":     "01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac",
-			"dataToSign": "7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d",
+	agg := &ethpb.AggregateAttestationAndProof{
+		AggregatorIndex: 0,
+		Aggregate: &ethpb.Attestation{
+			Data: &ethpb.AttestationData{
+				BeaconBlockRoot: make([]byte, 32),
+				Target:          &ethpb.Checkpoint{Root: make([]byte, 32)},
+				Source:          &ethpb.Checkpoint{Root: make([]byte, 32)},
+			},
+			Signature:       make([]byte, 96),
+			AggregationBits: make([]byte, 1),
 		},
-		core.PyrmontNetwork,
-	)
+		SelectionProof: make([]byte, 96),
+	}
+	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
+	req, err := test.serializedReq(pubKey, nil, domain, agg)
+	_, err = setup.SignAggregation(req, core.PyrmontNetwork)
 	require.NoError(t, err)
 
 	// Send requests in parallel
@@ -50,14 +62,7 @@ func (test *AggregationConcurrentSigning) Run(t *testing.T) {
 			t.Run("concurrent signing "+strconv.Itoa(i), func(t *testing.T) {
 				t.Parallel()
 
-				_, err := setup.SignAggregation(
-					map[string]interface{}{
-						"public_key": pubKey,
-						"domain":     "17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0",
-						"dataToSign": "7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e",
-					},
-					core.PyrmontNetwork,
-				)
+				_, err := setup.SignAggregation(req, core.PyrmontNetwork)
 				if err == nil {
 					return
 				}
@@ -71,4 +76,21 @@ func (test *AggregationConcurrentSigning) Run(t *testing.T) {
 			})
 		}
 	})
+}
+
+func (test *AggregationConcurrentSigning) serializedReq(pk, root, domain []byte, agg *ethpb.AggregateAttestationAndProof) (map[string]interface{}, error) {
+	req := &validatorpb.SignRequest{
+		PublicKey:       pk,
+		SigningRoot:     root,
+		SignatureDomain: domain,
+		Object:          &validatorpb.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: agg},
+	}
+
+	byts, err := req.Marshal()
+	if err != nil {
+		return nil, err
+	}
+	return map[string]interface{}{
+		"sign_req": hex.EncodeToString(byts),
+	}, nil
 }

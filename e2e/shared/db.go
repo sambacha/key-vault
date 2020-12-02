@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"testing"
 
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 	"github.com/bloxapp/eth2-key-manager/wallets"
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 	"github.com/bloxapp/eth2-key-manager/wallets/nd"
 	"github.com/stretchr/testify/require"
-	types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 // AccountIndex is the test account index.
@@ -24,7 +25,7 @@ func _byteArray(input string) []byte {
 
 // BaseInmemStorage creates the in-memory storage and creates the base account.
 func BaseInmemStorage(t *testing.T, minimalSlashingData bool, walletType core.WalletType, privKey []byte) (*in_memory.InMemStore, error) {
-	err := types.InitBLS()
+	err := core.InitBLS()
 	require.NoError(t, err)
 
 	store := in_memory.NewInMemStore(core.PyrmontNetwork)
@@ -41,7 +42,7 @@ func BaseInmemStorage(t *testing.T, minimalSlashingData bool, walletType core.Wa
 		}
 		k, err := core.NewHDKeyFromPrivateKey(_byteArray("5470813f7deef638dc531188ca89e36976d536f680e89849cd9077fd096e20bc"), "")
 		require.NoError(t, err)
-		acc, err = wallets.NewValidatorAccount("", k, k.PublicKey(), "", walletCtx)
+		acc, err = wallets.NewValidatorAccount("", k, k.PublicKey().Serialize(), "", walletCtx)
 		require.NoError(t, err)
 		require.NoError(t, wallet.AddValidatorAccount(acc))
 	} else {
@@ -61,12 +62,12 @@ func BaseInmemStorage(t *testing.T, minimalSlashingData bool, walletType core.Wa
 
 	// base highest att.
 	if minimalSlashingData {
-		err = store.SaveHighestAttestation(acc.ValidatorPublicKey(), &core.BeaconAttestation{
-			Source: &core.Checkpoint{
+		err = store.SaveHighestAttestation(acc.ValidatorPublicKey(), &eth.AttestationData{
+			Source: &eth.Checkpoint{
 				Epoch: 0,
 				Root:  nil,
 			},
-			Target: &core.Checkpoint{
+			Target: &eth.Checkpoint{
 				Epoch: 0,
 				Root:  nil,
 			},

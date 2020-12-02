@@ -4,12 +4,15 @@ import (
 	"encoding/hex"
 	"testing"
 
+	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+
+	"github.com/bloxapp/eth2-key-manager/signer"
+
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/slashing_protection"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
-	"github.com/bloxapp/eth2-key-manager/validator_signer"
 	"github.com/stretchr/testify/require"
-	v1 "github.com/wealdtech/eth2-signer-api/pb/v1"
 
 	"github.com/bloxapp/key-vault/e2e"
 	"github.com/bloxapp/key-vault/e2e/shared"
@@ -32,44 +35,55 @@ func (test *AggregationSigning) Run(t *testing.T) {
 	storage := setup.UpdateStorage(t, core.PyrmontNetwork, true, core.HDWallet, nil)
 	account := shared.RetrieveAccount(t, storage)
 	require.NotNil(t, account)
-	pubKeyBytes := account.ValidatorPublicKey().Marshal()
+	pubKeyBytes := account.ValidatorPublicKey()
 
 	// Get wallet
 	wallet, err := storage.OpenWallet()
 	require.NoError(t, err)
 
-	dataToSign := map[string]interface{}{
-		"public_key": hex.EncodeToString(pubKeyBytes),
-		"domain":     "01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac",
-		"dataToSign": "7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d",
+	agg := &ethpb.AggregateAttestationAndProof{
+		AggregatorIndex: 0,
+		Aggregate: &ethpb.Attestation{
+			Data: &ethpb.AttestationData{
+				BeaconBlockRoot: make([]byte, 32),
+				Target:          &ethpb.Checkpoint{Root: make([]byte, 32)},
+				Source:          &ethpb.Checkpoint{Root: make([]byte, 32)},
+			},
+			Signature:       make([]byte, 96),
+			AggregationBits: make([]byte, 1),
+		},
+		SelectionProof: make([]byte, 96),
 	}
+	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
+	req, err := test.serializedReq(pubKeyBytes, nil, domain, agg)
 
 	// Sign data
 	protector := slashing_protection.NewNormalProtection(in_memory.NewInMemStore(core.PyrmontNetwork))
-	var signer validator_signer.ValidatorSigner = validator_signer.NewSimpleSigner(wallet, protector, storage.Network())
+	var signer signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
 
-	res, err := signer.Sign(test.dataToSignRequest(t, pubKeyBytes, dataToSign))
+	res, err := signer.SignAggregateAndProof(agg, domain, pubKeyBytes)
 	require.NoError(t, err)
 
 	// Send sign attestation request
-	sig, err := setup.SignAggregation(dataToSign, core.PyrmontNetwork)
+	sig, err := setup.SignAggregation(req, core.PyrmontNetwork)
 	require.NoError(t, err)
 
-	require.Equal(t, res.GetSignature(), sig)
+	require.EqualValues(t, res, sig)
 }
 
-func (test *AggregationSigning) dataToSignRequest(t *testing.T, pubKey []byte, data map[string]interface{}) *v1.SignRequest {
-	// Decode domain
-	domainBytes, err := hex.DecodeString(data["domain"].(string))
-	require.NoError(t, err)
-
-	// Decode data to sign
-	dataToSign, err := hex.DecodeString(data["dataToSign"].(string))
-	require.NoError(t, err)
-
-	return &v1.SignRequest{
-		Id:     &v1.SignRequest_PublicKey{PublicKey: pubKey},
-		Domain: domainBytes,
-		Data:   dataToSign,
+func (test *AggregationSigning) serializedReq(pk, root, domain []byte, agg *ethpb.AggregateAttestationAndProof) (map[string]interface{}, error) {
+	req := &validatorpb.SignRequest{
+		PublicKey:       pk,
+		SigningRoot:     root,
+		SignatureDomain: domain,
+		Object:          &validatorpb.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: agg},
 	}
+
+	byts, err := req.Marshal()
+	if err != nil {
+		return nil, err
+	}
+	return map[string]interface{}{
+		"sign_req": hex.EncodeToString(byts),
+	}, nil
 }

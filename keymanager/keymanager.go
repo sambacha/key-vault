@@ -9,7 +9,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	"github.com/bloxapp/key-vault/backend"
+
 	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 	"github.com/prysmaticlabs/prysm/shared/bls"
 	"github.com/prysmaticlabs/prysm/validator/keymanager"
@@ -112,35 +113,44 @@ func (km *KeyManager) Sign(_ context.Context, req *validatorpb.SignRequest) (bls
 		return nil, ErrNoSuchKey
 	}
 
-	domain := bytex.ToBytes32(req.GetSignatureDomain())
-	switch data := req.GetObject().(type) {
-	case *validatorpb.SignRequest_Block:
-		return km.SignProposal(req.GetSignatureDomain(), &ethpb.BeaconBlockHeader{
-			Slot:          data.Block.GetSlot(),
-			ProposerIndex: data.Block.GetProposerIndex(),
-			StateRoot:     data.Block.GetStateRoot(),
-			ParentRoot:    data.Block.GetParentRoot(),
-			BodyRoot:      req.GetSigningRoot(),
-		})
-	case *validatorpb.SignRequest_AttestationData:
-		return km.SignAttestation(req.GetSignatureDomain(), data.AttestationData)
-	case *validatorpb.SignRequest_AggregateAttestationAndProof:
-		return km.SignGeneric(req.GetSigningRoot(), domain)
-	case *validatorpb.SignRequest_Slot:
-		return km.SignGeneric(req.GetSigningRoot(), domain)
-	case *validatorpb.SignRequest_Epoch:
-		return km.SignGeneric(req.GetSigningRoot(), domain)
-	default:
-		return nil, ErrUnsupportedSigning
+	byts, err := req.Marshal()
+	if err != nil {
+		return nil, err
 	}
+	reqMap := map[string]interface{}{
+		"sign_req": hex.EncodeToString(byts),
+	}
+
+	var resp SignResponse
+	if err := km.sendRequest(http.MethodPost, backend.SignPattern, reqMap, &resp); err != nil {
+		return nil, err
+	}
+
+	// Signature is base64 encoded, so we have to decode that.
+	decodedSignature, err := hex.DecodeString(resp.Data.Signature)
+	if err != nil {
+		return nil, NewGenericError(err, "failed to base64 decode")
+	}
+
+	// Get signature from bytes
+	sig, err := bls.SignatureFromBytes(decodedSignature)
+	if err != nil {
+		return nil, NewGenericError(err, "failed to get BLS signature from bytes")
+	}
+	return sig, nil
 }
 
 // sendRequest implements the logic to work with HTTP requests.
-func (km *KeyManager) sendRequest(method, path string, reqBody []byte, respBody interface{}) error {
+func (km *KeyManager) sendRequest(method, path string, reqBody interface{}, respBody interface{}) error {
 	endpoint := km.remoteAddress + endpoint.Build(km.network, path)
 
+	payloadByts, err := json.Marshal(reqBody)
+	if err != nil {
+		return err
+	}
+
 	// Prepare a new request
-	req, err := http.NewRequest(method, endpoint, bytes.NewBuffer(reqBody))
+	req, err := http.NewRequest(method, endpoint, bytes.NewBuffer(payloadByts))
 	if err != nil {
 		return NewGenericError(err, "failed to create HTTP request")
 	}

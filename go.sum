@@ -120,7 +120,12 @@ github.com/bloxapp/eth2-key-manager v0.2.23 h1:z2wbNrSVG6q1rBMOjCL/qbpo2pXVi5FRr
 github.com/bloxapp/eth2-key-manager v0.2.23/go.mod h1:Y94WryV/zcyr33u8sxNvoA3MnV1A9pH0w0M+OZv2d1c=
 github.com/bloxapp/eth2-key-manager v0.2.24-0.20201130064737-84c9b6a93f54 h1:2bBqqdS9hjDDDgFrk8l6U6Pn6j8Xymwqz7LT8t5GhXE=
 github.com/bloxapp/eth2-key-manager v0.2.24-0.20201130064737-84c9b6a93f54/go.mod h1:Y94WryV/zcyr33u8sxNvoA3MnV1A9pH0w0M+OZv2d1c=
-github.com/bloxapp/eth2-key-manager v0.2.24/go.mod h1:Y94WryV/zcyr33u8sxNvoA3MnV1A9pH0w0M+OZv2d1c=
+github.com/bloxapp/eth2-key-manager v0.2.25-0.20201201102611-3d57e234101b h1:Ns/gHOc0T5Kfg1mo4T3r/Jm72a6PbLiUxEV4o3bUjdQ=
+github.com/bloxapp/eth2-key-manager v0.2.25-0.20201201102611-3d57e234101b/go.mod h1:UohmLB2RRO7eS5UQkurR2OzWzq8+G7wqC7V8aoOMnkw=
+github.com/bloxapp/eth2-key-manager v0.2.25-0.20201202074402-7bda0c5bbb04 h1:h2a1f8Mgqz/CO2wvjo2rsSi6bh0fjumC2mDc/dS5NB4=
+github.com/bloxapp/eth2-key-manager v0.2.25-0.20201202074402-7bda0c5bbb04/go.mod h1:5Jqy43XAzEyHqK/JtSY/6Oxc2qyaI3qi8wQr/ENMnnc=
+github.com/bloxapp/eth2-key-manager v0.3.0 h1:OYytEbdKfod6WXLiv+P5cJ1aJUMkizdzax1UjNgExxU=
+github.com/bloxapp/eth2-key-manager v0.3.0/go.mod h1:5Jqy43XAzEyHqK/JtSY/6Oxc2qyaI3qi8wQr/ENMnnc=
 github.com/bmizerany/pat v0.0.0-20170815010413-6226ea591a40/go.mod h1:8rLXio+WjiTceGBHIoTvn60HIbs7Hm7bcHjyrSqYB9c=
 github.com/boltdb/bolt v1.3.1/go.mod h1:clJnj/oiGkjum5o1McbSZDSLxVThjynRyGBgiAx27Ps=
 github.com/bradfitz/gomemcache v0.0.0-20170208213004-1952afaa557d/go.mod h1:PmM6Mmwb0LSuEubjR8N7PtNe1KxZLtOUHtbeikc5h60=
@@ -503,6 +508,8 @@ github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d/go.mod h1:+NfK9FKe
 github.com/herumi/bls-eth-go-binary v0.0.0-20200706085701-832d8c2c0f7d/go.mod h1:luAnRm3OsMQeokhGzpYmc0ZKwawY7o87PUEP11Z7r7U=
 github.com/herumi/bls-eth-go-binary v0.0.0-20201019012252-4b463a10c225 h1:S7pKW74AvYc89WawL6IxGSnJRxF4TkE1GITYqKFyYy4=
 github.com/herumi/bls-eth-go-binary v0.0.0-20201019012252-4b463a10c225/go.mod h1:luAnRm3OsMQeokhGzpYmc0ZKwawY7o87PUEP11Z7r7U=
+github.com/herumi/bls-eth-go-binary v0.0.0-20201104034342-d782bdf735de h1:qLlwYGvpvAx/nDBnPt2KpZTXGli0oHBGddyYxJHTOds=
+github.com/herumi/bls-eth-go-binary v0.0.0-20201104034342-d782bdf735de/go.mod h1:luAnRm3OsMQeokhGzpYmc0ZKwawY7o87PUEP11Z7r7U=
 github.com/holiman/uint256 v1.1.1 h1:4JywC80b+/hSfljFlEBLHrrh+CIONLDz9NuFl0af4Mw=
 github.com/holiman/uint256 v1.1.1/go.mod h1:y4ga/t+u+Xwd7CpDgZESaRcWy0I7XMlTMA25ApIH5Jw=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
@@ -1140,6 +1147,7 @@ github.com/stretchr/testify v1.6.1 h1:hDPOHmpOpP40lSULcqw7IrRb/u7w6RpDC9399XyoNd
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/supranational/blst v0.2.1-0.20201025154037-03c38676b08b h1:r+p8ymKeCTy9qi6do3EHUpdnijQgU+37kGXmM4yZKmo=
 github.com/supranational/blst v0.2.1-0.20201025154037-03c38676b08b/go.mod h1:jZJtfjgudtNl4en1tzwPIV3KjUnQUvG3/j+w+fVonLw=
+github.com/supranational/blst v0.2.1-0.20201113213949-9b4b16fb4269 h1:s2HYqf1hRkGl7iEdl3sEQBT96lBHXplHmRP9KFsjhsA=
 github.com/supranational/blst v0.2.1-0.20201113213949-9b4b16fb4269/go.mod h1:jZJtfjgudtNl4en1tzwPIV3KjUnQUvG3/j+w+fVonLw=
 github.com/syndtr/goleveldb v1.0.0/go.mod h1:ZVVdQEZoIme9iO1Ch2Jdy24qqXrMMOU6lpPAyBWyWuQ=
 github.com/syndtr/goleveldb v1.0.1-0.20200815110645-5c35d600f0ca h1:Ld/zXl5t4+D69SiV4JoN7kkfvJdOWlPpfxrzxpLMoUk=

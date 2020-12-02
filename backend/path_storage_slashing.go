@@ -6,13 +6,13 @@ import (
 	"encoding/json"
 	"sync"
 
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+
 	vault "github.com/bloxapp/eth2-key-manager"
-	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
-	types "github.com/wealdtech/go-eth2-types/v2"
 
 	"github.com/bloxapp/key-vault/backend/store"
 	"github.com/bloxapp/key-vault/utils/errorex"
@@ -26,8 +26,8 @@ const (
 
 // SlashingHistory contains slashing history data.
 type SlashingHistory struct {
-	HighestAttestation *core.BeaconAttestation
-	Proposals          []*core.BeaconBlockHeader `json:"proposals"`
+	HighestAttestation *eth.AttestationData
+	Proposals          []*eth.BeaconBlock `json:"proposals"`
 }
 
 func storageSlashingDataPaths(b *backend) []*framework.Path {
@@ -140,7 +140,7 @@ func (b *backend) pathMinimalSlashingStorageRead(ctx context.Context, req *logic
 	var wg sync.WaitGroup
 	for i, account := range accounts {
 		wg.Add(1)
-		go func(i int, pubKey types.PublicKey) {
+		go func(i int, pubKey []byte) {
 			defer wg.Done()
 
 			// Load slashing history
@@ -151,7 +151,7 @@ func (b *backend) pathMinimalSlashingStorageRead(ctx context.Context, req *logic
 			}
 
 			responseData[i] = map[string]interface{}{
-				hex.EncodeToString(pubKey.Marshal()): slashingHistory,
+				hex.EncodeToString(pubKey): slashingHistory,
 			}
 		}(i, account.ValidatorPublicKey())
 	}
@@ -175,12 +175,12 @@ func (b *backend) pathMinimalSlashingStorageRead(ctx context.Context, req *logic
 	}, nil
 }
 
-func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey types.PublicKey) (string, error) {
+func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey []byte) (string, error) {
 	errs := make([]error, 2)
 	var wg sync.WaitGroup
 
 	// Fetch attestations
-	var highestAtt *core.BeaconAttestation
+	var highestAtt *eth.AttestationData
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -192,7 +192,7 @@ func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey types
 	}()
 
 	// Fetch proposals
-	var proposals []*core.BeaconBlockHeader
+	var proposals []*eth.BeaconBlock
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -222,7 +222,7 @@ func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey types
 	return hex.EncodeToString(slashingHistoryEncoded), nil
 }
 
-func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey types.PublicKey, slashingData string) error {
+func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey []byte, slashingData string) error {
 	// HEX decode slashing history
 	slashingHistoryBytes, err := hex.DecodeString(slashingData)
 	if err != nil {
@@ -246,7 +246,7 @@ func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey type
 		defer wg.Done()
 
 		if err := storage.SaveHighestAttestation(pubKey, slashingHistory.HighestAttestation); err != nil {
-			attErrs[0] = errors.Wrapf(err, "failed to save attestation for slot %d", slashingHistory.HighestAttestation.Slot)
+			attErrs[0] = errors.Wrapf(err, "failed to save attestation")
 		}
 	}()
 
@@ -258,7 +258,7 @@ func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey type
 		var propWg sync.WaitGroup
 		for i, proposal := range slashingHistory.Proposals {
 			propWg.Add(1)
-			go func(i int, proposal *core.BeaconBlockHeader) {
+			go func(i int, proposal *eth.BeaconBlock) {
 				defer propWg.Done()
 
 				if err := storage.SaveProposal(pubKey, proposal); err != nil {
@@ -272,9 +272,7 @@ func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey type
 	wg.Wait()
 
 	for _, err := range append(attErrs, propErrs...) {
-		if err != nil {
-			return err
-		}
+		return err
 	}
 
 	return nil
