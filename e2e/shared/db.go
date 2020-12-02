@@ -40,7 +40,7 @@ func BaseInmemStorage(t *testing.T, minimalSlashingData bool, walletType core.Wa
 		if err := store.SaveWallet(wallet); err != nil {
 			return nil, err
 		}
-		k, err := core.NewHDKeyFromPrivateKey(_byteArray("5470813f7deef638dc531188ca89e36976d536f680e89849cd9077fd096e20bc"), "")
+		k, err := core.NewHDKeyFromPrivateKey(privKey, "")
 		require.NoError(t, err)
 		acc, err = wallets.NewValidatorAccount("", k, k.PublicKey().Serialize(), "", walletCtx)
 		require.NoError(t, err)
