@@ -6,14 +6,14 @@ import (
 	"encoding/json"
 	"testing"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	"github.com/wealdtech/go-bytesutil"
+	bytesutil2 "github.com/prysmaticlabs/prysm/shared/bytesutil"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 	uuid "github.com/google/uuid"
 	"github.com/hashicorp/vault/sdk/logical"
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/backend/store"
@@ -26,7 +26,7 @@ func _byteArray(input string) []byte {
 
 func _byteArray32(input string) []byte {
 	res, _ := hex.DecodeString(input)
-	ret := bytesutil.ToBytes32(res)
+	ret := bytesutil2.ToBytes32(res)
 	return ret[:]
 }
 

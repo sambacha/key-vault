@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Microsoft/hcsshim v0.8.9 // indirect
-	github.com/bloxapp/eth2-key-manager v0.2.25-0.20201201102611-3d57e234101b
+	github.com/bloxapp/eth2-key-manager v0.2.25-0.20201202074402-7bda0c5bbb04
 	github.com/containerd/containerd v1.4.0 // indirect
 	github.com/containerd/continuity v0.0.0-20200710164510-efbc4488d8fe // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
@@ -36,9 +36,6 @@ require (
 	github.com/prysmaticlabs/prysm v1.0.2
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.6.1
-	github.com/wealdtech/eth2-signer-api v1.5.2
-	github.com/wealdtech/go-bytesutil v1.1.1
-	github.com/wealdtech/go-eth2-types/v2 v2.5.1
 	golang.org/x/crypto v0.0.0-20201112155050-0c6587e931a9 // indirect
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect
 	golang.org/x/tools v0.0.0-20201125231158-b5590deeca9b // indirect

@@ -6,10 +6,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/wealdtech/go-bytesutil"
+	bytesutil2 "github.com/prysmaticlabs/prysm/shared/bytesutil"
 
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-
 	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 
 	"github.com/hashicorp/vault/sdk/logical"
@@ -32,7 +31,7 @@ func basicProposalDataWithOps(undefinedPubKey bool, differentStateRoot bool, dif
 		blk.ParentRoot = _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
 	}
 	if differentBodyRoot {
-		blk.Body.Graffiti = bytesutil.Bytes32(10)
+		blk.Body.Graffiti = bytesutil2.Bytes32(10)
 	}
 
 	req := &validatorpb.SignRequest{

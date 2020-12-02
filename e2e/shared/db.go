@@ -13,7 +13,6 @@ import (
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 	"github.com/bloxapp/eth2-key-manager/wallets/nd"
 	"github.com/stretchr/testify/require"
-	types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 // AccountIndex is the test account index.
@@ -26,7 +25,7 @@ func _byteArray(input string) []byte {
 
 // BaseInmemStorage creates the in-memory storage and creates the base account.
 func BaseInmemStorage(t *testing.T, minimalSlashingData bool, walletType core.WalletType, privKey []byte) (*in_memory.InMemStore, error) {
-	err := types.InitBLS()
+	err := core.InitBLS()
 	require.NoError(t, err)
 
 	store := in_memory.NewInMemStore(core.PyrmontNetwork)
