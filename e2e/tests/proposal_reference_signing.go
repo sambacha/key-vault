@@ -9,8 +9,9 @@ import (
 	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/key-vault/e2e"
 	"github.com/stretchr/testify/require"
+
+	"github.com/bloxapp/key-vault/e2e"
 )
 
 func referenceBlock(t *testing.T) *eth.BeaconBlock {

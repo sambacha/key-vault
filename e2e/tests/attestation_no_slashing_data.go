@@ -9,9 +9,10 @@ import (
 	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/stretchr/testify/require"
+
 	"github.com/bloxapp/key-vault/e2e"
 	"github.com/bloxapp/key-vault/e2e/shared"
-	"github.com/stretchr/testify/require"
 )
 
 // AttestationNoSlashingDataSigning tests sign attestation endpoint.

@@ -10,11 +10,12 @@ import (
 
 	vault "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
-	"github.com/bloxapp/key-vault/backend/store"
-	"github.com/bloxapp/key-vault/utils/errorex"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
+
+	"github.com/bloxapp/key-vault/backend/store"
+	"github.com/bloxapp/key-vault/utils/errorex"
 )
 
 // Endpoints patterns
