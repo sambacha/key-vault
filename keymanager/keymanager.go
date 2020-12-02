@@ -63,6 +63,8 @@ func NewKeyManager(log *logrus.Entry, opts *Config) (*KeyManager, error) {
 		return nil, NewGenericError(err, "failed to hex decode public key '%s'", opts.PubKey)
 	}
 
+	log.Logf(logrus.InfoLevel, "KeyManager initialing for %s network", opts.Network)
+
 	return &KeyManager{
 		remoteAddress: opts.Location,
 		accessToken:   opts.AccessToken,
@@ -142,7 +144,11 @@ func (km *KeyManager) Sign(_ context.Context, req *validatorpb.SignRequest) (bls
 
 // sendRequest implements the logic to work with HTTP requests.
 func (km *KeyManager) sendRequest(method, path string, reqBody interface{}, respBody interface{}) error {
-	endpoint := km.remoteAddress + endpoint.Build(km.network, path)
+	networkPath, err := endpoint.Build(km.network, path)
+	if err != nil {
+		return NewGenericError(err, "could not build network path")
+	}
+	endpointStr := km.remoteAddress + networkPath
 
 	payloadByts, err := json.Marshal(reqBody)
 	if err != nil {
@@ -150,7 +156,7 @@ func (km *KeyManager) sendRequest(method, path string, reqBody interface{}, resp
 	}
 
 	// Prepare a new request
-	req, err := http.NewRequest(method, endpoint, bytes.NewBuffer(payloadByts))
+	req, err := http.NewRequest(method, endpointStr, bytes.NewBuffer(payloadByts))
 	if err != nil {
 		return NewGenericError(err, "failed to create HTTP request")
 	}
@@ -173,7 +179,7 @@ func (km *KeyManager) sendRequest(method, path string, reqBody interface{}, resp
 			km.log.WithError(err).Error("failed to read error response body")
 		}
 
-		return NewHTTPRequestError(endpoint, resp.StatusCode, responseBody, "unexpected status code")
+		return NewHTTPRequestError(endpointStr, resp.StatusCode, responseBody, "unexpected status code")
 	}
 
 	// Retrieve response body
