@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/prysmaticlabs/prysm/shared/bytesutil"
+
 	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 
 	"github.com/sirupsen/logrus"
@@ -202,4 +204,10 @@ func newTestRemoteWallet(handler http.HandlerFunc) *httptest.Server {
 func _byteArray(input string) []byte {
 	res, _ := hex.DecodeString(input)
 	return res
+}
+
+func _byteArray32(input string) []byte {
+	res, _ := hex.DecodeString(input)
+	ret := bytesutil.ToBytes32(res)
+	return ret[:]
 }
