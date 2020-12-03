@@ -54,7 +54,7 @@ func (test *ProposalSigning) Run(t *testing.T) {
 	require.NoError(t, err)
 
 	// Send sign attestation request
-	sig, err := setup.SignProposal(req, core.PyrmontNetwork)
+	sig, err := setup.Sign("sign", req, core.PyrmontNetwork)
 	require.NoError(t, err)
 
 	require.Equal(t, res, sig)

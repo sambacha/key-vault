@@ -25,6 +25,7 @@ var tests = []E2E{
 	&AggregationConcurrentSigning{},
 	&AggregationSigningAccountNotFound{},
 	&AggregationReferenceSigning{},
+	&AggregationProofReferenceSigning{},
 
 	//// Proposal signing
 	&ProposalSigning{},

@@ -40,7 +40,7 @@ func (test *ProposalConcurrentSigning) Run(t *testing.T) {
 	req, err := test.serializedReq(pubKey, nil, domain, blk)
 	require.NoError(t, err)
 
-	_, err = setup.SignProposal(req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
 	require.NoError(t, err)
 
 	// Send requests in parallel
@@ -64,7 +64,7 @@ func (test *ProposalConcurrentSigning) runSlashableProposal(t *testing.T, setup 
 	req, err := test.serializedReq(pubKey, nil, domain, blk)
 	require.NoError(t, err)
 
-	_, err = setup.SignProposal(req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
 	require.Error(t, err, "did not slash", index)
 	require.IsType(t, &e2e.ServiceError{}, err)
 

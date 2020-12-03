@@ -53,14 +53,14 @@ func (test *AttestationDoubleSigning) Run(t *testing.T) {
 	// sign and save the valid attestation
 	req, err := test.serializedReq(pubKey, nil, domain, att)
 	require.NoError(t, err)
-	_, err = setup.SignAttestation(req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
 	require.NoError(t, err)
 
 	// second sig, different block root
 	att.BeaconBlockRoot = _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0f")
 	req, err = test.serializedReq(pubKey, nil, domain, att)
 	require.NoError(t, err)
-	_, err = setup.SignAttestation(req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
 	expectedErr := fmt.Sprintf("1 error occurred:\n\t* failed to sign: slashable attestation (HighestAttestationVote), not signing\n\n")
 	require.Error(t, err)
 	require.IsType(t, &e2e.ServiceError{}, err)

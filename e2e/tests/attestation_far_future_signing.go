@@ -68,7 +68,7 @@ func (test *AttestationFarFutureSigning) testFarFuture(
 	// Send sign attestation request
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, att)
 	require.NoError(t, err)
-	_, err = setup.SignAttestation(req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
 	require.NotNil(t, err)
 	require.EqualError(t, err, expectedErr, fmt.Sprintf("actual: %s\n", err.Error()))
 }

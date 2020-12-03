@@ -52,7 +52,7 @@ func (test *SlashingStorageRead) Run(t *testing.T) {
 	req, err := test.serializedReq(pubKey, nil, domain, blk)
 	require.NoError(t, err)
 
-	_, err = setup.SignProposal(req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
 
 	// Read slashing storage
 	storageBytes, statusCode := setup.ReadSlashingStorage(t, core.PyrmontNetwork)

@@ -53,7 +53,7 @@ func (test *AttestationConcurrentSigning) Run(t *testing.T) {
 	// sign and save the valid attestation
 	req, err := test.serializedReq(pubKey, nil, domain, att)
 	require.NoError(t, err)
-	_, err = setup.SignAttestation(req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
 	require.NoError(t, err)
 
 	// Send requests in parallel
@@ -93,7 +93,7 @@ func (test *AttestationConcurrentSigning) runSlashableAttestation(t *testing.T, 
 
 	req, err := test.serializedReq(pubKey, nil, domain, att)
 	require.NoError(t, err)
-	_, err = setup.SignAttestation(req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
 	require.Error(t, err, "did not slash")
 	require.IsType(t, &e2e.ServiceError{}, err)
 

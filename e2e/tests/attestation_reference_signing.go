@@ -44,7 +44,7 @@ func (test *AttestationReferenceSigning) Run(t *testing.T) {
 	// Send sign attestation request
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, att)
 	require.NoError(t, err)
-	sig, err := setup.SignAttestation(req, core.PyrmontNetwork)
+	sig, err := setup.Sign("sign", req, core.PyrmontNetwork)
 	require.NoError(t, err)
 	expectedSig := _byteArray("b4fa352d2d6dbdf884266af7ea0914451929b343527ea6c1737ac93b3dde8b7c98e6ce61d68b7a2e7b7af8f8d0fd429d0bdd5f930b83e6842bf4342d3d1d3d10fc0d15bab7649bb8aa8287ca104a1f79d396ce0217bb5cd3e6503a3bce4c9776")
 	require.EqualValues(t, expectedSig, sig)

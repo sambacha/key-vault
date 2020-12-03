@@ -39,7 +39,7 @@ func (test *ProposalFarFutureSigning) Run(t *testing.T) {
 	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, blk)
 	require.NoError(t, err)
-	_, err = setup.SignProposal(req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
 	require.NotNil(t, err)
 	expectedErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: proposed block slot too far into the future\\n\\n\"}}")
 	require.EqualError(t, err, expectedErr, fmt.Sprintf("actual: %s\n", err.Error()))

@@ -43,7 +43,7 @@ func (test *AggregationReferenceSigning) Run(t *testing.T) {
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, agg)
 
 	// Send sign attestation request
-	sig, err := setup.SignAggregation(req, core.PyrmontNetwork)
+	sig, err := setup.Sign("sign", req, core.PyrmontNetwork)
 	require.NoError(t, err)
 	expectedSig := _byteArray("8bf29e58a5b594415ce220c3a9f0d64a4cfa44397f92138f8f31849100149e18e0418ed0cb6068f38909b01e9950d7360a8ba1504bd7451c74add42acd82b148ac0b5f3687c429cc571b96307a8902e9976a24747ad68ad21e372302236aab25")
 	require.EqualValues(t, expectedSig, sig)

@@ -49,7 +49,7 @@ func (test *ProposalReferenceSigning) Run(t *testing.T) {
 	domain := _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, blk)
 	require.NoError(t, err)
-	sig, err := setup.SignProposal(req, core.PyrmontNetwork)
+	sig, err := setup.Sign("sign", req, core.PyrmontNetwork)
 	require.NoError(t, err)
 
 	expectedSig := _byteArray("911ac2f6d74039279f16eee4cc46f4c6eea0ef9d18f0d9739b407c150c07ccb104c1c4b034ad46b25719bafc22fad05205975393000ea09636f5ce427814e2fe12ea72041099cc7f6ec249e504992dbf65e968ab448ddf4e124cbcbc722829b5")
