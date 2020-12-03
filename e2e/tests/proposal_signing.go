@@ -11,7 +11,6 @@ import (
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/slashing_protection"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/e2e"
@@ -47,7 +46,7 @@ func (test *ProposalSigning) Run(t *testing.T) {
 	require.NoError(t, err)
 
 	// Sign data
-	protector := slashing_protection.NewNormalProtection(in_memory.NewInMemStore(core.PyrmontNetwork))
+	protector := slashing_protection.NewNormalProtection(storage)
 	var signer signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
 
 	res, err := signer.SignBeaconBlock(blk, domain, pubKeyBytes)

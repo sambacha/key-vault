@@ -75,6 +75,13 @@ func BaseInmemStorage(t *testing.T, minimalSlashingData bool, walletType core.Wa
 		if err != nil {
 			return nil, err
 		}
+
+		err = store.SaveHighestProposal(acc.ValidatorPublicKey(), &eth.BeaconBlock{
+			Slot: 0,
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return store, nil

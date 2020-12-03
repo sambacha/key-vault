@@ -69,7 +69,7 @@ func (test *ProposalConcurrentSigning) runSlashableProposal(t *testing.T, setup 
 	require.IsType(t, &e2e.ServiceError{}, err)
 
 	errValue := err.(*e2e.ServiceError).ErrorValue()
-	protected := errValue == fmt.Sprintf("1 error occurred:\n\t* failed to sign: err, slashable proposal: DoubleProposal\n\n") ||
+	protected := errValue == fmt.Sprintf("1 error occurred:\n\t* failed to sign: slashable proposal (HighestProposalVote), not signing\n\n") ||
 		errValue == fmt.Sprintf("1 error occurred:\n\t* locked\n\n")
 	require.True(t, protected, err.Error())
 }
