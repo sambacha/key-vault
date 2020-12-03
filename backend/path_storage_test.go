@@ -68,6 +68,13 @@ func baseInmemStorage() (*in_memory.InMemStore, uuid.UUID, error) {
 		return nil, uuid.UUID{}, err
 	}
 
+	err = inMemStore.SaveHighestProposal(acc.ValidatorPublicKey(), &eth.BeaconBlock{
+		Slot: 0,
+	})
+	if err != nil {
+		return nil, uuid.UUID{}, err
+	}
+
 	return inMemStore, acc.ID(), nil
 }
 

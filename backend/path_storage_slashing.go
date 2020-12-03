@@ -27,7 +27,7 @@ const (
 // SlashingHistory contains slashing history data.
 type SlashingHistory struct {
 	HighestAttestation *eth.AttestationData
-	Proposals          []*eth.BeaconBlock `json:"proposals"`
+	HighestProposal    *eth.BeaconBlock
 }
 
 func storageSlashingDataPaths(b *backend) []*framework.Path {
@@ -192,14 +192,15 @@ func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey []byt
 	}()
 
 	// Fetch proposals
-	var proposals []*eth.BeaconBlock
+	var proposal *eth.BeaconBlock
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 
 		var err error
-		if proposals, err = storage.ListAllProposals(pubKey); err != nil {
-			errs[1] = errors.Wrap(err, "failed to list proposals data")
+		proposal = storage.RetrieveHighestProposal(pubKey)
+		if proposal == nil {
+			errs[1] = errors.Wrap(err, "highest proposal is nil")
 		}
 	}()
 
@@ -213,7 +214,7 @@ func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey []byt
 
 	slashingHistoryEncoded, err := json.Marshal(SlashingHistory{
 		HighestAttestation: highestAtt,
-		Proposals:          proposals,
+		HighestProposal:    proposal,
 	})
 	if err != nil {
 		return "", errors.Wrap(err, "failed to marshal slashing history")
@@ -236,7 +237,7 @@ func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey []by
 	}
 
 	attErrs := make([]error, 1)
-	propErrs := make([]error, len(slashingHistory.Proposals))
+	propErrs := make([]error, 1)
 
 	var wg sync.WaitGroup
 
@@ -255,18 +256,9 @@ func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey []by
 	go func() {
 		defer wg.Done()
 
-		var propWg sync.WaitGroup
-		for i, proposal := range slashingHistory.Proposals {
-			propWg.Add(1)
-			go func(i int, proposal *eth.BeaconBlock) {
-				defer propWg.Done()
-
-				if err := storage.SaveProposal(pubKey, proposal); err != nil {
-					propErrs[i] = errors.Wrapf(err, "failed to save proposal for slot %d", proposal.Slot)
-				}
-			}(i, proposal)
+		if err := storage.SaveHighestProposal(pubKey, slashingHistory.HighestProposal); err != nil {
+			attErrs[0] = errors.Wrapf(err, "failed to save proposal")
 		}
-		propWg.Wait()
 	}()
 
 	wg.Wait()

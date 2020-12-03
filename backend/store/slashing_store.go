@@ -3,8 +3,6 @@ package store
 import (
 	"encoding/hex"
 	"fmt"
-	"strconv"
-	"sync"
 
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 
@@ -15,8 +13,7 @@ import (
 // Paths
 const (
 	WalletHighestAttestationPath = "highestAttestations/"
-	WalletProposalsBase          = "proposals/%s/"            // account/proposal
-	WalletProposalsPath          = WalletProposalsBase + "%d" // account/proposal
+	WalletHighestProposalsBase   = "proposals/%s" // account/proposal
 )
 
 // SaveHighestAttestation saves highest attestation
@@ -64,12 +61,12 @@ func (store *HashicorpVaultStore) RetrieveHighestAttestation(pubKey []byte) *eth
 }
 
 // SaveProposal implements Storage interface.
-func (store *HashicorpVaultStore) SaveProposal(pubKey []byte, block *eth.BeaconBlock) error {
+func (store *HashicorpVaultStore) SaveHighestProposal(pubKey []byte, block *eth.BeaconBlock) error {
 	if block == nil || pubKey == nil {
 		return errors.Errorf("pubKey and block must not be nil")
 	}
 
-	path := fmt.Sprintf(WalletProposalsPath, store.identifierFromKey(pubKey), block.Slot)
+	path := fmt.Sprintf(WalletHighestProposalsBase, store.identifierFromKey(pubKey))
 	data, err := block.Marshal()
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal proposal request")
@@ -83,91 +80,28 @@ func (store *HashicorpVaultStore) SaveProposal(pubKey []byte, block *eth.BeaconB
 }
 
 // RetrieveProposal implements Storage interface.
-func (store *HashicorpVaultStore) RetrieveProposal(pubKey []byte, slot uint64) (*eth.BeaconBlock, error) {
+func (store *HashicorpVaultStore) RetrieveHighestProposal(pubKey []byte) *eth.BeaconBlock {
 	if pubKey == nil {
-		return nil, errors.Errorf("pubKey must not be nil")
+		return nil
 	}
 
-	path := fmt.Sprintf(WalletProposalsPath, store.identifierFromKey(pubKey), slot)
+	path := fmt.Sprintf(WalletHighestProposalsBase, store.identifierFromKey(pubKey))
 	entry, err := store.storage.Get(store.ctx, path)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get record with path '%s'", path)
+		return nil
 	}
 
 	// Return nothing if there is no record
 	if entry == nil {
-		return nil, nil
+		return nil
 	}
 
 	ret := &eth.BeaconBlock{}
 	if err = ret.Unmarshal(entry.Value); err != nil {
-		return nil, errors.Wrap(err, "failed to unmarshal beacon block header object")
+		return nil
 	}
 
-	return ret, nil
-}
-
-// ListAllProposals returns all proposal data from the DB
-func (store *HashicorpVaultStore) ListAllProposals(pubKey []byte) ([]*eth.BeaconBlock, error) {
-	if pubKey == nil {
-		return nil, errors.Errorf("pubKey must not be nil")
-	}
-
-	path := fmt.Sprintf(WalletProposalsBase, store.identifierFromKey(pubKey))
-	entries, err := store.storage.List(store.ctx, path)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to list records from storage with path '%s'", path)
-	}
-
-	// Return nothing if there is no record
-	if len(entries) == 0 {
-		return nil, nil
-	}
-
-	proposals := make([]*eth.BeaconBlock, len(entries))
-	errs := make([]error, len(entries))
-
-	var wg sync.WaitGroup
-	for i, entry := range entries {
-		wg.Add(1)
-		go func(i int, entry string) {
-			defer wg.Done()
-
-			if entry == "latest" {
-				return
-			}
-
-			epoch, err := strconv.Atoi(entry)
-			if err != nil {
-				errs[i] = errors.Wrapf(err, "invalid epoch number %s", entry)
-				return
-			}
-
-			ret, err := store.RetrieveProposal(pubKey, uint64(epoch))
-			if err != nil {
-				errs[i] = errors.Wrapf(err, "failed to retrieve beacon proposal for epoch %d", epoch)
-				return
-			}
-
-			proposals[i] = ret
-		}(i, entry)
-	}
-	wg.Wait()
-
-	for _, err := range errs {
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	clearedProposals := make([]*eth.BeaconBlock, 0)
-	for _, proposal := range proposals {
-		if proposal != nil {
-			clearedProposals = append(clearedProposals, proposal)
-		}
-	}
-
-	return clearedProposals, nil
+	return ret
 }
 
 func (store *HashicorpVaultStore) identifierFromKey(key []byte) string {

@@ -70,6 +70,10 @@ func FromInMemoryStore(ctx context.Context, inMem *in_memory.InMemStore, storage
 		return nil, err
 	}
 
+	if err := storage.Delete(ctx, WalletHighestProposalsBase); err != nil {
+		return nil, err
+	}
+
 	// Create new store
 	newStore := NewHashicorpVaultStore(ctx, storage, inMem.Network())
 
@@ -94,6 +98,15 @@ func FromInMemoryStore(ctx context.Context, inMem *in_memory.InMemStore, storage
 	for _, acc := range wallet.Accounts() {
 		if val := inMem.RetrieveHighestAttestation(acc.ValidatorPublicKey()); val != nil {
 			if err := newStore.SaveHighestAttestation(acc.ValidatorPublicKey(), val); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// save highest proposal.
+	for _, acc := range wallet.Accounts() {
+		if val := inMem.RetrieveHighestProposal(acc.ValidatorPublicKey()); val != nil {
+			if err := newStore.SaveHighestProposal(acc.ValidatorPublicKey(), val); err != nil {
 				return nil, err
 			}
 		}

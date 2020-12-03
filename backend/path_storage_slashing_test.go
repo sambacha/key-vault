@@ -26,7 +26,7 @@ func TestSlashingStorage_Update(t *testing.T) {
 	t.Run("successfully setup slashing history", func(t *testing.T) {
 		slashingHistory, err := json.Marshal(struct {
 			HighestAttestation *eth.AttestationData
-			Proposals          []*eth.BeaconBlock `json:"proposals"`
+			HighestProposal    *eth.BeaconBlock
 		}{
 			HighestAttestation: &eth.AttestationData{
 				Slot:            123123,
@@ -41,14 +41,12 @@ func TestSlashingStorage_Update(t *testing.T) {
 					Epoch: 123,
 				},
 			},
-			Proposals: []*eth.BeaconBlock{
-				{
-					Slot:          123123,
-					ProposerIndex: 1,
-					ParentRoot:    []byte{1, 2, 3},
-					StateRoot:     []byte{1, 2, 3},
-					Body:          &eth.BeaconBlockBody{},
-				},
+			HighestProposal: &eth.BeaconBlock{
+				Slot:          123123,
+				ProposerIndex: 1,
+				ParentRoot:    []byte{1, 2, 3},
+				StateRoot:     []byte{1, 2, 3},
+				Body:          &eth.BeaconBlockBody{},
 			},
 		})
 		require.NoError(t, err)
@@ -161,7 +159,7 @@ func TestSlashingStorage_Read(t *testing.T) {
 		require.NoError(t, err)
 		err = newStore.SaveHighestAttestation(account.ValidatorPublicKey(), attestation)
 		require.NoError(t, err)
-		err = newStore.SaveProposal(account.ValidatorPublicKey(), proposal)
+		err = newStore.SaveHighestProposal(account.ValidatorPublicKey(), proposal)
 		require.NoError(t, err)
 
 		res, err := b.HandleRequest(ctx, req)
@@ -173,9 +171,7 @@ func TestSlashingStorage_Read(t *testing.T) {
 		var slashingHistory SlashingHistory
 		err = json.Unmarshal(data, &slashingHistory)
 		require.NoError(t, err)
-		//require.Len(t, slashingHistory.Attestations, 1)
-		require.Len(t, slashingHistory.Proposals, 1)
 		require.EqualValues(t, attestation, slashingHistory.HighestAttestation)
-		require.EqualValues(t, proposal, slashingHistory.Proposals[0])
+		require.EqualValues(t, proposal, slashingHistory.HighestProposal)
 	})
 }

@@ -83,7 +83,7 @@ func TestProposalSlashing(t *testing.T) {
 		require.Nil(t, res)
 	})
 
-	t.Run("Successfully Sign proposal (exactly same)", func(t *testing.T) {
+	t.Run("Sign proposal (exactly same), should error under minimal proposal protection", func(t *testing.T) {
 		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
 		setupBaseStorage(t, req)
 
@@ -99,8 +99,8 @@ func TestProposalSlashing(t *testing.T) {
 		// second proposal
 		req.Data = basicProposalData()
 		res, err := b.HandleRequest(context.Background(), req)
-		require.NoError(t, err)
-		require.NotNil(t, res.Data)
+		require.EqualError(t, err, "failed to sign: slashable proposal (HighestProposalVote), not signing")
+		require.Nil(t, res)
 	})
 
 	t.Run("Sign double proposal(different state root), should error", func(t *testing.T) {
@@ -120,7 +120,7 @@ func TestProposalSlashing(t *testing.T) {
 		req.Data = basicProposalDataWithOps(false, true, false, false)
 		_, err = b.HandleRequest(context.Background(), req)
 		require.NotNil(t, err)
-		require.EqualError(t, err, "failed to sign: err, slashable proposal: DoubleProposal")
+		require.EqualError(t, err, "failed to sign: slashable proposal (HighestProposalVote), not signing")
 	})
 
 	t.Run("Sign double proposal(different parent root), should error", func(t *testing.T) {
@@ -140,7 +140,7 @@ func TestProposalSlashing(t *testing.T) {
 		req.Data = basicProposalDataWithOps(false, false, true, false)
 		_, err = b.HandleRequest(context.Background(), req)
 		require.NotNil(t, err)
-		require.EqualError(t, err, "failed to sign: err, slashable proposal: DoubleProposal")
+		require.EqualError(t, err, "failed to sign: slashable proposal (HighestProposalVote), not signing")
 	})
 
 	t.Run("Sign double proposal(different body root), should error", func(t *testing.T) {
@@ -160,6 +160,6 @@ func TestProposalSlashing(t *testing.T) {
 		req.Data = basicProposalDataWithOps(false, false, false, true)
 		_, err = b.HandleRequest(context.Background(), req)
 		require.NotNil(t, err)
-		require.EqualError(t, err, "failed to sign: err, slashable proposal: DoubleProposal")
+		require.EqualError(t, err, "failed to sign: slashable proposal (HighestProposalVote), not signing")
 	})
 }
