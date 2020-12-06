@@ -37,7 +37,7 @@ func CreateClient(logger *logrus.Entry, errorHandler retryablehttp.ErrorHandler)
 	retryClient.HTTPClient = &http.Client{
 		Transport: transport,
 	}
-
+  
 	client := &http.Client{
 		Transport: &retryablehttp.RoundTripper{
 			Client: retryClient,

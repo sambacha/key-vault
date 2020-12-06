@@ -1,5 +1,7 @@
 # key-vault
 
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbloxapp%2Fkey-vault.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbloxapp%2Fkey-vault?ref=badge_shield)
+
 ## How to use this project?
 
 
@@ -20,7 +22,7 @@
         ```sh
         $ docker-compose exec -T vault cat /data/keys/vault.root.token
         ```
-
+        
 ## Endpoints 
 
 
