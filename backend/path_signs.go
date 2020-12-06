@@ -9,7 +9,6 @@ import (
 	v2 "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 
 	vault "github.com/bloxapp/eth2-key-manager"
-	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/slashing_protection"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
@@ -73,7 +72,7 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to decode sign request hex")
 	}
-  
+
 	signReq := &v2.SignRequest{}
 	if err := signReq.Unmarshal(reqByts); err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal sign request SSZ")

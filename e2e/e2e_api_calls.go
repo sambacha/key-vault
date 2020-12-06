@@ -86,7 +86,7 @@ func Setup(t *testing.T) *BaseSetup {
 	}
 }
 
-// sign tests the sign endpoint.
+// Sign tests the sign endpoint.
 func (setup *BaseSetup) Sign(endpoint string, data map[string]interface{}, network core.Network) ([]byte, error) {
 	// body
 	body, err := json.Marshal(data)

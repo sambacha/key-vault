@@ -60,7 +60,7 @@ func (store *HashicorpVaultStore) RetrieveHighestAttestation(pubKey []byte) *eth
 	return ret
 }
 
-// SaveProposal implements Storage interface.
+// SaveHighestProposal implements Storage interface.
 func (store *HashicorpVaultStore) SaveHighestProposal(pubKey []byte, block *eth.BeaconBlock) error {
 	if block == nil || pubKey == nil {
 		return errors.Errorf("pubKey and block must not be nil")
@@ -79,7 +79,7 @@ func (store *HashicorpVaultStore) SaveHighestProposal(pubKey []byte, block *eth.
 	})
 }
 
-// RetrieveProposal implements Storage interface.
+// RetrieveHighestProposal implements Storage interface.
 func (store *HashicorpVaultStore) RetrieveHighestProposal(pubKey []byte) *eth.BeaconBlock {
 	if pubKey == nil {
 		return nil

@@ -90,9 +90,7 @@ func NewKeyManager(log *logrus.Entry, opts *Config) (*KeyManager, error) {
 					fields["response_body"] = string(respBody)
 				}
 			}
-
 			log.WithError(err).WithFields(fields).Error("failed to send request to key manager")
-      
 			return resp, fmt.Errorf("giving up after %d attempt(s): %s", numTries, err)
 		}),
 		log: log,

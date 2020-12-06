@@ -4,11 +4,13 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/key-vault/e2e"
 	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 	"github.com/stretchr/testify/require"
+
+	"github.com/bloxapp/key-vault/e2e"
+
+	"github.com/bloxapp/eth2-key-manager/core"
 )
 
 // AggregationReferenceSigning tests sign aggregation endpoint.
