@@ -12,6 +12,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/pborman/uuid"
 	"github.com/sirupsen/logrus"
@@ -84,23 +86,8 @@ func Setup(t *testing.T) *BaseSetup {
 	}
 }
 
-// SignAttestation tests the sign attestation endpoint.
-func (setup *BaseSetup) SignAttestation(data map[string]interface{}, network core.Network) ([]byte, error) {
-	return setup.sign("sign-attestation", data, network)
-}
-
-// SignProposal tests the sign proposal endpoint.
-func (setup *BaseSetup) SignProposal(data map[string]interface{}, network core.Network) ([]byte, error) {
-	return setup.sign("sign-proposal", data, network)
-}
-
-// SignAggregation tests the sign aggregation endpoint.
-func (setup *BaseSetup) SignAggregation(data map[string]interface{}, network core.Network) ([]byte, error) {
-	return setup.sign("sign-aggregation", data, network)
-}
-
-// sign tests the sign endpoint.
-func (setup *BaseSetup) sign(endpoint string, data map[string]interface{}, network core.Network) ([]byte, error) {
+// Sign tests the sign endpoint.
+func (setup *BaseSetup) Sign(endpoint string, data map[string]interface{}, network core.Network) ([]byte, error) {
 	// body
 	body, err := json.Marshal(data)
 	if err != nil {
@@ -237,9 +224,9 @@ func (setup *BaseSetup) ReadSlashingStorage(t *testing.T, network core.Network) 
 }
 
 // UpdateStorage updates the storage.
-func (setup *BaseSetup) UpdateStorage(t *testing.T, network core.Network) core.Storage {
+func (setup *BaseSetup) UpdateStorage(t *testing.T, network core.Network, minimalSlashingData bool, walletType core.WalletType, privKey []byte) *in_memory.InMemStore {
 	// get store
-	store, err := shared.BaseInmemStorage(t)
+	store, err := shared.BaseInmemStorage(t, minimalSlashingData, walletType, privKey)
 	require.NoError(t, err)
 
 	// encode store
@@ -282,6 +269,5 @@ func (setup *BaseSetup) UpdateStorage(t *testing.T, network core.Network) core.S
 	require.Equal(t, http.StatusOK, resp.StatusCode, respBody)
 
 	fmt.Printf("e2e: setup hashicorp vault db\n")
-
 	return store
 }

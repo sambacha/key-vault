@@ -35,7 +35,7 @@ func getBackend(t *testing.T) (logical.Backend, logical.Storage) {
 
 func setupBaseStorage(t *testing.T, req *logical.Request) {
 	entry, err := logical.StorageEntryJSON("config", Config{
-		Network: core.MainNetwork,
+		Network: core.PyrmontNetwork,
 	})
 	require.NoError(t, err)
 	req.Storage.Put(context.Background(), entry)
@@ -49,7 +49,7 @@ func TestAccountsList(t *testing.T) {
 		setupBaseStorage(t, req)
 
 		// setup logical storage
-		_, err := baseHashicorpStorage(req.Storage, context.Background())
+		_, err := baseHashicorpStorage(context.Background(), req.Storage)
 		require.NoError(t, err)
 
 		res, err := b.HandleRequest(context.Background(), req)

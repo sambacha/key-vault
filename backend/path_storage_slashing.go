@@ -6,13 +6,13 @@ import (
 	"encoding/json"
 	"sync"
 
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+
 	vault "github.com/bloxapp/eth2-key-manager"
-	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/wallet_hd"
+	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
-	types "github.com/wealdtech/go-eth2-types/v2"
 
 	"github.com/bloxapp/key-vault/backend/store"
 	"github.com/bloxapp/key-vault/utils/errorex"
@@ -26,11 +26,11 @@ const (
 
 // SlashingHistory contains slashing history data.
 type SlashingHistory struct {
-	Attestations []*core.BeaconAttestation `json:"attestations"`
-	Proposals    []*core.BeaconBlockHeader `json:"proposals"`
+	HighestAttestation *eth.AttestationData
+	HighestProposal    *eth.BeaconBlock
 }
 
-func storageSlashingPaths(b *backend) []*framework.Path {
+func storageSlashingDataPaths(b *backend) []*framework.Path {
 	return []*framework.Path{
 		&framework.Path{
 			Pattern:         SlashingStoragePattern,
@@ -38,14 +38,14 @@ func storageSlashingPaths(b *backend) []*framework.Path {
 			HelpDescription: `Manage KeyVault slashing storage`,
 			ExistenceCheck:  b.pathExistenceCheck,
 			Callbacks: map[logical.Operation]framework.OperationFunc{
-				logical.CreateOperation: b.pathSlashingStorageBatchUpdate,
-				logical.ReadOperation:   b.pathSlashingStorageBatchRead,
+				logical.CreateOperation: b.pathMinimalSlashingStorageUpdate,
+				logical.ReadOperation:   b.pathMinimalSlashingStorageRead,
 			},
 		},
 	}
 }
 
-func (b *backend) pathSlashingStorageBatchUpdate(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+func (b *backend) pathMinimalSlashingStorageUpdate(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
 	// Load config
 	config, err := b.configured(ctx, req)
 	if err != nil {
@@ -95,7 +95,7 @@ func (b *backend) pathSlashingStorageBatchUpdate(ctx context.Context, req *logic
 
 	for _, err := range errs {
 		if err != nil {
-			if err == wallet_hd.ErrAccountNotFound {
+			if err == hd.ErrAccountNotFound {
 				return b.notFoundResponse()
 			}
 
@@ -110,7 +110,7 @@ func (b *backend) pathSlashingStorageBatchUpdate(ctx context.Context, req *logic
 	}, nil
 }
 
-func (b *backend) pathSlashingStorageBatchRead(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+func (b *backend) pathMinimalSlashingStorageRead(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
 	// Load config
 	config, err := b.configured(ctx, req)
 	if err != nil {
@@ -140,7 +140,7 @@ func (b *backend) pathSlashingStorageBatchRead(ctx context.Context, req *logical
 	var wg sync.WaitGroup
 	for i, account := range accounts {
 		wg.Add(1)
-		go func(i int, pubKey types.PublicKey) {
+		go func(i int, pubKey []byte) {
 			defer wg.Done()
 
 			// Load slashing history
@@ -151,7 +151,7 @@ func (b *backend) pathSlashingStorageBatchRead(ctx context.Context, req *logical
 			}
 
 			responseData[i] = map[string]interface{}{
-				hex.EncodeToString(pubKey.Marshal()): slashingHistory,
+				hex.EncodeToString(pubKey): slashingHistory,
 			}
 		}(i, account.ValidatorPublicKey())
 	}
@@ -175,48 +175,32 @@ func (b *backend) pathSlashingStorageBatchRead(ctx context.Context, req *logical
 	}, nil
 }
 
-func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey types.PublicKey) (string, error) {
+func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey []byte) (string, error) {
 	errs := make([]error, 2)
 	var wg sync.WaitGroup
 
 	// Fetch attestations
-	var attestation []*core.BeaconAttestation
+	var highestAtt *eth.AttestationData
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 
-		latestAttestation, err := storage.RetrieveLatestAttestation(pubKey)
-		if err != nil {
-			errs[0] = errors.Wrap(err, "failed to retrieve latest attestation")
-			return
-		}
-
-		if latestAttestation != nil && latestAttestation.Target != nil && latestAttestation.Target.Epoch > 1000 {
-			from := latestAttestation.Target.Epoch - 1000
-			to := latestAttestation.Target.Epoch
-			if attestation, err = storage.ListAttestations(pubKey, from, to); err != nil {
-				errs[0] = errors.Wrap(err, "failed to list attestations data by epochs limit")
-				return
-			}
-
-			attestation = append(attestation, latestAttestation)
-		} else {
-			if attestation, err = storage.ListAllAttestations(pubKey); err != nil {
-				errs[0] = errors.Wrap(err, "failed to list all attestations data")
-				return
-			}
+		highestAtt = storage.RetrieveHighestAttestation(pubKey)
+		if highestAtt == nil {
+			errs[0] = errors.Errorf("highest attestation is nil")
 		}
 	}()
 
 	// Fetch proposals
-	var proposals []*core.BeaconBlockHeader
+	var proposal *eth.BeaconBlock
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 
 		var err error
-		if proposals, err = storage.ListAllProposals(pubKey); err != nil {
-			errs[1] = errors.Wrap(err, "failed to list proposals data")
+		proposal = storage.RetrieveHighestProposal(pubKey)
+		if proposal == nil {
+			errs[1] = errors.Wrap(err, "highest proposal is nil")
 		}
 	}()
 
@@ -229,8 +213,8 @@ func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey types
 	}
 
 	slashingHistoryEncoded, err := json.Marshal(SlashingHistory{
-		Attestations: attestation,
-		Proposals:    proposals,
+		HighestAttestation: highestAtt,
+		HighestProposal:    proposal,
 	})
 	if err != nil {
 		return "", errors.Wrap(err, "failed to marshal slashing history")
@@ -239,7 +223,7 @@ func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey types
 	return hex.EncodeToString(slashingHistoryEncoded), nil
 }
 
-func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey types.PublicKey, slashingData string) error {
+func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey []byte, slashingData string) error {
 	// HEX decode slashing history
 	slashingHistoryBytes, err := hex.DecodeString(slashingData)
 	if err != nil {
@@ -252,8 +236,8 @@ func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey type
 		return errorex.NewErrBadRequest(err.Error())
 	}
 
-	attErrs := make([]error, len(slashingHistory.Attestations))
-	propErrs := make([]error, len(slashingHistory.Proposals))
+	attErrs := make([]error, 1)
+	propErrs := make([]error, 1)
 
 	var wg sync.WaitGroup
 
@@ -262,18 +246,9 @@ func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey type
 	go func() {
 		defer wg.Done()
 
-		var attWg sync.WaitGroup
-		for i, attestation := range slashingHistory.Attestations {
-			attWg.Add(1)
-			go func(i int, attestation *core.BeaconAttestation) {
-				defer attWg.Done()
-
-				if err := storage.SaveAttestation(pubKey, attestation); err != nil {
-					attErrs[i] = errors.Wrapf(err, "failed to save attestation for slot %d", attestation.Slot)
-				}
-			}(i, attestation)
+		if err := storage.SaveHighestAttestation(pubKey, slashingHistory.HighestAttestation); err != nil {
+			attErrs[0] = errors.Wrapf(err, "failed to save attestation")
 		}
-		attWg.Wait()
 	}()
 
 	// Store proposal history
@@ -281,26 +256,15 @@ func storeAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey type
 	go func() {
 		defer wg.Done()
 
-		var propWg sync.WaitGroup
-		for i, proposal := range slashingHistory.Proposals {
-			propWg.Add(1)
-			go func(i int, proposal *core.BeaconBlockHeader) {
-				defer propWg.Done()
-
-				if err := storage.SaveProposal(pubKey, proposal); err != nil {
-					propErrs[i] = errors.Wrapf(err, "failed to save proposal for slot %d", proposal.Slot)
-				}
-			}(i, proposal)
+		if err := storage.SaveHighestProposal(pubKey, slashingHistory.HighestProposal); err != nil {
+			attErrs[0] = errors.Wrapf(err, "failed to save proposal")
 		}
-		propWg.Wait()
 	}()
 
 	wg.Wait()
 
 	for _, err := range append(attErrs, propErrs...) {
-		if err != nil {
-			return err
-		}
+		return err
 	}
 
 	return nil

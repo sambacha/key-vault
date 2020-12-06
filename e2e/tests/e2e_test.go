@@ -15,18 +15,26 @@ var tests = []E2E{
 	&AttestationSigningAccountNotFound{},
 	&AttestationDoubleSigning{},
 	&AttestationConcurrentSigning{},
+	&AttestationFarFutureSigning{},
+	&AttestationNoSlashingDataSigning{},
+	&AttestationReferenceSigning{},
 
 	// Aggregation signing
 	&AggregationSigning{},
 	&AggregationDoubleSigning{},
 	&AggregationConcurrentSigning{},
 	&AggregationSigningAccountNotFound{},
+	&AggregationReferenceSigning{},
+	&AggregationProofReferenceSigning{},
 
-	// Proposal signing
+	//// Proposal signing
 	&ProposalSigning{},
 	&ProposalDoubleSigning{},
 	&ProposalConcurrentSigning{},
 	&ProposalSigningAccountNotFound{},
+	&ProposalFarFutureSigning{},
+	&ProposalReferenceSigning{},
+	&RandaoReferenceSigning{},
 
 	// Accounts tests
 	&AccountsList{},

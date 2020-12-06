@@ -6,7 +6,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/bloxapp/eth2-key-manager/core"
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/stretchr/testify/require"
 
@@ -20,36 +21,32 @@ func TestSlashingStorage_Update(t *testing.T) {
 
 	account, err := inMemStore.OpenAccount(accountID)
 	require.NoError(t, err)
-	publicKey := hex.EncodeToString(account.ValidatorPublicKey().Marshal())
+	publicKey := hex.EncodeToString(account.ValidatorPublicKey())
 
 	t.Run("successfully setup slashing history", func(t *testing.T) {
 		slashingHistory, err := json.Marshal(struct {
-			Attestations []*core.BeaconAttestation `json:"attestations"`
-			Proposals    []*core.BeaconBlockHeader `json:"proposals"`
+			HighestAttestation *eth.AttestationData
+			HighestProposal    *eth.BeaconBlock
 		}{
-			Attestations: []*core.BeaconAttestation{
-				{
-					Slot:            123123,
-					BeaconBlockRoot: []byte{1, 2, 3},
-					CommitteeIndex:  1,
-					Source: &core.Checkpoint{
-						Root:  []byte{1, 2, 3},
-						Epoch: 123,
-					},
-					Target: &core.Checkpoint{
-						Root:  []byte{1, 2, 3},
-						Epoch: 123,
-					},
+			HighestAttestation: &eth.AttestationData{
+				Slot:            123123,
+				BeaconBlockRoot: []byte{1, 2, 3},
+				CommitteeIndex:  1,
+				Source: &eth.Checkpoint{
+					Root:  []byte{1, 2, 3},
+					Epoch: 123,
+				},
+				Target: &eth.Checkpoint{
+					Root:  []byte{1, 2, 3},
+					Epoch: 123,
 				},
 			},
-			Proposals: []*core.BeaconBlockHeader{
-				{
-					Slot:          123123,
-					ProposerIndex: 1,
-					BodyRoot:      []byte{1, 2, 3},
-					ParentRoot:    []byte{1, 2, 3},
-					StateRoot:     []byte{1, 2, 3},
-				},
+			HighestProposal: &eth.BeaconBlock{
+				Slot:          123123,
+				ProposerIndex: 1,
+				ParentRoot:    []byte{1, 2, 3},
+				StateRoot:     []byte{1, 2, 3},
+				Body:          &eth.BeaconBlockBody{},
 			},
 		})
 		require.NoError(t, err)
@@ -101,11 +98,11 @@ func TestSlashingStorage_Update(t *testing.T) {
 	t.Run("rejects setup slashing history for unknown public key", func(t *testing.T) {
 		fakePublicKey := "ab0cb36c4ce5ddabdc38a1d6868c871328539ebde5fea89686b2cd6332bf4cc5f9c48a501d1d6d87bf916d0e1b01ead963e1b6ce52075e26dc65bad535ecfad0"
 		slashingHistory, err := json.Marshal(struct {
-			Attestations []*core.BeaconAttestation `json:"attestations"`
-			Proposals    []*core.BeaconBlockHeader `json:"proposals"`
+			Attestations []*eth.AttestationData `json:"attestations"`
+			Proposals    []*eth.BeaconBlock     `json:"proposals"`
 		}{
-			Attestations: []*core.BeaconAttestation{},
-			Proposals:    []*core.BeaconBlockHeader{},
+			Attestations: []*eth.AttestationData{},
+			Proposals:    []*eth.BeaconBlock{},
 		})
 		require.NoError(t, err)
 
@@ -131,27 +128,27 @@ func TestSlashingStorage_Read(t *testing.T) {
 
 	account, err := inMemStore.OpenAccount(accountID)
 	require.NoError(t, err)
-	publicKey := hex.EncodeToString(account.ValidatorPublicKey().Marshal())
+	publicKey := hex.EncodeToString(account.ValidatorPublicKey())
 
-	attestation := &core.BeaconAttestation{
+	attestation := &eth.AttestationData{
 		Slot:            123123,
 		BeaconBlockRoot: []byte{1, 2, 3},
 		CommitteeIndex:  1,
-		Source: &core.Checkpoint{
+		Source: &eth.Checkpoint{
 			Root:  []byte{1, 2, 3},
 			Epoch: 123,
 		},
-		Target: &core.Checkpoint{
+		Target: &eth.Checkpoint{
 			Root:  []byte{1, 2, 3},
 			Epoch: 123,
 		},
 	}
-	proposal := &core.BeaconBlockHeader{
+	proposal := &eth.BeaconBlock{
 		Slot:          123123,
 		ProposerIndex: 1,
-		BodyRoot:      []byte{1, 2, 3},
 		ParentRoot:    []byte{1, 2, 3},
 		StateRoot:     []byte{1, 2, 3},
+		Body:          &eth.BeaconBlockBody{},
 	}
 
 	t.Run("successfully read slashing history", func(t *testing.T) {
@@ -160,9 +157,9 @@ func TestSlashingStorage_Read(t *testing.T) {
 		setupBaseStorage(t, req)
 		newStore, err := store.FromInMemoryStore(ctx, inMemStore, req.Storage)
 		require.NoError(t, err)
-		err = newStore.SaveAttestation(account.ValidatorPublicKey(), attestation)
+		err = newStore.SaveHighestAttestation(account.ValidatorPublicKey(), attestation)
 		require.NoError(t, err)
-		err = newStore.SaveProposal(account.ValidatorPublicKey(), proposal)
+		err = newStore.SaveHighestProposal(account.ValidatorPublicKey(), proposal)
 		require.NoError(t, err)
 
 		res, err := b.HandleRequest(ctx, req)
@@ -174,9 +171,7 @@ func TestSlashingStorage_Read(t *testing.T) {
 		var slashingHistory SlashingHistory
 		err = json.Unmarshal(data, &slashingHistory)
 		require.NoError(t, err)
-		require.Len(t, slashingHistory.Attestations, 1)
-		require.Len(t, slashingHistory.Proposals, 1)
-		require.EqualValues(t, attestation, slashingHistory.Attestations[0])
-		require.EqualValues(t, proposal, slashingHistory.Proposals[0])
+		require.EqualValues(t, attestation, slashingHistory.HighestAttestation)
+		require.EqualValues(t, proposal, slashingHistory.HighestProposal)
 	})
 }

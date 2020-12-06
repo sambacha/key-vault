@@ -2,37 +2,106 @@ package backend
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"testing"
 
+	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+
+	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/stretchr/testify/require"
+
+	"github.com/bloxapp/key-vault/backend/store"
 )
 
 func basicAttestationData() map[string]interface{} {
-	return map[string]interface{}{
-		"public_key":      "95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
-		"domain":          "01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac",
-		"slot":            284115,
-		"committeeIndex":  2,
-		"beaconBlockRoot": "7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e",
-		"sourceEpoch":     8877,
-		"sourceRoot":      "7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d",
-		"targetEpoch":     8878,
-		"targetRoot":      "17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0",
+	return basicAttestationDataWithOps(false, false, false, false, false)
+}
+
+func basicAttestationDataWithOps(differentPubKey, differentBlockRoot, differentSourceRoot, differentTargetRoot, differentDomain bool) map[string]interface{} {
+	att := &eth.AttestationData{
+		Slot:            284115,
+		CommitteeIndex:  2,
+		BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
+		Source: &eth.Checkpoint{
+			Epoch: 77,
+			Root:  _byteArray32("7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d"),
+		},
+		Target: &eth.Checkpoint{
+			Epoch: 78,
+			Root:  _byteArray32("17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0"),
+		},
 	}
+
+	if differentBlockRoot {
+		att.BeaconBlockRoot = _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0d")
+	}
+	if differentSourceRoot {
+		att.Source.Root = _byteArray32("7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c333")
+	}
+	if differentTargetRoot {
+		att.Target.Root = _byteArray32("17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb1")
+	}
+
+	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
+	if differentDomain {
+		domain = _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dad")
+	}
+	pubKey := _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")
+	if differentPubKey {
+		pubKey = _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcd")
+	}
+
+	return reqObject(
+		att,
+		domain,
+		pubKey,
+	)
+}
+
+func reqObject(att *eth.AttestationData, domain []byte, pubKey []byte) map[string]interface{} {
+	req := &validatorpb.SignRequest{
+		PublicKey:       pubKey,
+		SigningRoot:     nil,
+		SignatureDomain: domain,
+		Object:          &validatorpb.SignRequest_AttestationData{AttestationData: att},
+	}
+
+	byts, _ := req.Marshal()
+	return map[string]interface{}{
+		"sign_req": hex.EncodeToString(byts),
+	}
+}
+
+func updateWithBasicHighestAtt(storage logical.Storage) error {
+	s := store.NewHashicorpVaultStore(context.Background(), storage, core.PyrmontNetwork)
+	pubKey, _ := hex.DecodeString("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")
+	return s.SaveHighestAttestation(pubKey, &eth.AttestationData{
+		Source: &eth.Checkpoint{
+			Epoch: 0,
+			Root:  nil,
+		},
+		Target: &eth.Checkpoint{
+			Epoch: 0,
+			Root:  nil,
+		},
+	})
 }
 
 func TestAttestationSlashing(t *testing.T) {
 	b, _ := getBackend(t)
 
 	t.Run("Successfully Sign Attestation", func(t *testing.T) {
-		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign-attestation")
+		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
 		setupBaseStorage(t, req)
 
 		// setup storage
 		err := setupStorageWithWalletAndAccounts(req.Storage)
 		require.NoError(t, err)
+		require.NoError(t, updateWithBasicHighestAtt(req.Storage))
 
 		req.Data = basicAttestationData()
 		res, err := b.HandleRequest(context.Background(), req)
@@ -40,18 +109,19 @@ func TestAttestationSlashing(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, res.Data)
 		require.Equal(t,
-			"b162e5ee4ee141738518f36707c6891ae33f929d12f5cb51ad989774ccb4b04d6aeabc2d4f68e8624b1743ef863cc72b10e090a0ae8d2d7f2abaf08372b9ab5c3312b31537bfebb858c41b41ebbe8dfffa1354185c6b4b881326b1bc7554f04d",
+			"866c25f50559c26d70a2918b29f1a1eb4e36a5cc4834ac114cec2e4ab59e8a69a23444a3a904512744caf0bfa34bd0510e436d4e1c9d66f17ed6f03a03a44baf18f8b164c69006b5538e0f4de904e66d470e5c73f0863aee220033f5f13ec050",
 			res.Data["signature"],
 		)
 	})
 
-	t.Run("Sign duplicated Attestation (exactly same), should sign", func(t *testing.T) {
-		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign-attestation")
+	t.Run("Sign duplicated Attestation (exactly same), should NOT sign", func(t *testing.T) {
+		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
 		setupBaseStorage(t, req)
 
 		// setup storage
 		err := setupStorageWithWalletAndAccounts(req.Storage)
 		require.NoError(t, err)
+		require.NoError(t, updateWithBasicHighestAtt(req.Storage))
 
 		// first attestation
 		req.Data = basicAttestationData()
@@ -62,21 +132,18 @@ func TestAttestationSlashing(t *testing.T) {
 		// duplicated attestation
 		req.Data = basicAttestationData()
 		res, err = b.HandleRequest(context.Background(), req)
-		require.NoError(t, err)
-		require.NotNil(t, res.Data)
-		require.Equal(t,
-			"b162e5ee4ee141738518f36707c6891ae33f929d12f5cb51ad989774ccb4b04d6aeabc2d4f68e8624b1743ef863cc72b10e090a0ae8d2d7f2abaf08372b9ab5c3312b31537bfebb858c41b41ebbe8dfffa1354185c6b4b881326b1bc7554f04d",
-			res.Data["signature"],
-		)
+		require.EqualError(t, err, "failed to sign: slashable attestation (HighestAttestationVote), not signing")
+		require.Nil(t, res)
 	})
 
 	t.Run("Sign double Attestation (different block root), should return error", func(t *testing.T) {
-		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign-attestation")
+		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
 		setupBaseStorage(t, req)
 
 		// setup storage
 		err := setupStorageWithWalletAndAccounts(req.Storage)
 		require.NoError(t, err)
+		require.NoError(t, updateWithBasicHighestAtt(req.Storage))
 
 		// first attestation
 		req.Data = basicAttestationData()
@@ -85,22 +152,22 @@ func TestAttestationSlashing(t *testing.T) {
 		require.NotNil(t, res.Data)
 
 		// slashable attestation
-		data := basicAttestationData()
-		data["beaconBlockRoot"] = "7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0f"
+		data := basicAttestationDataWithOps(false, true, false, false, false)
 		req.Data = data
 		res, err = b.HandleRequest(context.Background(), req)
 		require.Error(t, err)
-		require.EqualError(t, err, "failed to sign attestation: slashable attestation (DoubleVote), not signing")
+		require.EqualError(t, err, "failed to sign: slashable attestation (HighestAttestationVote), not signing")
 		require.Nil(t, res)
 	})
 
 	t.Run("Sign double Attestation (different source root), should return error", func(t *testing.T) {
-		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign-attestation")
+		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
 		setupBaseStorage(t, req)
 
 		// setup storage
 		err := setupStorageWithWalletAndAccounts(req.Storage)
 		require.NoError(t, err)
+		require.NoError(t, updateWithBasicHighestAtt(req.Storage))
 
 		// first attestation
 		req.Data = basicAttestationData()
@@ -109,22 +176,21 @@ func TestAttestationSlashing(t *testing.T) {
 		require.NotNil(t, res.Data)
 
 		// slashable attestation
-		data := basicAttestationData()
-		data["sourceRoot"] = "7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33e"
-		req.Data = data
+		req.Data = basicAttestationDataWithOps(false, false, true, false, false)
 		res, err = b.HandleRequest(context.Background(), req)
 		require.Error(t, err)
-		require.EqualError(t, err, "failed to sign attestation: slashable attestation (DoubleVote), not signing")
+		require.EqualError(t, err, "failed to sign: slashable attestation (HighestAttestationVote), not signing")
 		require.Nil(t, res)
 	})
 
 	t.Run("Sign double Attestation (different target root), should return error", func(t *testing.T) {
-		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign-attestation")
+		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
 		setupBaseStorage(t, req)
 
 		// setup storage
 		err := setupStorageWithWalletAndAccounts(req.Storage)
 		require.NoError(t, err)
+		require.NoError(t, updateWithBasicHighestAtt(req.Storage))
 
 		// first attestation
 		req.Data = basicAttestationData()
@@ -133,22 +199,21 @@ func TestAttestationSlashing(t *testing.T) {
 		require.NotNil(t, res.Data)
 
 		// slashable attestation
-		data := basicAttestationData()
-		data["targetRoot"] = "17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb1"
-		req.Data = data
+		req.Data = basicAttestationDataWithOps(false, false, false, true, false)
 		res, err = b.HandleRequest(context.Background(), req)
 		require.Error(t, err)
-		require.EqualError(t, err, "failed to sign attestation: slashable attestation (DoubleVote), not signing")
+		require.EqualError(t, err, "failed to sign: slashable attestation (HighestAttestationVote), not signing")
 		require.Nil(t, res)
 	})
 
 	t.Run("Sign Attestation (different domain), should sign", func(t *testing.T) {
-		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign-attestation")
+		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
 		setupBaseStorage(t, req)
 
 		// setup storage
 		err := setupStorageWithWalletAndAccounts(req.Storage)
 		require.NoError(t, err)
+		require.NoError(t, updateWithBasicHighestAtt(req.Storage))
 
 		// first attestation
 		req.Data = basicAttestationData()
@@ -157,25 +222,20 @@ func TestAttestationSlashing(t *testing.T) {
 		require.NotNil(t, res.Data)
 
 		// slashable attestation
-		data := basicAttestationData()
-		data["domain"] = "01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dad"
-		req.Data = data
+		req.Data = basicAttestationDataWithOps(false, false, false, false, true)
 		res, err = b.HandleRequest(context.Background(), req)
-		require.NoError(t, err)
-		require.NotNil(t, res.Data)
-		require.Equal(t,
-			"8cabc3f514695d46de7d5ae37a34ad07dd4de10f56272da0b14ded2178d49bb5e8d5b3698f077c947fca9bc26b9f9aa8198e7cbc569d7edb93e8813afee02319347530b7377c64f92d1293d21a4dc039442129f5b28e117d7efb16e3a3b413c7",
-			res.Data["signature"],
-		)
+		require.EqualError(t, err, "failed to sign: slashable attestation (HighestAttestationVote), not signing")
+		require.Nil(t, res)
 	})
 
 	t.Run("Sign surrounding Attestation, should error", func(t *testing.T) {
-		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign-attestation")
+		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
 		setupBaseStorage(t, req)
 
 		// setup storage
 		err := setupStorageWithWalletAndAccounts(req.Storage)
 		require.NoError(t, err)
+		require.NoError(t, updateWithBasicHighestAtt(req.Storage))
 
 		// first attestation
 		req.Data = basicAttestationData()
@@ -183,49 +243,48 @@ func TestAttestationSlashing(t *testing.T) {
 		require.NoError(t, err)
 
 		// add another attestation building on the base
-		// 8877 <- 8878 <- 8879
-		req.Data = map[string]interface{}{
-			"public_key":      "95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
-			"domain":          "01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac",
-			"slot":            284116,
-			"committeeIndex":  2,
-			"beaconBlockRoot": "7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e",
-			"sourceEpoch":     8878,
-			"sourceRoot":      "7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d",
-			"targetEpoch":     8879,
-			"targetRoot":      "17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0",
+		// 77 <- 78 <- 79
+		att := &eth.AttestationData{
+			Slot:            284116,
+			CommitteeIndex:  2,
+			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
+			Source: &eth.Checkpoint{
+				Epoch: 78,
+				Root:  _byteArray32("7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d"),
+			},
+			Target: &eth.Checkpoint{
+				Epoch: 79,
+				Root:  _byteArray32("17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0"),
+			},
 		}
+		domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
+		pubKey := _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")
+		req.Data = reqObject(att, domain, pubKey)
 		_, err = b.HandleRequest(context.Background(), req)
 		require.NoError(t, err)
 
 		// surround previous vote
-		// 8877 <- 8878 <- 8879
-		// 	<- 8880
+		// 77 <- 78 <- 79
+		// 	<------------ 80
 		// slashable
-		req.Data = map[string]interface{}{
-			"public_key":      "95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
-			"domain":          "01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac",
-			"slot":            284117,
-			"committeeIndex":  2,
-			"beaconBlockRoot": "7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e",
-			"sourceEpoch":     8877,
-			"sourceRoot":      "7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d",
-			"targetEpoch":     8880,
-			"targetRoot":      "17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0",
-		}
+		att.Slot = 284117
+		att.Source.Epoch = 77
+		att.Target.Epoch = 80
+		req.Data = reqObject(att, domain, pubKey)
 		res, err := b.HandleRequest(context.Background(), req)
 		require.Error(t, err)
-		require.EqualError(t, err, "failed to sign attestation: slashable attestation (SurroundingVote), not signing")
+		require.EqualError(t, err, "failed to sign: slashable attestation (HighestAttestationVote), not signing")
 		require.Nil(t, res)
 	})
 
 	t.Run("Sign surrounded Attestation, should error", func(t *testing.T) {
-		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign-attestation")
+		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
 		setupBaseStorage(t, req)
 
 		// setup storage
 		err := setupStorageWithWalletAndAccounts(req.Storage)
 		require.NoError(t, err)
+		require.NoError(t, updateWithBasicHighestAtt(req.Storage))
 
 		// first attestation
 		req.Data = basicAttestationData()
@@ -233,39 +292,37 @@ func TestAttestationSlashing(t *testing.T) {
 		require.NoError(t, err)
 
 		// add another attestation building on the base
-		// 8877 <- 8878 <- 8879 <----------------------9000
-		req.Data = map[string]interface{}{
-			"public_key":      "95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
-			"domain":          "01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac",
-			"slot":            284116,
-			"committeeIndex":  2,
-			"beaconBlockRoot": "7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e",
-			"sourceEpoch":     8878,
-			"sourceRoot":      "7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d",
-			"targetEpoch":     9000,
-			"targetRoot":      "17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0",
+		// 77 <- 78 <- 79 <----------------------90
+		att := &eth.AttestationData{
+			Slot:            284116,
+			CommitteeIndex:  2,
+			BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
+			Source: &eth.Checkpoint{
+				Epoch: 79,
+				Root:  _byteArray32("7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d"),
+			},
+			Target: &eth.Checkpoint{
+				Epoch: 95,
+				Root:  _byteArray32("17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0"),
+			},
 		}
+		domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
+		pubKey := _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")
+		req.Data = reqObject(att, domain, pubKey)
 		_, err = b.HandleRequest(context.Background(), req)
 		require.NoError(t, err)
 
 		// surround previous vote
-		// 8877 <- 8878 <- 8879 <----------------------9000
-		// 								8900 <- 8901
+		// 77 <- 78 <- 79 <----------------------95
+		// 								88 <- 89
 		// slashable
-		req.Data = map[string]interface{}{
-			"public_key":      "95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf",
-			"domain":          "01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac",
-			"slot":            284117,
-			"committeeIndex":  2,
-			"beaconBlockRoot": "7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e",
-			"sourceEpoch":     8900,
-			"sourceRoot":      "7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d",
-			"targetEpoch":     8901,
-			"targetRoot":      "17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0",
-		}
+		att.Slot = 284117
+		att.Source.Epoch = 89
+		att.Target.Epoch = 88
+		req.Data = reqObject(att, domain, pubKey)
 		res, err := b.HandleRequest(context.Background(), req)
 		require.Error(t, err)
-		require.EqualError(t, err, "failed to sign attestation: slashable attestation (SurroundedVote), not signing")
+		require.EqualError(t, err, "failed to sign: slashable attestation (HighestAttestationVote), not signing")
 		require.Nil(t, res)
 	})
 }

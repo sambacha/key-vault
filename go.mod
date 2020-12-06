@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Microsoft/hcsshim v0.8.9 // indirect
-	github.com/bloxapp/eth2-key-manager v0.2.22
+	github.com/bloxapp/eth2-key-manager v1.0.0
 	github.com/containerd/containerd v1.4.0 // indirect
 	github.com/containerd/continuity v0.0.0-20200710164510-efbc4488d8fe // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
@@ -15,6 +15,7 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
+	github.com/hashicorp/go-cleanhttp v0.5.1
 	github.com/hashicorp/go-hclog v0.14.1
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/hashicorp/go-retryablehttp v0.6.8
@@ -31,17 +32,15 @@ require (
 	github.com/pborman/uuid v1.2.1
 	github.com/pierrec/lz4 v2.6.0+incompatible // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/prysmaticlabs/ethereumapis v0.0.0-20201003171600-a72e5f77d233
-	github.com/prysmaticlabs/prysm v1.0.0-beta.3
+	github.com/prysmaticlabs/ethereumapis v0.0.0-20201117145913-073714f478fb
+	github.com/prysmaticlabs/prysm v1.0.2
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.6.1
-	github.com/wealdtech/eth2-signer-api v1.5.2
-	github.com/wealdtech/go-eth2-types/v2 v2.5.1
 	golang.org/x/crypto v0.0.0-20201112155050-0c6587e931a9 // indirect
+	golang.org/x/mod v0.4.0 // indirect
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect
+	golang.org/x/tools v0.0.0-20201204222352-654352759326 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 )
 
 replace github.com/ethereum/go-ethereum => github.com/prysmaticlabs/bazel-go-ethereum v0.0.0-20201113091623-013fd65b3791
-
-replace github.com/prysmaticlabs/prysm => github.com/prysmaticlabs/prysm v1.0.0-beta.3

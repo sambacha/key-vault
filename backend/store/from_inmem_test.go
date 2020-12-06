@@ -22,12 +22,11 @@ func _byteArray(input string) []byte {
 
 func baseKeyVault(seed []byte, t *testing.T) (*in_memory.InMemStore, core.Wallet, []core.ValidatorAccount) {
 	// store
-	inMemStore := in_memory.NewInMemStore(core.TestNetwork)
+	inMemStore := in_memory.NewInMemStore(core.PyrmontNetwork)
 	// seed
 	// create keyvault in a normal in mem store
 	options := &ethkeymanager.KeyVaultOptions{}
 	options.SetStorage(inMemStore)
-	options.SetSeed(seed)
 	options.SetEncryptor(keystorev4.New())
 	options.SetPassword("password")
 	kv, err := ethkeymanager.NewKeyVault(options)
@@ -90,9 +89,9 @@ func TestImportAndDeleteFromInMem(t *testing.T) {
 	// compare
 	require.Equal(t, inMemWallet.ID().String(), hashiWallet.ID().String())
 	require.Equal(t, inMemAccounts[1].ID().String(), hashiAcc3.ID().String())
-	require.Equal(t, inMemAccounts[1].ValidatorPublicKey().Marshal(), hashiAcc3.ValidatorPublicKey().Marshal())
+	require.Equal(t, inMemAccounts[1].ValidatorPublicKey(), hashiAcc3.ValidatorPublicKey())
 	require.Equal(t, inMemAccounts[0].ID().String(), hashiAcc4.ID().String())
-	require.Equal(t, inMemAccounts[0].ValidatorPublicKey().Marshal(), hashiAcc4.ValidatorPublicKey().Marshal())
+	require.Equal(t, inMemAccounts[0].ValidatorPublicKey(), hashiAcc4.ValidatorPublicKey())
 }
 
 func TestImportFromInMem(t *testing.T) {
@@ -119,7 +118,7 @@ func TestImportFromInMem(t *testing.T) {
 	// compare
 	require.Equal(t, inMemWallet.ID().String(), hashiWallet.ID().String())
 	require.Equal(t, inMemAccounts[1].ID().String(), hashiAcc1.ID().String())
-	require.Equal(t, inMemAccounts[1].ValidatorPublicKey().Marshal(), hashiAcc1.ValidatorPublicKey().Marshal())
+	require.Equal(t, inMemAccounts[1].ValidatorPublicKey(), hashiAcc1.ValidatorPublicKey())
 	require.Equal(t, inMemAccounts[0].ID().String(), hashiAcc2.ID().String())
-	require.Equal(t, inMemAccounts[0].ValidatorPublicKey().Marshal(), hashiAcc2.ValidatorPublicKey().Marshal())
+	require.Equal(t, inMemAccounts[0].ValidatorPublicKey(), hashiAcc2.ValidatorPublicKey())
 }

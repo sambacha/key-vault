@@ -8,10 +8,10 @@ const (
 )
 
 // Build builds full path.
-func Build(network, pattern string) string {
+func Build(network, pattern string) (string, error) {
 	if len(network) > 0 {
-		return fmt.Sprintf("%s/%s/%s", BasePath, network, pattern)
+		return fmt.Sprintf("%s/%s/%s", BasePath, network, pattern), nil
 	}
 
-	return fmt.Sprintf("%s/%s", BasePath, pattern)
+	return "", fmt.Errorf("netowrk is not defined")
 }

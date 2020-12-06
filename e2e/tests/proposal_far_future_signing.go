@@ -2,32 +2,30 @@ package tests
 
 import (
 	"encoding/hex"
+	"fmt"
 	"testing"
-
-	"github.com/bloxapp/eth2-key-manager/signer"
 
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/slashing_protection"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/e2e"
 	"github.com/bloxapp/key-vault/e2e/shared"
 )
 
-// ProposalSigning tests sign proposal endpoint.
-type ProposalSigning struct {
+// ProposalFarFutureSigning tests sign proposal endpoint with future signing.
+type ProposalFarFutureSigning struct {
 }
 
 // Name returns the name of the test.
-func (test *ProposalSigning) Name() string {
-	return "Test proposal signing"
+func (test *ProposalFarFutureSigning) Name() string {
+	return "Test proposal far future signing"
 }
 
 // Run run the test.
-func (test *ProposalSigning) Run(t *testing.T) {
+func (test *ProposalFarFutureSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
@@ -36,30 +34,18 @@ func (test *ProposalSigning) Run(t *testing.T) {
 	require.NotNil(t, account)
 	pubKeyBytes := account.ValidatorPublicKey()
 
-	// Get wallet
-	wallet, err := storage.OpenWallet()
-	require.NoError(t, err)
-
 	blk := referenceBlock(t)
+	blk.Slot = 888878
 	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, blk)
 	require.NoError(t, err)
-
-	// Sign data
-	protector := slashing_protection.NewNormalProtection(storage)
-	var signer signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
-
-	res, err := signer.SignBeaconBlock(blk, domain, pubKeyBytes)
-	require.NoError(t, err)
-
-	// Send sign attestation request
-	sig, err := setup.Sign("sign", req, core.PyrmontNetwork)
-	require.NoError(t, err)
-
-	require.Equal(t, res, sig)
+	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
+	require.NotNil(t, err)
+	expectedErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: proposed block slot too far into the future\\n\\n\"}}")
+	require.EqualError(t, err, expectedErr, fmt.Sprintf("actual: %s\n", err.Error()))
 }
 
-func (test *ProposalSigning) serializedReq(pk, root, domain []byte, blk *eth.BeaconBlock) (map[string]interface{}, error) {
+func (test *ProposalFarFutureSigning) serializedReq(pk, root, domain []byte, blk *eth.BeaconBlock) (map[string]interface{}, error) {
 	req := &validatorpb.SignRequest{
 		PublicKey:       pk,
 		SigningRoot:     root,

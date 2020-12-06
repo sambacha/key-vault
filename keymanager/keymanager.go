@@ -9,13 +9,13 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	"github.com/bloxapp/key-vault/backend"
+
 	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 	"github.com/prysmaticlabs/prysm/shared/bls"
 	"github.com/prysmaticlabs/prysm/validator/keymanager"
 	"github.com/sirupsen/logrus"
 
-	"github.com/bloxapp/key-vault/backend"
 	"github.com/bloxapp/key-vault/utils/bytex"
 	"github.com/bloxapp/key-vault/utils/endpoint"
 	"github.com/bloxapp/key-vault/utils/httpex"
@@ -63,6 +63,8 @@ func NewKeyManager(log *logrus.Entry, opts *Config) (*KeyManager, error) {
 		return nil, NewGenericError(err, "failed to hex decode public key '%s'", opts.PubKey)
 	}
 
+	log.Logf(logrus.InfoLevel, "KeyManager initialing for %s network", opts.Network)
+
 	return &KeyManager{
 		remoteAddress: opts.Location,
 		accessToken:   opts.AccessToken,
@@ -73,18 +75,22 @@ func NewKeyManager(log *logrus.Entry, opts *Config) (*KeyManager, error) {
 			if err == nil {
 				return resp, nil
 			}
-			defer resp.Body.Close()
 
-			respBody, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				return resp, err
+			fields := logrus.Fields{}
+			if resp != nil {
+				fields["status_code"] = resp.StatusCode
+
+				if resp.Body != nil {
+					defer resp.Body.Close()
+
+					respBody, err := ioutil.ReadAll(resp.Body)
+					if err != nil {
+						return resp, err
+					}
+					fields["response_body"] = string(respBody)
+				}
 			}
-
-			log.WithError(err).WithFields(logrus.Fields{
-				"status_code":   resp.StatusCode,
-				"response_body": string(respBody),
-			}).Error("failed to send request to key manager")
-
+			log.WithError(err).WithFields(fields).Error("failed to send request to key manager")
 			return resp, fmt.Errorf("giving up after %d attempt(s): %s", numTries, err)
 		}),
 		log: log,
@@ -107,53 +113,17 @@ func (km *KeyManager) Sign(_ context.Context, req *validatorpb.SignRequest) (bls
 		return nil, ErrNoSuchKey
 	}
 
-	domain := bytex.ToBytes32(req.GetSignatureDomain())
-	switch data := req.GetObject().(type) {
-	case *validatorpb.SignRequest_Block:
-		return km.SignProposal(km.pubKey, domain, &ethpb.BeaconBlockHeader{
-			Slot:          data.Block.GetSlot(),
-			ProposerIndex: data.Block.GetProposerIndex(),
-			StateRoot:     data.Block.GetStateRoot(),
-			ParentRoot:    data.Block.GetParentRoot(),
-			BodyRoot:      req.GetSigningRoot(),
-		})
-	case *validatorpb.SignRequest_AttestationData:
-		return km.SignAttestation(km.pubKey, domain, data.AttestationData)
-	case *validatorpb.SignRequest_AggregateAttestationAndProof:
-		return km.SignGeneric(km.pubKey, bytex.ToBytes32(req.GetSigningRoot()), domain)
-	case *validatorpb.SignRequest_Slot:
-		return km.SignGeneric(km.pubKey, bytex.ToBytes32(req.GetSigningRoot()), domain)
-	case *validatorpb.SignRequest_Epoch:
-		return km.SignGeneric(km.pubKey, bytex.ToBytes32(req.GetSigningRoot()), domain)
-	default:
-		return nil, ErrUnsupportedSigning
-	}
-}
-
-// SignGeneric implements ProtectingKeyManager interface.
-func (km *KeyManager) SignGeneric(pubKey [48]byte, root [32]byte, domain [32]byte) (bls.Signature, error) {
-	if pubKey != km.pubKey {
-		return nil, ErrNoSuchKey
-	}
-
-	// Prepare request body.
-	req := SignAggregationRequest{
-		PubKey:     km.originPubKey,
-		Domain:     hex.EncodeToString(domain[:]),
-		DataToSign: hex.EncodeToString(root[:]),
-	}
-
-	// Json encode the request body
-	reqBody, err := json.Marshal(req)
+	byts, err := req.Marshal()
 	if err != nil {
-		return nil, NewGenericError(err, "failed to marshal request body")
+		return nil, err
+	}
+	reqMap := map[string]interface{}{
+		"sign_req": hex.EncodeToString(byts),
 	}
 
-	// Send request.
 	var resp SignResponse
-	if err := km.sendRequest(http.MethodPost, backend.SignAggregationPattern, reqBody, &resp); err != nil {
-		km.log.WithError(err).Error("failed to send sign aggregation request")
-		return nil, NewGenericError(err, "failed to send SignGeneric request to remote vault wallet")
+	if err := km.sendRequest(http.MethodPost, backend.SignPattern, reqMap, &resp); err != nil {
+		return nil, err
 	}
 
 	// Signature is base64 encoded, so we have to decode that.
@@ -167,108 +137,24 @@ func (km *KeyManager) SignGeneric(pubKey [48]byte, root [32]byte, domain [32]byt
 	if err != nil {
 		return nil, NewGenericError(err, "failed to get BLS signature from bytes")
 	}
-
-	return sig, nil
-}
-
-// SignProposal implements ProtectingKeyManager interface.
-func (km *KeyManager) SignProposal(pubKey [48]byte, domain [32]byte, data *ethpb.BeaconBlockHeader) (bls.Signature, error) {
-	if pubKey != km.pubKey {
-		return nil, ErrNoSuchKey
-	}
-
-	// Prepare request body.
-	req := SignProposalRequest{
-		PubKey:        km.originPubKey,
-		Domain:        hex.EncodeToString(domain[:]),
-		Slot:          data.GetSlot(),
-		ProposerIndex: data.GetProposerIndex(),
-		ParentRoot:    hex.EncodeToString(data.GetParentRoot()),
-		StateRoot:     hex.EncodeToString(data.GetStateRoot()),
-		BodyRoot:      hex.EncodeToString(data.GetBodyRoot()),
-	}
-
-	// Json encode the request body
-	reqBody, err := json.Marshal(req)
-	if err != nil {
-		return nil, NewGenericError(err, "failed to marshal request body")
-	}
-
-	// Send request.
-	var resp SignResponse
-	if err := km.sendRequest(http.MethodPost, backend.SignProposalPattern, reqBody, &resp); err != nil {
-		km.log.WithError(err).Error("failed to send sign proposal request")
-		return nil, NewGenericError(err, "failed to send SignProposal request to remote vault wallet")
-	}
-
-	// Signature is base64 encoded, so we have to decode that.
-	decodedSignature, err := hex.DecodeString(resp.Data.Signature)
-	if err != nil {
-		return nil, NewGenericError(err, "failed to base64 decode")
-	}
-
-	// Get signature from bytes
-	sig, err := bls.SignatureFromBytes(decodedSignature)
-	if err != nil {
-		return nil, NewGenericError(err, "failed to get BLS signature from bytes")
-	}
-
-	return sig, nil
-}
-
-// SignAttestation implements ProtectingKeyManager interface.
-func (km *KeyManager) SignAttestation(pubKey [48]byte, domain [32]byte, data *ethpb.AttestationData) (bls.Signature, error) {
-	if pubKey != km.pubKey {
-		return nil, ErrNoSuchKey
-	}
-
-	// Prepare request body.
-	req := SignAttestationRequest{
-		PubKey:          km.originPubKey,
-		Domain:          hex.EncodeToString(domain[:]),
-		Slot:            data.GetSlot(),
-		CommitteeIndex:  data.GetCommitteeIndex(),
-		BeaconBlockRoot: hex.EncodeToString(data.GetBeaconBlockRoot()),
-		SourceEpoch:     data.GetSource().GetEpoch(),
-		SourceRoot:      hex.EncodeToString(data.GetSource().GetRoot()),
-		TargetEpoch:     data.GetTarget().GetEpoch(),
-		TargetRoot:      hex.EncodeToString(data.GetTarget().GetRoot()),
-	}
-
-	// Json encode the request body
-	reqBody, err := json.Marshal(req)
-	if err != nil {
-		return nil, NewGenericError(err, "failed to marshal request body")
-	}
-
-	// Send request.
-	var resp SignResponse
-	if err := km.sendRequest(http.MethodPost, backend.SignAttestationPattern, reqBody, &resp); err != nil {
-		km.log.WithError(err).Error("failed to send sign attestation request")
-		return nil, NewGenericError(err, "failed to send SignAttestation request to remote vault wallet")
-	}
-
-	// Signature is base64 encoded, so we have to decode that.
-	decodedSignature, err := hex.DecodeString(resp.Data.Signature)
-	if err != nil {
-		return nil, NewGenericError(err, "failed to base64 decode")
-	}
-
-	// Get signature from bytes
-	sig, err := bls.SignatureFromBytes(decodedSignature)
-	if err != nil {
-		return nil, NewGenericError(err, "failed to get BLS signature from bytes")
-	}
-
 	return sig, nil
 }
 
 // sendRequest implements the logic to work with HTTP requests.
-func (km *KeyManager) sendRequest(method, path string, reqBody []byte, respBody interface{}) error {
-	endpoint := km.remoteAddress + endpoint.Build(km.network, path)
+func (km *KeyManager) sendRequest(method, path string, reqBody interface{}, respBody interface{}) error {
+	networkPath, err := endpoint.Build(km.network, path)
+	if err != nil {
+		return NewGenericError(err, "could not build network path")
+	}
+	endpointStr := km.remoteAddress + networkPath
+
+	payloadByts, err := json.Marshal(reqBody)
+	if err != nil {
+		return err
+	}
 
 	// Prepare a new request
-	req, err := http.NewRequest(method, endpoint, bytes.NewBuffer(reqBody))
+	req, err := http.NewRequest(method, endpointStr, bytes.NewBuffer(payloadByts))
 	if err != nil {
 		return NewGenericError(err, "failed to create HTTP request")
 	}
@@ -291,7 +177,7 @@ func (km *KeyManager) sendRequest(method, path string, reqBody []byte, respBody 
 			km.log.WithError(err).Error("failed to read error response body")
 		}
 
-		return NewHTTPRequestError(endpoint, resp.StatusCode, responseBody, "unexpected status code")
+		return NewHTTPRequestError(endpointStr, resp.StatusCode, responseBody, "unexpected status code")
 	}
 
 	// Retrieve response body
