@@ -25,6 +25,7 @@ sleep 5
 if [ "$UNSEAL" = "true" ]; then
   /bin/sh /vault/config/vault-init.sh
   /bin/sh /vault/config/vault-unseal.sh
+  /bin/sh /vault/config/vault-policies.sh
   /bin/sh /vault/config/vault-plugin.sh
 fi
 
