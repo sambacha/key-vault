@@ -2,11 +2,16 @@ package backend
 
 import (
 	"context"
+	"encoding/hex"
+	"encoding/json"
 
+	vault "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
+
+	"github.com/bloxapp/key-vault/backend/store"
 )
 
 // Endpoints patterns
@@ -49,10 +54,13 @@ func configPaths(b *backend) []*framework.Path {
 
 // pathWriteConfig is the write config path handler
 func (b *backend) pathWriteConfig(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
-	network := data.Get("network").(string)
+	network := core.NetworkFromString(data.Get("network").(string))
+	if network == "" {
+		return nil, errors.New("invalid network provided")
+	}
 
 	configBundle := Config{
-		Network: core.NetworkFromString(network),
+		Network: network,
 	}
 
 	// Create storage entry
@@ -85,10 +93,21 @@ func (b *backend) pathReadConfig(ctx context.Context, req *logical.Request, data
 		return nil, nil
 	}
 
-	// Return the secret
+	// TODO: Remove this
+	storage := store.NewHashicorpVaultStore(ctx, req.Storage, configBundle.Network)
+	options := vault.KeyVaultOptions{}
+	options.SetStorage(storage)
+	var dataStore []byte
+	if portfolio, err := vault.OpenKeyVault(&options); err == nil {
+		if wallet, err := portfolio.Wallet(); err == nil {
+			dataStore, _ = json.Marshal(wallet.Accounts())
+		}
+	}
+
 	return &logical.Response{
 		Data: map[string]interface{}{
-			"network": configBundle.Network,
+			"network":   configBundle.Network,
+			"dataStore": hex.EncodeToString(dataStore),
 		},
 	}, nil
 }
