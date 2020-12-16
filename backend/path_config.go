@@ -2,16 +2,11 @@ package backend
 
 import (
 	"context"
-	"encoding/hex"
-	"encoding/json"
 
-	vault "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
-
-	"github.com/bloxapp/key-vault/backend/store"
 )
 
 // Endpoints patterns
@@ -93,21 +88,9 @@ func (b *backend) pathReadConfig(ctx context.Context, req *logical.Request, data
 		return nil, nil
 	}
 
-	// TODO: Remove this
-	storage := store.NewHashicorpVaultStore(ctx, req.Storage, configBundle.Network)
-	options := vault.KeyVaultOptions{}
-	options.SetStorage(storage)
-	var dataStore []byte
-	if portfolio, err := vault.OpenKeyVault(&options); err == nil {
-		if wallet, err := portfolio.Wallet(); err == nil {
-			dataStore, _ = json.Marshal(wallet.Accounts())
-		}
-	}
-
 	return &logical.Response{
 		Data: map[string]interface{}{
-			"network":   configBundle.Network,
-			"dataStore": hex.EncodeToString(dataStore), // TODO: Remove this
+			"network": configBundle.Network,
 		},
 	}, nil
 }
