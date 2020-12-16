@@ -91,9 +91,8 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 		sig, err = simpleSigner.SignEpoch(t.Epoch, signReq.SignatureDomain, signReq.PublicKey)
 	case *v2.SignRequest_AggregateAttestationAndProof:
 		sig, err = simpleSigner.SignAggregateAndProof(t.AggregateAttestationAndProof, signReq.SignatureDomain, signReq.PublicKey)
-
 	default:
-		err = errors.Errorf("sign request: not supported")
+		return nil, errors.Errorf("sign request: not supported")
 	}
 
 	if err != nil {
