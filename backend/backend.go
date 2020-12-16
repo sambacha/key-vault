@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	"encoding/hex"
 	"net/http"
 
 	"github.com/hashicorp/vault/sdk/framework"
@@ -62,6 +63,11 @@ func (b *backend) pathExistenceCheck(ctx context.Context, req *logical.Request, 
 	if err != nil {
 		b.Logger().Error("Path existence check failed", err)
 		return false, errors.Errorf("existence check failed: %v", err)
+	}
+
+	if b.Route(req.Path) == nil {
+		b.Logger().With("path", hex.EncodeToString(out.Value)).Error("Path not found")
+		return false, errors.Errorf("existence check failed: %s", hex.EncodeToString(out.Value))
 	}
 
 	return out != nil, nil

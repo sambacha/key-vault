@@ -40,21 +40,23 @@ vault write ethereum/mainnet/config \
     network="mainnet"
 echo "Configured MainNet network"
 
+TOKEN=$(cat /data/keys/vault.root.token)
+
 # Reload plugin
-curl --insecure --header "X-Vault-Token: $(cat /data/keys/vault.root.token)" \
+curl --insecure --header "X-Vault-Token: $TOKEN" \
      --request PUT \
      --data '{"plugin": "ethsign"}' \
      ${VAULT_SERVER_SCHEMA:-http}://127.0.0.1:8200/v1/sys/plugins/reload/backend
 
 # Make sure everything works well
 curl --insecure \
-     --header "X-Vault-Token: $(cat /data/keys/vault.root.token)" \
+     --header "X-Vault-Token: $TOKEN" \
      --request GET \
      --fail \
      ${VAULT_SERVER_SCHEMA:-http}://127.0.0.1:8200/v1/ethereum/pyrmont/config
 
 curl --insecure \
-     --header "X-Vault-Token: $(cat /data/keys/vault.root.token)" \
+     --header "X-Vault-Token: $TOKEN" \
      --request GET \
      --fail \
      ${VAULT_SERVER_SCHEMA:-http}://127.0.0.1:8200/v1/ethereum/mainnet/config

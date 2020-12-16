@@ -20,7 +20,7 @@ const (
 
 func accountsPaths(b *backend) []*framework.Path {
 	return []*framework.Path{
-		&framework.Path{
+		{
 			Pattern:         AccountsPattern,
 			HelpSynopsis:    "List wallet accounts",
 			HelpDescription: ``,

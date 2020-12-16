@@ -4,15 +4,13 @@ import (
 	"context"
 	"encoding/hex"
 
-	"github.com/bloxapp/eth2-key-manager/signer"
-
-	v2 "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
-
 	vault "github.com/bloxapp/eth2-key-manager"
+	"github.com/bloxapp/eth2-key-manager/signer"
 	"github.com/bloxapp/eth2-key-manager/slashing_protection"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
+	v2 "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 
 	"github.com/bloxapp/key-vault/backend/store"
 )
@@ -25,7 +23,7 @@ const (
 
 func signsPaths(b *backend) []*framework.Path {
 	return []*framework.Path{
-		&framework.Path{
+		{
 			Pattern:         SignPattern,
 			HelpSynopsis:    "Sign",
 			HelpDescription: `Sign`,
@@ -79,20 +77,20 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 	}
 
 	protector := slashing_protection.NewNormalProtection(storage)
-	var signer signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
+	var simpleSigner signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
 
 	var sig []byte
 	switch t := signReq.GetObject().(type) {
 	case *v2.SignRequest_Block:
-		sig, err = signer.SignBeaconBlock(t.Block, signReq.SignatureDomain, signReq.PublicKey)
+		sig, err = simpleSigner.SignBeaconBlock(t.Block, signReq.SignatureDomain, signReq.PublicKey)
 	case *v2.SignRequest_AttestationData:
-		sig, err = signer.SignBeaconAttestation(t.AttestationData, signReq.SignatureDomain, signReq.PublicKey)
+		sig, err = simpleSigner.SignBeaconAttestation(t.AttestationData, signReq.SignatureDomain, signReq.PublicKey)
 	case *v2.SignRequest_Slot:
-		sig, err = signer.SignSlot(t.Slot, signReq.SignatureDomain, signReq.PublicKey)
+		sig, err = simpleSigner.SignSlot(t.Slot, signReq.SignatureDomain, signReq.PublicKey)
 	case *v2.SignRequest_Epoch:
-		sig, err = signer.SignEpoch(t.Epoch, signReq.SignatureDomain, signReq.PublicKey)
+		sig, err = simpleSigner.SignEpoch(t.Epoch, signReq.SignatureDomain, signReq.PublicKey)
 	case *v2.SignRequest_AggregateAttestationAndProof:
-		sig, err = signer.SignAggregateAndProof(t.AggregateAttestationAndProof, signReq.SignatureDomain, signReq.PublicKey)
+		sig, err = simpleSigner.SignAggregateAndProof(t.AggregateAttestationAndProof, signReq.SignatureDomain, signReq.PublicKey)
 
 	default:
 		err = errors.Errorf("sign request: not supported")

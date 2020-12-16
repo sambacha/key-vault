@@ -157,7 +157,7 @@ func (l *Docker) Launch(ctx context.Context, name string) (*Config, error) {
 			if strings.Contains(dta, "connection refused") {
 				l.Stop(ctx, cont.ID)
 				return nil, errors.Errorf("failed to launch instance: %s", string(dat))
-			} else if strings.Contains(dta, "core: successfully reloaded plugin: plugin=ethsign path=ethereum") {
+			} else if strings.Contains(dta, "core: successfully reloaded plugin: plugin=ethsign1 path=ethereum") {
 				loaded = true
 				break
 			}

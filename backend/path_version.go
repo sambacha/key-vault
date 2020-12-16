@@ -15,7 +15,7 @@ const (
 
 func versionPaths(b *backend) []*framework.Path {
 	return []*framework.Path{
-		&framework.Path{
+		{
 			Pattern:         VersionPattern,
 			HelpSynopsis:    "Shows app version",
 			HelpDescription: ``,
@@ -28,7 +28,7 @@ func versionPaths(b *backend) []*framework.Path {
 	}
 }
 
-func (b *backend) pathVersion(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+func (b *backend) pathVersion(_ context.Context, _ *logical.Request, _ *framework.FieldData) (*logical.Response, error) {
 	return &logical.Response{
 		Data: map[string]interface{}{
 			"version": b.Version,

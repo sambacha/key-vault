@@ -6,13 +6,12 @@ import (
 	"encoding/json"
 	"sync"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-
 	vault "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 
 	"github.com/bloxapp/key-vault/backend/store"
 	"github.com/bloxapp/key-vault/utils/errorex"
@@ -32,7 +31,7 @@ type SlashingHistory struct {
 
 func storageSlashingDataPaths(b *backend) []*framework.Path {
 	return []*framework.Path{
-		&framework.Path{
+		{
 			Pattern:         SlashingStoragePattern,
 			HelpSynopsis:    "Manage slashing storage",
 			HelpDescription: `Manage KeyVault slashing storage`,

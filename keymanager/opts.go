@@ -25,9 +25,9 @@ func UnmarshalConfigFile(r io.ReadCloser) (*Config, error) {
 	}
 	defer r.Close()
 
-	cfg := &Config{}
-	if err := json.Unmarshal(enc, cfg); err != nil {
+	var cfg Config
+	if err := json.Unmarshal(enc, &cfg); err != nil {
 		return nil, errors.Wrap(err, "could not JSON unmarshal")
 	}
-	return cfg, nil
+	return &cfg, nil
 }
