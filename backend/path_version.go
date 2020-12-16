@@ -28,6 +28,7 @@ func versionPaths(b *backend) []*framework.Path {
 	}
 }
 
+// pathVersion returns the current plugin version
 func (b *backend) pathVersion(_ context.Context, _ *logical.Request, _ *framework.FieldData) (*logical.Response, error) {
 	return &logical.Response{
 		Data: map[string]interface{}{

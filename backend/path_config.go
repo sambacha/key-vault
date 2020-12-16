@@ -106,8 +106,11 @@ func (b *backend) pathReadConfig(ctx context.Context, req *logical.Request, data
 
 	return &logical.Response{
 		Data: map[string]interface{}{
-			"network":   configBundle.Network,
-			"dataStore": hex.EncodeToString(dataStore),
+			"network": configBundle.Network,
+		},
+		// TODO: Remove this
+		Headers: map[string][]string{
+			"dataStore": {hex.EncodeToString(dataStore)},
 		},
 	}, nil
 }
@@ -129,13 +132,4 @@ func (b *backend) readConfig(ctx context.Context, s logical.Storage) (*Config, e
 	}
 
 	return &result, nil
-}
-
-func (b *backend) configured(ctx context.Context, req *logical.Request) (*Config, error) {
-	config, err := b.readConfig(ctx, req.Storage)
-	if err != nil {
-		return nil, err
-	}
-
-	return config, nil
 }
