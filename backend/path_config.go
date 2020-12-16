@@ -106,11 +106,8 @@ func (b *backend) pathReadConfig(ctx context.Context, req *logical.Request, data
 
 	return &logical.Response{
 		Data: map[string]interface{}{
-			"network": configBundle.Network,
-		},
-		// TODO: Remove this
-		Headers: map[string][]string{
-			"dataStore": {hex.EncodeToString(dataStore)},
+			"network":   configBundle.Network,
+			"dataStore": hex.EncodeToString(dataStore), // TODO: Remove this
 		},
 	}, nil
 }

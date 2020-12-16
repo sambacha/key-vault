@@ -80,17 +80,17 @@ func FromInMemoryStore(ctx context.Context, inMem *in_memory.InMemStore, storage
 	// Save wallet
 	wallet, err := inMem.OpenWallet()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to open wallet")
 	}
 
 	if err := newStore.SaveWallet(wallet); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to save wallet")
 	}
 
 	// Save accounts
 	for _, acc := range wallet.Accounts() {
 		if err := newStore.SaveAccount(acc); err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "failed to save account")
 		}
 	}
 
@@ -98,7 +98,7 @@ func FromInMemoryStore(ctx context.Context, inMem *in_memory.InMemStore, storage
 	for _, acc := range wallet.Accounts() {
 		if val := inMem.RetrieveHighestAttestation(acc.ValidatorPublicKey()); val != nil {
 			if err := newStore.SaveHighestAttestation(acc.ValidatorPublicKey(), val); err != nil {
-				return nil, err
+				return nil, errors.Wrap(err, "failed to save highest attestation")
 			}
 		}
 	}
@@ -107,7 +107,7 @@ func FromInMemoryStore(ctx context.Context, inMem *in_memory.InMemStore, storage
 	for _, acc := range wallet.Accounts() {
 		if val := inMem.RetrieveHighestProposal(acc.ValidatorPublicKey()); val != nil {
 			if err := newStore.SaveHighestProposal(acc.ValidatorPublicKey(), val); err != nil {
-				return nil, err
+				return nil, errors.Wrap(err, "failed to save highest proposal")
 			}
 		}
 	}
@@ -141,10 +141,9 @@ func (store *HashicorpVaultStore) SaveWallet(wallet core.Wallet) error {
 
 // OpenWallet returns nil,nil if no wallet was found
 func (store *HashicorpVaultStore) OpenWallet() (core.Wallet, error) {
-	path := WalletDataPath
-	entry, err := store.storage.Get(store.ctx, path)
+	entry, err := store.storage.Get(store.ctx, WalletDataPath)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get wallet data")
 	}
 
 	// Return nothing if there is no record

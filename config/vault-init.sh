@@ -1,7 +1,9 @@
 #!/bin/sh
 
 mkdir -p /data/keys
+
 vault operator init -status
+
 if [[ $? -eq 2 ]]; then
   vault operator init \
       -key-shares=1 \

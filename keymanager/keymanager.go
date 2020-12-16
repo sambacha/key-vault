@@ -181,14 +181,8 @@ func (km *KeyManager) sendRequest(method, path string, reqBody interface{}, resp
 		return NewHTTPRequestError(endpointStr, resp.StatusCode, responseBody, "unexpected status code")
 	}
 
-	// Retrieve response body
-	responseBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return NewGenericError(err, "failed to read response body")
-	}
-
 	// Read response body into the given object.
-	if err := json.Unmarshal(responseBody, &respBody); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		return NewGenericError(err, "failed to decode response body")
 	}
 

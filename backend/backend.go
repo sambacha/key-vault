@@ -62,12 +62,12 @@ type backend struct {
 func (b *backend) pathExistenceCheck(ctx context.Context, req *logical.Request, data *framework.FieldData) (bool, error) {
 	out, err := req.Storage.Get(ctx, req.Path)
 	if err != nil {
-		b.Logger().Error("Path existence check failed", err)
+		b.logger.WithError(err).Error("Path existence check failed")
 		return false, errors.Errorf("existence check failed: %v", err)
 	}
 
 	if b.Route(req.Path) == nil {
-		b.Logger().With("path", hex.EncodeToString(out.Value)).Error("Path not found")
+		b.logger.WithField("path", hex.EncodeToString(out.Value)).Error("Path not found")
 		return false, errors.Errorf("existence check failed: %s", hex.EncodeToString(out.Value))
 	}
 
