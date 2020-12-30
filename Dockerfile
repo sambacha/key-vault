@@ -44,7 +44,9 @@ COPY ./config/entrypoint.sh /vault/config/entrypoint.sh
 COPY ./config/vault-tls.sh /vault/config/vault-tls.sh
 COPY ./config/vault-init.sh /vault/config/vault-init.sh
 COPY ./config/vault-unseal.sh /vault/config/vault-unseal.sh
+COPY ./config/vault-policies.sh /vault/config/vault-policies.sh
 COPY ./config/vault-plugin.sh /vault/config/vault-plugin.sh
+COPY ./policies/signer-policy.hcl /vault/policies/signer-policy.hcl
 
 RUN chown vault /vault/config/entrypoint.sh
 RUN apk add jq

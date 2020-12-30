@@ -27,9 +27,10 @@ echo "started vault server"
 
 sleep 5
 if [ "$UNSEAL" = "true" ]; then
-  /vault/config/vault-init.sh
-  /vault/config/vault-unseal.sh
-  /vault/config/vault-plugin.sh
+  /bin/sh /vault/config/vault-init.sh
+  /bin/sh /vault/config/vault-unseal.sh
+  /bin/sh /vault/config/vault-policies.sh
+  /bin/sh /vault/config/vault-plugin.sh
 fi
 
 sleep 356000d
