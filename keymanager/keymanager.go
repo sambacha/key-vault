@@ -5,9 +5,10 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/pkg/errors"
 
 	"github.com/bloxapp/key-vault/backend"
 
@@ -91,7 +92,7 @@ func NewKeyManager(log *logrus.Entry, opts *Config) (*KeyManager, error) {
 				}
 			}
 			log.WithError(err).WithFields(fields).Error("failed to send request to key manager")
-			return resp, fmt.Errorf("giving up after %d attempt(s): %s", numTries, err)
+			return resp, errors.Errorf("giving up after %d attempt(s): %s", numTries, err)
 		}),
 		log: log,
 	}, nil
@@ -180,14 +181,8 @@ func (km *KeyManager) sendRequest(method, path string, reqBody interface{}, resp
 		return NewHTTPRequestError(endpointStr, resp.StatusCode, responseBody, "unexpected status code")
 	}
 
-	// Retrieve response body
-	responseBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return NewGenericError(err, "failed to read response body")
-	}
-
 	// Read response body into the given object.
-	if err := json.Unmarshal(responseBody, &respBody); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		return NewGenericError(err, "failed to decode response body")
 	}
 

@@ -2,7 +2,7 @@ package backend
 
 import (
 	"context"
-	"fmt"
+	"encoding/hex"
 	"net/http"
 
 	"github.com/hashicorp/vault/sdk/framework"
@@ -58,16 +58,23 @@ type backend struct {
 	Version string
 }
 
+// pathExistenceCheck checks if the given path exists
 func (b *backend) pathExistenceCheck(ctx context.Context, req *logical.Request, data *framework.FieldData) (bool, error) {
 	out, err := req.Storage.Get(ctx, req.Path)
 	if err != nil {
-		b.Logger().Error("Path existence check failed", err)
-		return false, fmt.Errorf("existence check failed: %v", err)
+		b.logger.WithError(err).Error("Path existence check failed")
+		return false, errors.Errorf("existence check failed: %v", err)
+	}
+
+	if b.Route(req.Path) == nil {
+		b.logger.WithField("path", hex.EncodeToString(out.Value)).Error("Path not found")
+		return false, errors.Errorf("existence check failed: %s", hex.EncodeToString(out.Value))
 	}
 
 	return out != nil, nil
 }
 
+// notFoundResponse returns not found error
 func (b *backend) notFoundResponse() (*logical.Response, error) {
 	return logical.RespondWithStatusCode(&logical.Response{
 		Data: map[string]interface{}{
@@ -77,6 +84,7 @@ func (b *backend) notFoundResponse() (*logical.Response, error) {
 	}, nil, http.StatusNotFound)
 }
 
+// prepareErrorResponse prepares error response
 func (b *backend) prepareErrorResponse(originError error) (*logical.Response, error) {
 	switch err := errors.Cause(originError).(type) {
 	case *errorex.ErrBadRequest:

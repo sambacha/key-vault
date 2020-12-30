@@ -21,7 +21,7 @@ const (
 
 func storagePaths(b *backend) []*framework.Path {
 	return []*framework.Path{
-		&framework.Path{
+		{
 			Pattern:         StoragePattern,
 			HelpSynopsis:    "Update storage",
 			HelpDescription: `Manage KeyVault storage`,

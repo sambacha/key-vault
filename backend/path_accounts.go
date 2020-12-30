@@ -20,7 +20,7 @@ const (
 
 func accountsPaths(b *backend) []*framework.Path {
 	return []*framework.Path{
-		&framework.Path{
+		{
 			Pattern:         AccountsPattern,
 			HelpSynopsis:    "List wallet accounts",
 			HelpDescription: ``,
@@ -35,7 +35,7 @@ func accountsPaths(b *backend) []*framework.Path {
 
 func (b *backend) pathWalletAccountsList(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
 	// Load config
-	config, err := b.configured(ctx, req)
+	config, err := b.readConfig(ctx, req.Storage)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get config")
 	}

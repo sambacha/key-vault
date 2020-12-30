@@ -7,10 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/shared/bytesutil"
-
 	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
-
+	"github.com/prysmaticlabs/prysm/shared/bytesutil"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
@@ -18,8 +16,10 @@ import (
 	"github.com/bloxapp/key-vault/utils/bytex"
 )
 
-var DefaultAccountPublicKey = "965586b5d05c851873f26cb736ed42de96591674772576e7b43848cd7a5c2827a5c5228034fdd55be0e9dc0f0cbc91d7"
-var DefaultAccessToken = "supersecureaccesstoken"
+var (
+	DefaultAccountPublicKey = "965586b5d05c851873f26cb736ed42de96591674772576e7b43848cd7a5c2827a5c5228034fdd55be0e9dc0f0cbc91d7"
+	DefaultAccessToken      = "supersecureaccesstoken"
+)
 
 func TestNewKeyManager(t *testing.T) {
 	entry := logrus.NewEntry(logrus.New())
