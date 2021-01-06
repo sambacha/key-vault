@@ -277,19 +277,18 @@ Use the following policy to assign to a signer level access token, with the abil
 
 ```
 # Ability to list existing wallet accounts ("list")
-path "ethereum/pyrmont/accounts" {
-  capabilities = ["list"]
-}
-path "ethereum/mainnet/accounts" {
+path "ethereum/+/accounts" {
   capabilities = ["list"]
 }
 
 # Ability to sign data ("create")
-path "ethereum/pyrmont/accounts/sign-*" {
+path "ethereum/+/accounts/sign" {
   capabilities = ["create"]
 }
-path "ethereum/mainnet/accounts/sign-*" {
-  capabilities = ["create"]
+
+# Ability to get version ("read")
+path "ethereum/+/version" {
+  capabilities = ["read"]
 }
 ```
 
@@ -298,27 +297,28 @@ Use the following policy to assign to a admin level access token, with the full 
 
 ```
 # Ability to list existing wallet accounts ("list")
-path "ethereum/pyrmont/accounts" {
-  capabilities = ["list"]
-}
-path "ethereum/mainnet/accounts" {
+path "ethereum/+/accounts" {
   capabilities = ["list"]
 }
 
 # Ability to sign data ("create")
-path "ethereum/pyrmont/accounts/sign-*" {
-  capabilities = ["create"]
-}
-path "ethereum/mainnet/accounts/sign-*" {
+path "ethereum/+/accounts/sign" {
   capabilities = ["create"]
 }
 
+# Ability to get version ("read")
+path "ethereum/+/version" {
+  capabilities = ["read"]
+}
+
 # Ability to update storage ("create")
-path "ethereum/pyrmont/storage" {
+path "ethereum/+/storage" {
   capabilities = ["create"]
 }
-path "ethereum/mainnet/storage" {
-  capabilities = ["create"]
+
+# Ability to read slashing storage ("read")
+path "ethereum/+/storage/slashing" {
+  capabilities = ["read"]
 }
 ```
 
