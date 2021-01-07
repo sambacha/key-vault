@@ -6,7 +6,7 @@ import (
 
 	vault "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/signer"
-	"github.com/bloxapp/eth2-key-manager/slashing_protection"
+	slashingprotection "github.com/bloxapp/eth2-key-manager/slashing_protection"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
@@ -76,7 +76,7 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 		return nil, errors.Wrap(err, "failed to unmarshal sign request SSZ")
 	}
 
-	protector := slashing_protection.NewNormalProtection(storage)
+	protector := slashingprotection.NewNormalProtection(storage)
 	var simpleSigner signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
 
 	var sig []byte

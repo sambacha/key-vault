@@ -7,7 +7,7 @@ import (
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/encryptor"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 	"github.com/bloxapp/eth2-key-manager/wallets"
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 	"github.com/google/uuid"
@@ -43,7 +43,7 @@ func NewHashicorpVaultStore(ctx context.Context, storage logical.Storage, networ
 }
 
 // FromInMemoryStore creates the HashicorpVaultStore based on the given in-memory store.
-func FromInMemoryStore(ctx context.Context, inMem *in_memory.InMemStore, storage logical.Storage) (*HashicorpVaultStore, error) {
+func FromInMemoryStore(ctx context.Context, inMem *inmemory.InMemStore, storage logical.Storage) (*HashicorpVaultStore, error) {
 	// first delete old data
 	// delete all accounts
 	res, err := storage.List(ctx, AccountBase)
@@ -151,7 +151,7 @@ func (store *HashicorpVaultStore) OpenWallet() (core.Wallet, error) {
 		return nil, errors.New("wallet not found")
 	}
 
-	var ret hd.HDWallet
+	var ret hd.Wallet
 	ret.SetContext(store.freshContext())
 	if err := json.Unmarshal(entry.Value, &ret); err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal HD Wallet object")

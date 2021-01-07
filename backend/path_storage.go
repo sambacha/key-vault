@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
@@ -46,7 +46,7 @@ func (b *backend) pathStorageUpdate(ctx context.Context, req *logical.Request, d
 		return nil, errors.Wrap(err, "failed to HEX decode storage")
 	}
 
-	var inMemStore *in_memory.InMemStore
+	var inMemStore *inmemory.InMemStore
 	err = json.Unmarshal(storageBytes, &inMemStore)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to JSON un-marshal storage")
