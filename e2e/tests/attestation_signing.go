@@ -4,16 +4,12 @@ import (
 	"encoding/hex"
 	"testing"
 
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
-
-	"github.com/prysmaticlabs/prysm/shared/bytesutil"
-
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-
-	"github.com/bloxapp/eth2-key-manager/signer"
-
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/slashing_protection"
+	"github.com/bloxapp/eth2-key-manager/signer"
+	slashingprotection "github.com/bloxapp/eth2-key-manager/slashing_protection"
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	"github.com/prysmaticlabs/prysm/shared/bytesutil"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/e2e"
@@ -70,7 +66,7 @@ func (test *AttestationSigning) Run(t *testing.T) {
 	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
 
 	// Sign data
-	protector := slashing_protection.NewNormalProtection(storage)
+	protector := slashingprotection.NewNormalProtection(storage)
 	var signer signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
 
 	res, err := signer.SignBeaconAttestation(att, domain, pubKeyBytes)

@@ -10,8 +10,8 @@ import (
 	"github.com/bloxapp/eth2-key-manager/signer"
 
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/slashing_protection"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	slashingprotection "github.com/bloxapp/eth2-key-manager/slashing_protection"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/e2e"
@@ -58,7 +58,7 @@ func (test *AggregationSigning) Run(t *testing.T) {
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, agg)
 
 	// Sign data
-	protector := slashing_protection.NewNormalProtection(in_memory.NewInMemStore(core.PyrmontNetwork))
+	protector := slashingprotection.NewNormalProtection(inmemory.NewInMemStore(core.PyrmontNetwork))
 	var signer signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
 
 	res, err := signer.SignAggregateAndProof(agg, domain, pubKeyBytes)

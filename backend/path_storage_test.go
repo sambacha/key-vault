@@ -6,14 +6,13 @@ import (
 	"encoding/json"
 	"testing"
 
-	bytesutil2 "github.com/prysmaticlabs/prysm/shared/bytesutil"
-
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 	uuid "github.com/google/uuid"
 	"github.com/hashicorp/vault/sdk/logical"
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	bytesutil2 "github.com/prysmaticlabs/prysm/shared/bytesutil"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/backend/store"
@@ -30,11 +29,11 @@ func _byteArray32(input string) []byte {
 	return ret[:]
 }
 
-func baseInmemStorage() (*in_memory.InMemStore, uuid.UUID, error) {
-	inMemStore := in_memory.NewInMemStore(core.PyrmontNetwork)
+func baseInmemStorage() (*inmemory.InMemStore, uuid.UUID, error) {
+	inMemStore := inmemory.NewInMemStore(core.PyrmontNetwork)
 
 	// wallet
-	wallet := hd.NewHDWallet(&core.WalletContext{Storage: inMemStore})
+	wallet := hd.NewWallet(&core.WalletContext{Storage: inMemStore})
 	err := inMemStore.SaveWallet(wallet)
 	if err != nil {
 		return nil, uuid.UUID{}, err
