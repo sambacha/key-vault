@@ -276,8 +276,13 @@ The plugin's endpoint paths are designed such that admin-level access policies v
 Use the following policy to assign to a signer level access token, with the abilities to list accounts and sign transactions.
 
 ```
-# Ability to list existing wallet accounts ("list")
-path "ethereum/+/accounts" {
+# Ability to list pyrmont wallet accounts ("list")
+path "ethereum/pyrmont/accounts" {
+  capabilities = ["list"]
+}
+
+# Ability to list mainnet wallet accounts ("list")
+path "ethereum/mainnet/accounts" {
   capabilities = ["list"]
 }
 
@@ -296,8 +301,13 @@ path "ethereum/+/version" {
 Use the following policy to assign to a admin level access token, with the full ability to update storage, list accounts and sign transactions.
 
 ```
-# Ability to list existing wallet accounts ("list")
-path "ethereum/+/accounts" {
+# Ability to list pyrmont wallet accounts ("list")
+path "ethereum/pyrmont/accounts" {
+  capabilities = ["list"]
+}
+
+# Ability to list mainnet wallet accounts ("list")
+path "ethereum/mainnet/accounts" {
   capabilities = ["list"]
 }
 
