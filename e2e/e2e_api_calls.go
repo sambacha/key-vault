@@ -12,9 +12,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
-
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 	"github.com/pborman/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
@@ -224,7 +223,7 @@ func (setup *BaseSetup) ReadSlashingStorage(t *testing.T, network core.Network) 
 }
 
 // UpdateStorage updates the storage.
-func (setup *BaseSetup) UpdateStorage(t *testing.T, network core.Network, minimalSlashingData bool, walletType core.WalletType, privKey []byte) *in_memory.InMemStore {
+func (setup *BaseSetup) UpdateStorage(t *testing.T, network core.Network, minimalSlashingData bool, walletType core.WalletType, privKey []byte) *inmemory.InMemStore {
 	// get store
 	store, err := shared.BaseInmemStorage(t, minimalSlashingData, walletType, privKey)
 	require.NoError(t, err)
