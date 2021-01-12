@@ -1,5 +1,10 @@
-# Ability to list existing wallet accounts ("list")
-path "ethereum/+/accounts" {
+# Ability to list pyrmont wallet accounts ("list")
+path "ethereum/pyrmont/accounts" {
+  capabilities = ["list"]
+}
+
+# Ability to list mainnet wallet accounts ("list")
+path "ethereum/mainnet/accounts" {
   capabilities = ["list"]
 }
 

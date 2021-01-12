@@ -13,6 +13,5 @@
       "tls_key_file": "/vault/config/server.key",
       "tls_client_ca_file": "/vault/config/ca.pem"
     }
-  },
-  "ui": true
+  }
 }
