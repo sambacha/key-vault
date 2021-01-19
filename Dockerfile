@@ -29,7 +29,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflag
 #
 # STEP 3: Get vault image and copy the plugin
 #
-FROM vault:1.6.0 AS runner
+FROM vault:1.6.1 AS runner
 
 # Download dependencies
 RUN apk -v --update --no-cache add \
@@ -44,7 +44,9 @@ COPY ./config/entrypoint.sh /vault/config/entrypoint.sh
 COPY ./config/vault-tls.sh /vault/config/vault-tls.sh
 COPY ./config/vault-init.sh /vault/config/vault-init.sh
 COPY ./config/vault-unseal.sh /vault/config/vault-unseal.sh
+COPY ./config/vault-policies.sh /vault/config/vault-policies.sh
 COPY ./config/vault-plugin.sh /vault/config/vault-plugin.sh
+COPY ./policies/signer-policy.hcl /vault/policies/signer-policy.hcl
 
 RUN chown vault /vault/config/entrypoint.sh
 RUN apk add jq

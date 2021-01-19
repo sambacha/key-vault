@@ -8,11 +8,9 @@ import (
 	"sync"
 	"testing"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-
-	v2 "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
-
 	"github.com/hashicorp/vault/sdk/logical"
+	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	v2 "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 

@@ -8,7 +8,7 @@ import (
 	ethkeymanager "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/encryptor/keystorev4"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/stretchr/testify/require"
 
@@ -20,9 +20,9 @@ func _byteArray(input string) []byte {
 	return res
 }
 
-func baseKeyVault(seed []byte, t *testing.T) (*in_memory.InMemStore, core.Wallet, []core.ValidatorAccount) {
+func baseKeyVault(seed []byte, t *testing.T) (*inmemory.InMemStore, core.Wallet, []core.ValidatorAccount) {
 	// store
-	inMemStore := in_memory.NewInMemStore(core.PyrmontNetwork)
+	inMemStore := inmemory.NewInMemStore(core.PyrmontNetwork)
 	// seed
 	// create keyvault in a normal in mem store
 	options := &ethkeymanager.KeyVaultOptions{}

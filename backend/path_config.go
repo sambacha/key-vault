@@ -49,10 +49,13 @@ func configPaths(b *backend) []*framework.Path {
 
 // pathWriteConfig is the write config path handler
 func (b *backend) pathWriteConfig(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
-	network := data.Get("network").(string)
+	network := core.NetworkFromString(data.Get("network").(string))
+	if network == "" {
+		return nil, errors.New("invalid network provided")
+	}
 
 	configBundle := Config{
-		Network: core.NetworkFromString(network),
+		Network: network,
 	}
 
 	// Create storage entry
@@ -85,7 +88,6 @@ func (b *backend) pathReadConfig(ctx context.Context, req *logical.Request, data
 		return nil, nil
 	}
 
-	// Return the secret
 	return &logical.Response{
 		Data: map[string]interface{}{
 			"network": configBundle.Network,
@@ -110,13 +112,4 @@ func (b *backend) readConfig(ctx context.Context, s logical.Storage) (*Config, e
 	}
 
 	return &result, nil
-}
-
-func (b *backend) configured(ctx context.Context, req *logical.Request) (*Config, error) {
-	config, err := b.readConfig(ctx, req.Storage)
-	if err != nil {
-		return nil, err
-	}
-
-	return config, nil
 }

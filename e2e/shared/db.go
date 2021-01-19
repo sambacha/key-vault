@@ -6,13 +6,13 @@ import (
 	"testing"
 
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 	"github.com/bloxapp/eth2-key-manager/wallets"
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 	"github.com/bloxapp/eth2-key-manager/wallets/nd"
-	"github.com/stretchr/testify/require"
 )
 
 // AccountIndex is the test account index.
@@ -24,11 +24,11 @@ func _byteArray(input string) []byte {
 }
 
 // BaseInmemStorage creates the in-memory storage and creates the base account.
-func BaseInmemStorage(t *testing.T, minimalSlashingData bool, walletType core.WalletType, privKey []byte) (*in_memory.InMemStore, error) {
+func BaseInmemStorage(t *testing.T, minimalSlashingData bool, walletType core.WalletType, privKey []byte) (*inmemory.InMemStore, error) {
 	err := core.InitBLS()
 	require.NoError(t, err)
 
-	store := in_memory.NewInMemStore(core.PyrmontNetwork)
+	store := inmemory.NewInMemStore(core.PyrmontNetwork)
 
 	// wallet
 	walletCtx := &core.WalletContext{Storage: store}
@@ -36,17 +36,16 @@ func BaseInmemStorage(t *testing.T, minimalSlashingData bool, walletType core.Wa
 	// account
 	var acc core.ValidatorAccount
 	if walletType == core.NDWallet {
-		wallet := nd.NewNDWallet(walletCtx)
+		wallet := nd.NewWallet(walletCtx)
 		if err := store.SaveWallet(wallet); err != nil {
 			return nil, err
 		}
 		k, err := core.NewHDKeyFromPrivateKey(privKey, "")
 		require.NoError(t, err)
-		acc, err = wallets.NewValidatorAccount("", k, k.PublicKey().Serialize(), "", walletCtx)
-		require.NoError(t, err)
+		acc = wallets.NewValidatorAccount("", k, k.PublicKey().Serialize(), "", walletCtx)
 		require.NoError(t, wallet.AddValidatorAccount(acc))
 	} else {
-		wallet := hd.NewHDWallet(walletCtx)
+		wallet := hd.NewWallet(walletCtx)
 		if err := store.SaveWallet(wallet); err != nil {
 			return nil, err
 		}

@@ -10,7 +10,7 @@ import (
 	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
-	"github.com/bloxapp/eth2-key-manager/slashing_protection"
+	slashingprotection "github.com/bloxapp/eth2-key-manager/slashing_protection"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/e2e"
@@ -46,7 +46,7 @@ func (test *ProposalSigning) Run(t *testing.T) {
 	require.NoError(t, err)
 
 	// Sign data
-	protector := slashing_protection.NewNormalProtection(storage)
+	protector := slashingprotection.NewNormalProtection(storage)
 	var signer signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
 
 	res, err := signer.SignBeaconBlock(blk, domain, pubKeyBytes)

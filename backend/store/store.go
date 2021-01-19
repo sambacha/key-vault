@@ -7,7 +7,7 @@ import (
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/encryptor"
-	"github.com/bloxapp/eth2-key-manager/stores/in_memory"
+	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 	"github.com/bloxapp/eth2-key-manager/wallets"
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 	"github.com/google/uuid"
@@ -43,7 +43,7 @@ func NewHashicorpVaultStore(ctx context.Context, storage logical.Storage, networ
 }
 
 // FromInMemoryStore creates the HashicorpVaultStore based on the given in-memory store.
-func FromInMemoryStore(ctx context.Context, inMem *in_memory.InMemStore, storage logical.Storage) (*HashicorpVaultStore, error) {
+func FromInMemoryStore(ctx context.Context, inMem *inmemory.InMemStore, storage logical.Storage) (*HashicorpVaultStore, error) {
 	// first delete old data
 	// delete all accounts
 	res, err := storage.List(ctx, AccountBase)
@@ -80,17 +80,17 @@ func FromInMemoryStore(ctx context.Context, inMem *in_memory.InMemStore, storage
 	// Save wallet
 	wallet, err := inMem.OpenWallet()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to open wallet")
 	}
 
 	if err := newStore.SaveWallet(wallet); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to save wallet")
 	}
 
 	// Save accounts
 	for _, acc := range wallet.Accounts() {
 		if err := newStore.SaveAccount(acc); err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "failed to save account")
 		}
 	}
 
@@ -98,7 +98,7 @@ func FromInMemoryStore(ctx context.Context, inMem *in_memory.InMemStore, storage
 	for _, acc := range wallet.Accounts() {
 		if val := inMem.RetrieveHighestAttestation(acc.ValidatorPublicKey()); val != nil {
 			if err := newStore.SaveHighestAttestation(acc.ValidatorPublicKey(), val); err != nil {
-				return nil, err
+				return nil, errors.Wrap(err, "failed to save highest attestation")
 			}
 		}
 	}
@@ -107,7 +107,7 @@ func FromInMemoryStore(ctx context.Context, inMem *in_memory.InMemStore, storage
 	for _, acc := range wallet.Accounts() {
 		if val := inMem.RetrieveHighestProposal(acc.ValidatorPublicKey()); val != nil {
 			if err := newStore.SaveHighestProposal(acc.ValidatorPublicKey(), val); err != nil {
-				return nil, err
+				return nil, errors.Wrap(err, "failed to save highest proposal")
 			}
 		}
 	}
@@ -141,10 +141,9 @@ func (store *HashicorpVaultStore) SaveWallet(wallet core.Wallet) error {
 
 // OpenWallet returns nil,nil if no wallet was found
 func (store *HashicorpVaultStore) OpenWallet() (core.Wallet, error) {
-	path := WalletDataPath
-	entry, err := store.storage.Get(store.ctx, path)
+	entry, err := store.storage.Get(store.ctx, WalletDataPath)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get wallet data")
 	}
 
 	// Return nothing if there is no record
@@ -152,7 +151,7 @@ func (store *HashicorpVaultStore) OpenWallet() (core.Wallet, error) {
 		return nil, errors.New("wallet not found")
 	}
 
-	var ret hd.HDWallet
+	var ret hd.Wallet
 	ret.SetContext(store.freshContext())
 	if err := json.Unmarshal(entry.Value, &ret); err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal HD Wallet object")

@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Microsoft/hcsshim v0.8.9 // indirect
-	github.com/bloxapp/eth2-key-manager v1.0.0
+	github.com/bloxapp/eth2-key-manager v1.0.3
 	github.com/containerd/containerd v1.4.0 // indirect
 	github.com/containerd/continuity v0.0.0-20200710164510-efbc4488d8fe // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
@@ -22,6 +22,7 @@ require (
 	github.com/hashicorp/go-rootcerts v1.0.2 // indirect
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/hashicorp/vault/sdk v0.1.13
+	github.com/herumi/bls-eth-go-binary v0.0.0-20201104034342-d782bdf735de
 	github.com/makasim/sentryhook v0.3.0
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/onsi/ginkgo v1.14.1 // indirect
