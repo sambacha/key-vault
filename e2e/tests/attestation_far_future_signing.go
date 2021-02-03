@@ -37,9 +37,9 @@ func (test *AttestationFarFutureSigning) Run(t *testing.T) {
 	expectedSourceErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: source epoch too far into the future\\n\\n\"}}")
 	expectedTargetErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: target epoch too far into the future\\n\\n\"}}")
 
-	test.testFarFuture(t, setup, pubKeyBytes, 15000, 78, expectedSourceErr)    // far future source
-	test.testFarFuture(t, setup, pubKeyBytes, 77, 15000, expectedTargetErr)    // far future target
-	test.testFarFuture(t, setup, pubKeyBytes, 15000, 15000, expectedTargetErr) // far future both
+	test.testFarFuture(t, setup, pubKeyBytes, 300000, 78, expectedSourceErr)    // far future source
+	test.testFarFuture(t, setup, pubKeyBytes, 77, 300000, expectedTargetErr)    // far future target
+	test.testFarFuture(t, setup, pubKeyBytes, 300000, 300000, expectedTargetErr) // far future both
 }
 
 func (test *AttestationFarFutureSigning) testFarFuture(
