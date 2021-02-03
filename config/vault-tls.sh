@@ -36,7 +36,7 @@ EOF
 # Create CA certificate and private key
 openssl req -x509 \
     -newkey rsa:2048 \
-    -out $VAULT_CACERT \
+    -out "$VAULT_CACERT" \
     -outform PEM \
     -keyout /vault/config/ca.key \
     -days 10000 \
@@ -50,12 +50,12 @@ openssl req \
     -newkey rsa:2048 \
     -keyout /vault/config/server.key \
     -out /vault/config/server.req \
-    -subj /CN=$VAULT_EXTERNAL_ADDRESS \
+    -subj /CN="$VAULT_EXTERNAL_ADDRESS" \
     -sha256 -nodes
 
 # Issue server certificate
 openssl x509 -req \
-    -CA $VAULT_CACERT \
+    -CA "$VAULT_CACERT" \
     -CAkey /vault/config/ca.key \
     -in /vault/config/server.req \
     -out /vault/config/server.pem \
