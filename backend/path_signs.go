@@ -43,6 +43,9 @@ func signsPaths(b *backend) []*framework.Path {
 }
 
 func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+	b.signLock.Lock()
+	defer b.signLock.Unlock()
+
 	// Load config
 	config, err := b.readConfig(ctx, req.Storage)
 	if err != nil {
