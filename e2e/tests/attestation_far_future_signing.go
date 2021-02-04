@@ -37,9 +37,11 @@ func (test *AttestationFarFutureSigning) Run(t *testing.T) {
 	expectedSourceErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: source epoch too far into the future\\n\\n\"}}")
 	expectedTargetErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: target epoch too far into the future\\n\\n\"}}")
 
-	test.testFarFuture(t, setup, pubKeyBytes, 15000, 78, expectedSourceErr)    // far future source
-	test.testFarFuture(t, setup, pubKeyBytes, 77, 15000, expectedTargetErr)    // far future target
-	test.testFarFuture(t, setup, pubKeyBytes, 15000, 15000, expectedTargetErr) // far future both
+	currentEpoch := core.PyrmontNetwork.EstimatedCurrentEpoch()
+	futureEpoch := core.PyrmontNetwork.EstimatedCurrentEpoch() + 1000
+	test.testFarFuture(t, setup, pubKeyBytes, futureEpoch, currentEpoch, expectedSourceErr) // far future source
+	test.testFarFuture(t, setup, pubKeyBytes, currentEpoch, futureEpoch, expectedTargetErr) // far future target
+	test.testFarFuture(t, setup, pubKeyBytes, futureEpoch, futureEpoch, expectedTargetErr)  // far future both
 }
 
 func (test *AttestationFarFutureSigning) testFarFuture(
@@ -51,7 +53,7 @@ func (test *AttestationFarFutureSigning) testFarFuture(
 	expectedErr string,
 ) {
 	att := &eth.AttestationData{
-		Slot:            core.PyrmontNetwork.EstimatedCurrentSlot() + 110,
+		Slot:            core.PyrmontNetwork.EstimatedCurrentSlot() + 1000,
 		CommitteeIndex:  2,
 		BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
 		Source: &eth.Checkpoint{

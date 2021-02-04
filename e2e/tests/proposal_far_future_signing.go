@@ -35,7 +35,7 @@ func (test *ProposalFarFutureSigning) Run(t *testing.T) {
 	pubKeyBytes := account.ValidatorPublicKey()
 
 	blk := referenceBlock(t)
-	blk.Slot = core.PyrmontNetwork.EstimatedCurrentSlot() + 110
+	blk.Slot = core.PyrmontNetwork.EstimatedCurrentSlot() + 200
 	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, blk)
 	require.NoError(t, err)
