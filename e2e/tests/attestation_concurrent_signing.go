@@ -3,6 +3,7 @@ package tests
 import (
 	"encoding/hex"
 	"math/rand"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -37,8 +38,10 @@ func (test *AttestationConcurrentSigning) Run(t *testing.T) {
 
 	wg := &sync.WaitGroup{}
 	signedCnt := int64(0)
-	for i := uint64(0); i < 20; i++ {
-		go test.runSlashableAttestation(t, &signedCnt, wg, setup, pubKey)
+	for i := 0; i < 20; i++ {
+		t.Run("request "+strconv.Itoa(i), func(t *testing.T) {
+			go test.runSlashableAttestation(t, &signedCnt, wg, setup, pubKey)
+		})
 	}
 	wg.Wait()
 	require.EqualValues(t, 1, signedCnt)
@@ -72,6 +75,7 @@ func (test *AttestationConcurrentSigning) runSlashableAttestation(t *testing.T, 
 
 	req, err := test.serializedReq(pubKey, nil, domain, att)
 	require.NoError(t, err)
+
 	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
 	if err == nil {
 		atomic.AddInt64(cnt, 1)
