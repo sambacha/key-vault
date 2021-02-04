@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"math/rand"
 	"sync"
+	"sync/atomic"
 	"testing"
 
 	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
@@ -35,7 +36,7 @@ func (test *AttestationConcurrentSigning) Run(t *testing.T) {
 	pubKey := account.ValidatorPublicKey()
 
 	wg := &sync.WaitGroup{}
-	signedCnt := 0
+	signedCnt := int64(0)
 	for i := uint64(0); i < 20; i++ {
 		go test.runSlashableAttestation(t, &signedCnt, wg, setup, pubKey)
 	}
@@ -44,7 +45,7 @@ func (test *AttestationConcurrentSigning) Run(t *testing.T) {
 }
 
 // will return no error if trying to sign a slashable attestation will not work
-func (test *AttestationConcurrentSigning) runSlashableAttestation(t *testing.T, cnt *int, wg *sync.WaitGroup, setup *e2e.BaseSetup, pubKey []byte) {
+func (test *AttestationConcurrentSigning) runSlashableAttestation(t *testing.T, cnt *int64, wg *sync.WaitGroup, setup *e2e.BaseSetup, pubKey []byte) {
 	wg.Add(1)
 	defer wg.Done()
 
@@ -73,7 +74,7 @@ func (test *AttestationConcurrentSigning) runSlashableAttestation(t *testing.T, 
 	require.NoError(t, err)
 	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
 	if err == nil {
-		*cnt++
+		atomic.AddInt64(cnt, 1)
 	}
 }
 

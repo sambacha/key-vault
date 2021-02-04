@@ -58,7 +58,6 @@ func (test *AggregationConcurrentSigning) Run(t *testing.T) {
 	t.Run("concurrent signing", func(t *testing.T) {
 		t.Parallel()
 		for i := 0; i < 5; i++ {
-			i := i
 			t.Run("concurrent signing "+strconv.Itoa(i), func(t *testing.T) {
 				t.Parallel()
 
