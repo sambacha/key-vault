@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"net/http"
+	"sync"
 
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
@@ -27,8 +28,9 @@ func Factory(version string, logger *logrus.Logger) logical.Factory {
 // newBackend returns the backend
 func newBackend(version string, logger *logrus.Logger) *backend {
 	b := &backend{
-		logger:  logger,
-		Version: version,
+		logger:   logger,
+		Version:  version,
+		signLock: make(map[string]*sync.Mutex),
 	}
 	b.Backend = &framework.Backend{
 		Help: "",
@@ -54,8 +56,9 @@ func newBackend(version string, logger *logrus.Logger) *backend {
 // backend implements the Backend for this plugin
 type backend struct {
 	*framework.Backend
-	logger  *logrus.Logger
-	Version string
+	logger   *logrus.Logger
+	Version  string
+	signLock map[string]*sync.Mutex
 }
 
 // pathExistenceCheck checks if the given path exists
