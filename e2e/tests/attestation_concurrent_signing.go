@@ -35,10 +35,11 @@ func (test *AttestationConcurrentSigning) Run(t *testing.T) {
 	account := shared.RetrieveAccount(t, store)
 	pubKey := account.ValidatorPublicKey()
 
+	// Send requests in parallel
 	wg := &sync.WaitGroup{}
 	signedCnt := int64(0)
 	for i := 0; i < 20; i++ {
-		t.Run("request "+strconv.Itoa(i), func(t *testing.T) {
+		t.Run("concurrent signing "+strconv.Itoa(i), func(t *testing.T) {
 			go test.runSlashableAttestation(t, &signedCnt, wg, setup, pubKey)
 		})
 	}

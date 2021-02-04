@@ -37,8 +37,8 @@ func (test *ProposalConcurrentSigning) Run(t *testing.T) {
 	// Send requests in parallel
 	wg := &sync.WaitGroup{}
 	signedCnt := int64(0)
-	for i := uint64(2); i < 7; i++ {
-		t.Run("concurrent signing "+strconv.Itoa(int(i)), func(t *testing.T) {
+	for i := 0; i < 20; i++ {
+		t.Run("concurrent signing "+strconv.Itoa(i), func(t *testing.T) {
 			go test.runSlashableProposal(t, &signedCnt, wg, setup, pubKey)
 		})
 	}
