@@ -51,7 +51,7 @@ func (test *AttestationFarFutureSigning) testFarFuture(
 	expectedErr string,
 ) {
 	att := &eth.AttestationData{
-		Slot:            284115,
+		Slot:            core.PyrmontNetwork.EstimatedCurrentSlot() + 100,
 		CommitteeIndex:  2,
 		BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
 		Source: &eth.Checkpoint{
