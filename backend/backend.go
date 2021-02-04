@@ -30,7 +30,7 @@ func newBackend(version string, logger *logrus.Logger) *backend {
 	b := &backend{
 		logger:   logger,
 		Version:  version,
-		signLock: sync.Mutex{},
+		signLock: make(map[string]*sync.Mutex),
 	}
 	b.Backend = &framework.Backend{
 		Help: "",
@@ -58,7 +58,7 @@ type backend struct {
 	*framework.Backend
 	logger   *logrus.Logger
 	Version  string
-	signLock sync.Mutex
+	signLock map[string]*sync.Mutex
 }
 
 // pathExistenceCheck checks if the given path exists
