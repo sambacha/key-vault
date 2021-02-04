@@ -11,7 +11,6 @@ function banner() {
 function init() {
   banner "Initiating..."
   SECRETS=$(vault operator init -key-shares=1 -key-threshold=1 -format=json | jq .)
-  banner "SECRETS $SECRETS"
 }
 
 function unseal() {
@@ -24,12 +23,12 @@ function authenticate() {
   banner "Authenticating to $VAULT_ADDR as root"
   ROOT=$(echo "$SECRETS" | jq -r .root_token)
   banner "ROOT $ROOT"
-  vault login "$ROOT"
   export VAULT_TOKEN=$ROOT
 }
 
-function unauthenticate() {
+function revoke_root_token() {
   banner "Unsetting VAULT_TOKEN"
+  vault token revoke -self
   unset VAULT_TOKEN
 }
 
@@ -44,7 +43,7 @@ if [[ $? -eq 2 ]]; then
   authenticate
   /bin/bash /vault/config/v2/vault-plugin.sh
   /bin/bash /vault/config/v2/vault-policies.sh
-  unauthenticate
+  revoke_root_token
   status
 else
   unseal

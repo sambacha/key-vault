@@ -11,6 +11,7 @@ function banner() {
 function write_policy() {
   banner "Writing $1 policy"
   vault policy write "$1" vault/policies/"$1"-policy.hcl
+  echo "$1".token="$(vault token create -orphan=true -policy="$1" -field=token)"
 }
 
 write_policy signer
