@@ -61,7 +61,7 @@ func TestSignAttestation(t *testing.T) {
 		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
 		setupBaseStorage(t, req)
 		_, err := b.HandleRequest(context.Background(), req)
-		require.EqualError(t, err, "failed to open key vault: wallet not found")
+		require.EqualError(t, err, "failed to sign: failed to open key vault: wallet not found")
 	})
 
 	t.Run("Sign Attestation of unknown account", func(t *testing.T) {
@@ -102,7 +102,7 @@ func TestSignProposal(t *testing.T) {
 		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
 		setupBaseStorage(t, req)
 		_, err := b.HandleRequest(context.Background(), req)
-		require.EqualError(t, err, "failed to open key vault: wallet not found")
+		require.EqualError(t, err, "failed to sign: failed to open key vault: wallet not found")
 	})
 
 	t.Run("Sign Proposal of unknown account", func(t *testing.T) {
@@ -141,7 +141,7 @@ func TestSignAggregation(t *testing.T) {
 		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
 		setupBaseStorage(t, req)
 		_, err := b.HandleRequest(context.Background(), req)
-		require.EqualError(t, err, "failed to open key vault: wallet not found")
+		require.EqualError(t, err, "failed to sign: failed to open key vault: wallet not found")
 	})
 
 	t.Run("Sign Aggregation of unknown account", func(t *testing.T) {
