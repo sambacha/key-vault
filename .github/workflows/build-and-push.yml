@@ -72,5 +72,5 @@ jobs:
       - name: Verify Docker Action
         uses: christopher-dG/verify-docker-action@v1.0.0
         with:
-          image: ${{ steps.docker_build.outputs.docker_image }}
+          image: ${{ steps.prep.outputs.docker_image }}
           digest: ${{ steps.docker_build.outputs.digest }}
