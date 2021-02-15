@@ -15,8 +15,7 @@ jobs:
       - name: Prepare
         id: prep
         run: |
-          DOCKER_HUB_USERNAME=bloxstaking
-          DOCKER_REPOSITORY="${DOCKER_HUB_USERNAME}/key-vault"
+          DOCKER_REPOSITORY=bloxstaking/key-vault
           VERSION=edge
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
@@ -31,7 +30,6 @@ jobs:
             TAGS="$TAGS,${DOCKER_REPOSITORY}:latest"
           fi
           echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=docker_hub_username::${DOCKER_HUB_USERNAME}
           echo ::set-output name=docker_image::${DOCKER_IMAGE}
 
       - name: Set up QEMU
@@ -53,7 +51,7 @@ jobs:
         #        if: github.event_name != 'pull_request'
         uses: docker/login-action@v1
         with:
-          username: ${{ steps.prep.outputs.docker_hub_username }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Build and push
