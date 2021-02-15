@@ -3,7 +3,7 @@ name: ci
 on:
   push:
     tags:
-      - "v*.*.*-rc"
+      - "v*.*.*"
 
 jobs:
   docker:
@@ -15,10 +15,14 @@ jobs:
       - name: Prepare
         id: prep
         run: |
-          DOCKER_IMAGE=bloxstaking/key-vault-rc
+          DOCKER_IMAGE=bloxstaking/key-vault
           VERSION=edge
           if [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/v}
+            VERSION=${GITHUB_REF#refs/tags/}
+          fi
+          if [[ $VERSION == *-rc ]]
+            DOCKER_IMAGE="$DOCKER_IMAGE-rc"
+            VERSION=${VERSION%-*}
           fi
           TAGS="${DOCKER_IMAGE}:${VERSION}"
           if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
