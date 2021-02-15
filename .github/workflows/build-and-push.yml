@@ -6,13 +6,8 @@ on:
       - "v*.*.*-rc"
 
 jobs:
-  local-registry:
+  docker:
     runs-on: ubuntu-latest
-    services:
-      registry:
-        image: registry:2
-        ports:
-          - 5000:5000
     steps:
       - name: Checkout
         uses: actions/checkout@v2
