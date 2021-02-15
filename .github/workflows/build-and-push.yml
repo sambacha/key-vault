@@ -20,7 +20,7 @@ jobs:
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
           fi
-          if [[ $VERSION == *-rc ]]
+          if [[ $VERSION == *-rc ]]; then
             DOCKER_IMAGE="$DOCKER_IMAGE-rc"
             VERSION=${VERSION%-*}
           fi
