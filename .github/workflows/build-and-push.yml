@@ -29,6 +29,7 @@ jobs:
             TAGS="$TAGS,${DOCKER_IMAGE}:latest"
           fi
           echo ::set-output name=tags::${TAGS}
+          echo ::set-output name=docker_image::"${DOCKER_IMAGE}:${VERSION}"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -67,3 +68,9 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: Verify Docker Action
+        uses: christopher-dG/verify-docker-action@v1.0.0
+        with:
+          image: ${{ steps.docker_build.outputs.docker_image }}
+          digest: ${{ steps.docker_build.outputs.digest }}
