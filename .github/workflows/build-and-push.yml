@@ -20,20 +20,23 @@ jobs:
         run: |
           DOCKER_REPOSITORY=bloxstaking/key-vault
           VERSION=edge
+          BRANCH=master
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
           fi
           if [[ $VERSION == *-rc ]]; then
             DOCKER_REPOSITORY="${DOCKER_REPOSITORY}-rc"
             VERSION=${VERSION%-*}
+            BRANCH=stage
           fi
           DOCKER_IMAGE="${DOCKER_REPOSITORY}:${VERSION}"
           TAGS="$DOCKER_IMAGE"
-          if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+          if [[ $VERSION =~ ^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
             TAGS="$TAGS,${DOCKER_REPOSITORY}:latest"
           fi
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=docker_image::${DOCKER_IMAGE}
+          echo ::set-output name=branch::${BRANCH}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -89,7 +92,7 @@ jobs:
 
       - name: Create local changes
         run: |
-          date +%s > report.txt
+          "${{ steps.prep.outputs.tags }}: ${{ steps.docker_build.outputs.digest }}" > docker-digest.md
       - name: Commit files
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -101,4 +104,4 @@ jobs:
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: stage
+          branch: ${{ steps.prep.outputs.branch }}
