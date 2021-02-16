@@ -92,7 +92,7 @@ jobs:
 
       - name: Create local changes
         run: |
-          "${{ steps.prep.outputs.tags }}: ${{ steps.docker_build.outputs.digest }}" > docker-digest.md
+          echo "${{ steps.prep.outputs.tags }}: ${{ steps.docker_build.outputs.digest }}" > docker-digest.md
       - name: Commit files
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
