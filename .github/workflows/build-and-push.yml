@@ -78,12 +78,11 @@ jobs:
           IMAGE=${{ steps.prep.outputs.docker_image }}
           BUILD_DIGEST=${{ steps.docker_build.outputs.digest }}
           docker pull "$IMAGE"
-          REMOTE_DIGEST=$(docker inspect "$IMAGE" --format {{.ID}})
+          REMOTE_IMAGE=$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE)
+          REMOTE_DIGEST=${REMOTE_IMAGE#*@}
           if [[ $BUILD_DIGEST == $REMOTE_DIGEST ]]; then
             echo "Image verification succeeded"
           else
-            echo $BUILD_DIGEST
-            echo $REMOTE_DIGEST
             echo "Image verification failed"
             exit 1
           fi
