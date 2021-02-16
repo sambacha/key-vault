@@ -92,13 +92,13 @@ jobs:
 
       - name: Create local changes
         run: |
-          echo "${{ steps.prep.outputs.tags }}: ${{ steps.docker_build.outputs.digest }}" > docker-digest.md
+          echo "### ${{ steps.prep.outputs.tags }}: ${{ steps.docker_build.outputs.digest }}" > DOCKER-DIGEST.md
       - name: Commit files
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add -A
-          git commit -m "test ci" -a
+          git commit -m "update latest image digest" -a
 
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
