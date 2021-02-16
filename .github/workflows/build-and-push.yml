@@ -82,6 +82,8 @@ jobs:
           if [[ $BUILD_DIGEST == $REMOTE_DIGEST ]]; then
             echo "Image verification succeeded"
           else
+            echo $BUILD_DIGEST
+            echo $REMOTE_DIGEST
             echo "Image verification failed"
             exit 1
           fi
