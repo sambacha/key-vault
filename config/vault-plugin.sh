@@ -12,22 +12,28 @@ vault plugin register \
     -args="--log-levels=${LOG_LEVELS}" \
     secret ethsign
 
-# Enable networks
-echo "Enabling plugin..."
-vault secrets disable ethereum/pyrmont
-vault secrets enable \
+# Enable secrets
+if vault secrets tune ethereum/pyrmont/ ; then
+  echo "the secret at path ethereum/pyrmont already exists"
+else
+  echo "Enabling pyrmont plugin..."
+  vault secrets enable \
     -path=ethereum/pyrmont \
     -description="Eth Signing Wallet - Pyrmont Test network" \
     -plugin-name=ethsign plugin
-echo "Enabled plugin"
+  echo "Enabled plugin"
+fi
 
-echo "Enabling plugin..."
-vault secrets disable ethereum/mainnet
-vault secrets enable \
+if vault secrets tune ethereum/mainnet/ ; then
+  echo "the secret at path ethereum/mainnet already exists"
+else
+  echo "Enabling mainnet plugin..."
+  vault secrets enable \
     -path=ethereum/mainnet \
-    -description="Eth Signing Wallet - MainNet" \
+    -description="Eth Signing Wallet - Mainnet network" \
     -plugin-name=ethsign plugin
-echo "Enabled plugin"
+  echo "Enabled plugin"
+fi
 
 # Configuring networks
 echo "Configuring Pyrmont Test network..."

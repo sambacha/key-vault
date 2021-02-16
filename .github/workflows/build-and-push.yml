@@ -1,80 +1,103 @@
-name: ci
-
-on:
-  push:
-    tags:
-      - "v*.*.*"
-
-jobs:
-  docker:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Prepare
-        id: prep
-        run: |
-          DOCKER_REPOSITORY="${secrets.DOCKER_HUB_USERNAME}/key-vault"
-          VERSION=edge
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          fi
-          if [[ $VERSION == *-rc ]]; then
-            DOCKER_REPOSITORY="${DOCKER_REPOSITORY}-rc"
-            VERSION=${VERSION%-*}
-          fi
-          DOCKER_IMAGE="${DOCKER_REPOSITORY}:${VERSION}"
-          TAGS="$DOCKER_IMAGE"
-          if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            TAGS="$TAGS,${DOCKER_REPOSITORY}:latest"
-          fi
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=docker_image::${DOCKER_IMAGE}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      - name: Login to DockerHub
-#        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      - name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          builder: ${{ steps.buildx.outputs.name }}
-          context: ./
-          file: ./Dockerfile
-          push: true
-#          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.prep.outputs.tags }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
-
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
-
-      - name: Docker Image
-        run: echo ${{ steps.prep.outputs.docker_image }}
-
-      - name: Verify Docker Action
-        uses: christopher-dG/verify-docker-action@v1.0.0
-        with:
-          image: ${{ steps.prep.outputs.docker_image }}
-          digest: ${{ steps.docker_build.outputs.digest }}
+#name: ci
+#
+#on:
+#  push:
+#    tags:
+#      - "v*.*.*"
+#
+#jobs:
+#  docker:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v2
+#        with:
+#          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
+#          fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+#
+#      - name: Prepare
+#        id: prep
+#        run: |
+#          DOCKER_REPOSITORY=bloxstaking/key-vault
+#          VERSION=edge
+#          if [[ $GITHUB_REF == refs/tags/* ]]; then
+#            VERSION=${GITHUB_REF#refs/tags/}
+#          fi
+#          if [[ $VERSION == *-rc ]]; then
+#            DOCKER_REPOSITORY="${DOCKER_REPOSITORY}-rc"
+#            VERSION=${VERSION%-*}
+#          fi
+#          DOCKER_IMAGE="${DOCKER_REPOSITORY}:${VERSION}"
+#          TAGS="$DOCKER_IMAGE"
+#          if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+#            TAGS="$TAGS,${DOCKER_REPOSITORY}:latest"
+#          fi
+#          echo ::set-output name=tags::${TAGS}
+#          echo ::set-output name=docker_image::${DOCKER_IMAGE}
+#
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v1
+#
+#      - name: Set up Docker Buildx
+#        id: buildx
+#        uses: docker/setup-buildx-action@v1
+#
+#      - name: Cache Docker layers
+#        uses: actions/cache@v2
+#        with:
+#          path: /tmp/.buildx-cache
+#          key: ${{ runner.os }}-buildx-${{ github.sha }}
+#          restore-keys: |
+#            ${{ runner.os }}-buildx-
+#
+#      - name: Login to DockerHub
+#        #        if: github.event_name != 'pull_request'
+#        uses: docker/login-action@v1
+#        with:
+#          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+#          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+#
+#      - name: Build and push
+#        id: docker_build
+#        uses: docker/build-push-action@v2
+#        with:
+#          builder: ${{ steps.buildx.outputs.name }}
+#          context: ./
+#          file: ./Dockerfile
+#          push: true
+#          #          push: ${{ github.event_name != 'pull_request' }}
+#          tags: ${{ steps.prep.outputs.tags }}
+#          cache-from: type=local,src=/tmp/.buildx-cache
+#          cache-to: type=local,dest=/tmp/.buildx-cache
+#
+#      - name: Image digest
+#        run: echo ${{ steps.docker_build.outputs.digest }}
+#
+#      - name: Verify Image Digest
+#        run: |
+#          IMAGE=${{ steps.prep.outputs.docker_image }}
+#          BUILD_DIGEST=${{ steps.docker_build.outputs.digest }}
+#          docker pull "$IMAGE"
+#          REMOTE_DIGEST=$(docker inspect "$IMAGE" --format {{.ID}})
+#          if [[ $BUILD_DIGEST == $REMOTE_DIGEST ]]; then
+#            echo "Image verification succeeded"
+#          else
+#            // TODO remove tag from docker hub
+#            echo "Image verification failed"
+#            exit 1
+#          fi
+#
+#        - name: Create local changes
+#          run: |
+#            date +%s > report.txt
+#        - name: Commit files
+#          run: |
+#            git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+#            git config --local user.name "github-actions[bot]"
+#            git commit -m "test ci" -a
+#
+#        - name: Push changes
+#          uses: ad-m/github-push-action@v0.6.0
+#          with:
+#            github_token: ${{ secrets.GITHUB_TOKEN }}
+#            branch: stage

@@ -6,9 +6,11 @@
     }
   },
   "listener": {
-    "tcp":{
+    "tcp": {
       "address": "[::]:8200",
       "tls_disable": 1
     }
-  }
+  },
+  "default_lease_ttl": "36792h",
+  "max_lease_ttl": "36792h"
 }

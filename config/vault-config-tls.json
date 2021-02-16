@@ -6,12 +6,14 @@
     }
   },
   "listener": {
-    "tcp":{
+    "tcp": {
       "address": "[::]:8200",
       "tls_disable": 0,
       "tls_cert_file": "/vault/config/server.pem",
       "tls_key_file": "/vault/config/server.key",
       "tls_client_ca_file": "/vault/config/ca.pem"
     }
-  }
+  },
+  "default_lease_ttl": "36792h",
+  "max_lease_ttl": "36792h"
 }
