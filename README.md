@@ -36,6 +36,34 @@ sha256:cb2888614147cf667c06f4afe13b992886ab47c4f1fa3d17493ec1c397fcedd1
 ## Endpoints 
 
 
+### GET VERSION
+
+This endpoint will get a version of key-vault.
+
+| Method  | Path | Produces |
+| ------------- | ------------- | ------------- |
+| `GET`  | `:mount-path/:network/version`  | `200 application/json` |
+
+
+#### Sample Response
+
+The example below shows output for a query path of `/ethereum/pyrmont/version`.
+
+```
+{
+    "request_id": "b68953bf-811e-f218-a1c4-b5a7aa4122bc",
+    "lease_id": "",
+    "renewable": false,
+    "lease_duration": 0,
+    "data": {
+        "version": "v1.1.1"
+    },
+    "wrap_info": null,
+    "warnings": null,
+    "auth": null
+}
+```
+
 ### LIST ACCOUNTS
 
 This endpoint will list all accounts of key-vault.
