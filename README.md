@@ -2,6 +2,11 @@
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbloxapp%2Fkey-vault.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbloxapp%2Fkey-vault?ref=badge_shield)
 
+## Latest Image Digest
+
+<!-- /DIGEST_START_MARKER/ -->
+<!-- /DIGEST_END_MARKER/ -->
+
 ## How to use this project?
 
 
@@ -37,7 +42,7 @@ This endpoint will list all accounts of key-vault.
 
 #### Sample Response
 
-The example below shows output for a query path of `/ethereum/accounts` when there is 1 account.
+The example below shows output for a query path of `/ethereum/pyrmont/accounts` when there is 1 account.
 
 ```
 {
@@ -72,7 +77,7 @@ This endpoint will update the storage.
 
 #### Sample Response
 
-The example below shows output for a query path of `/ethereum/storage`.
+The example below shows output for a query path of `/ethereum/pyrmont/storage`.
 
 ```
 {
@@ -91,45 +96,6 @@ The example below shows output for a query path of `/ethereum/storage`.
 }
 ```
 
-### UPDATE SLASHING STORAGE
-
-This endpoint will update the storage.
-
-| Method  | Path | Produces |
-| ------------- | ------------- | ------------- |
-| `POST`  | `:mount-path/:network/storage/slashing`  | `200 application/json` |
-
-
-#### Sample Request
-
-The example below shows input for a query path of `/ethereum/storage/slashing`.
-
-```
-{
-    "<public_key>": "<hex_encoded_slashing_storage>"
-}
-```
-
-
-#### Sample Response
-
-The example below shows output for a query path of `/ethereum/storage/slashing`.
-
-```
-{
-    "request_id": "d53d5075-6a3b-2642-ffde-0714beb595f5",
-    "lease_id": "",
-    "renewable": false,
-    "lease_duration": 0,
-    "data": {
-        "status": true
-    },
-    "wrap_info": null,
-    "warnings": null,
-    "auth": null
-}
-```
-
 ### READ SLASHING STORAGE
 
 This endpoint will update the storage.
@@ -141,7 +107,7 @@ This endpoint will update the storage.
 
 #### Sample Response
 
-The example below shows output for a query path of `/ethereum/storage/slashing`.
+The example below shows output for a query path of `/ethereum/pyrmont/storage/slashing`.
 
 ```
 {
@@ -166,7 +132,7 @@ This endpoint will sign attestation for specific account at a path.
 
 | Method  | Path | Produces |
 | ------------- | ------------- | ------------- |
-| `POST`  | `:mount-path/:network/accounts/sign-attestation`  | `200 application/json` |
+| `POST`  | `:mount-path/:network/accounts/sign`  | `200 application/json` |
 
 #### Parameters
 
@@ -182,7 +148,7 @@ This endpoint will sign attestation for specific account at a path.
 
 #### Sample Response
 
-The example below shows output for the successful sign of `/ethereum/accounts/account1/sign-attestation`.
+The example below shows output for the successful sign of `/ethereum/accounts/sign`.
 
 ```
 {
@@ -192,76 +158,6 @@ The example below shows output for the successful sign of `/ethereum/accounts/ac
     "lease_duration": 0,
     "data": {
         "signature": "kEEOMxNkouz7EOSULfrG6hXzZbIOvRCVVK+lfBofj3U49/PHm7YHji8ac9Gf9vgEFVEmbPp+lhO3OpAElt3yaBajTKaJBWocgXuv64Ojq44tfxLJo6jrzMU5yoP78dYW"
-    },
-    "wrap_info": null,
-    "warnings": null,
-    "auth": null
-}
-```
-
-### SIGN PROPOSAL
-
-This endpoint will sign attestation for specific account at a path.
-
-| Method  | Path | Produces |
-| ------------- | ------------- | ------------- |
-| `POST`  | `:mount-path/<pyrmont|mainnet>/accounts/sign-proposal`  | `200 application/json` |
-
-#### Parameters
-
-* `public_key` (`string: <required>`) - Specifies the public key of the account to sign.
-* `domain` (`string: <required>`) - Specifies the domain.
-* `slot` (`int: <required>`) - Specifies the slot.
-* `proposerIndex` (`int: <required>`) - Specifies the proposerIndex.
-* `parentRoot` (`string: <required>`) - Specifies the parentRoot.
-* `stateRoot` (`string: <required>`) - Specifies the stateRoot.
-* `bodyRoot` (`string: <required>`) - Specifies the bodyRoot.
-
-#### Sample Response
-
-The example below shows output for the successful sign of `/ethereum/accounts/account1/sign-proposal`.
-
-```
-{
-    "request_id": "b767dcca-5b10-4a52-1d9a-0a9b81b378ae",
-    "lease_id": "",
-    "renewable": false,
-    "lease_duration": 0,
-    "data": {
-        "signature": "kPyCp8ID44ceUB3KSp+7QsxqTlGSP2u6/cytr04qJyxkkIKIO/FW57qwH9E7/c48D1PgHsyb8hgoT8/jOLMD7Y/Jt06Qiw80ZRtoS78CzMFYRut/OQot+FzAJcW7Jk0U"
-    },
-    "wrap_info": null,
-    "warnings": null,
-    "auth": null
-}
-```
-
-### SIGN AGGREGATION
-
-This endpoint will sign attestation for specific account at a path.
-
-| Method  | Path | Produces |
-| ------------- | ------------- | ------------- |
-| `POST`  | `:mount-path/:network/accounts/sign-aggregation`  | `200 application/json` |
-
-#### Parameters
-
-* `public_key` (`string: <required>`) - Specifies the public key of the account to sign.
-* `domain` (`string: <required>`) - Specifies the domain.
-* `dataToSign` (`string: <required>`) - Specifies the slot.
-
-#### Sample Response
-
-The example below shows output for the successful creation of `/ethereum/accounts/account1/sign-aggregation`.
-
-```
-{
-    "request_id": "b767dcca-5b10-4a52-1d9a-0a9b81b378ae",
-    "lease_id": "",
-    "renewable": false,
-    "lease_duration": 0,
-    "data": {
-        "signature": "kPyCp8ID44ceUB3KSp+7QsxqTlGSP2u6/cytr04qJyxkkIKIO/FW57qwH9E7/c48D1PgHsyb8hgoT8/jOLMD7Y/Jt06Qiw80ZRtoS78CzMFYRut/OQot+FzAJcW7Jk0U"
     },
     "wrap_info": null,
     "warnings": null,
