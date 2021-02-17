@@ -6,7 +6,7 @@
 
 <!-- /DIGEST_START_MARKER/ -->
 ```bloxstaking/key-vault-rc:v1.1.1,bloxstaking/key-vault-rc:latest```
-```sha256:1b532aff501309ba1063f5b16ea86bf5fd02165140badd697befa7a43263f327```
+```sha256:3e79257fde9890af1af628b0f0b46bfbdee43ef9956528f22dd503c5bf036f79```
 <!-- /DIGEST_END_MARKER/ -->
 
 ## How to use this project?
