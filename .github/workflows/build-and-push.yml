@@ -96,8 +96,8 @@ jobs:
           end_marker="<!-- /DIGEST_END_MARKER/ -->"
           sed -i '\%'"$start_marker"'%,\%'"$end_marker"'%c\
           '"$start_marker"'\
-          '"${{ steps.prep.outputs.tags }}"'\
-          '"${{ steps.docker_build.outputs.digest }}"'\
+          '\`\`\`"${{ steps.prep.outputs.tags }}"\`\`\`'\
+          '\`\`\`"${{ steps.docker_build.outputs.digest }}"\`\`\`'\
           '"$end_marker"'' README.md
 
       - name: Commit files
