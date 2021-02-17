@@ -92,7 +92,15 @@ jobs:
 
       - name: Create local changes
         run: |
+          start_marker="<!-- /DIGEST_START_MARKER/ -->"
+          end_marker="<!-- /DIGEST_END_MARKER/ -->"
+          sed -i '\%'"$start_marker"'%,\%'"$end_marker"'%c\
+          '"$start_marker"'\n\
+          '"${{ steps.prep.outputs.tags }}"'\n\
+          '"${{ steps.docker_build.outputs.digest }}"'\n\
+          '"$end_marker"'' README.md
           echo "### ${{ steps.prep.outputs.tags }}: ${{ steps.docker_build.outputs.digest }}" > DOCKER-DIGEST.md
+
       - name: Commit files
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
