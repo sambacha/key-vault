@@ -4,13 +4,31 @@
 
 ## Latest Image Digest
 
+Latest verified image digest hosted on Docker Hub.<br />
+Use this hash when you `docker run` the image 
+
 <!-- /DIGEST_START_MARKER/ -->
 ```bloxstaking/key-vault-rc:v1.1.1,bloxstaking/key-vault-rc:latest```
 ```sha256:3e79257fde9890af1af628b0f0b46bfbdee43ef9956528f22dd503c5bf036f79```
 <!-- /DIGEST_END_MARKER/ -->
 
-## How to use this project?
+## How to run?
 
+ Use docker run with the latest image digest:
+
+```sh
+$ docker run -d --restart unless-stopped --cap-add=IPC_LOCK --name=key_vault\
+  -v $(pwd)/data:/data -v $(pwd)/policies:/policies -p 8200:8200\
+  -e VAULT_ADDR='http://127.0.0.1:8200/' -e VAULT_API_ADDR='http://127.0.0.1:8200/'\
+  -e VAULT_CLIENT_TIMEOUT='30s' -e UNSEAL=true bloxstaking/key-vault@{LATEST_IMAGE_DIGEST}
+```
+
+ For example:
+ ```sh
+ bloxstaking/key-vault@sha256:3e79257fde9890af1af628b0f0b46bfbdee43ef9956528f22dd503c5bf036f79
+ ```
+
+## How to build from source (development purposes)?
 
   1. Build the images and run the containers:
 
