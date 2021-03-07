@@ -4,51 +4,40 @@
 
 ## Latest Image Digest
 
-Latest verified image digest hosted on Docker Hub.<br />
-Use this hash when you `docker run` the image 
-
+Latest verified image digest hosted on Docker Hub.
+<!-- /TAG_START_MARKER/ -->
+<!-- /TAG_END_MARKER/ -->
+Use this hash when you `docker run` the image.
 <!-- /DIGEST_START_MARKER/ -->
-```bloxstaking/key-vault-rc:v1.1.1,bloxstaking/key-vault-rc:latest```
-```sha256:3e79257fde9890af1af628b0f0b46bfbdee43ef9956528f22dd503c5bf036f79```
 <!-- /DIGEST_END_MARKER/ -->
 
 ## How to run?
 
- Use docker run with the latest image digest:
-
-```sh
-$ docker run -d --restart unless-stopped --cap-add=IPC_LOCK --name=key_vault\
-  -v $(pwd)/data:/data -v $(pwd)/policies:/policies -p 8200:8200\
-  -e VAULT_ADDR='http://127.0.0.1:8200/' -e VAULT_API_ADDR='http://127.0.0.1:8200/'\
-  -e VAULT_CLIENT_TIMEOUT='30s' -e UNSEAL=true bloxstaking/key-vault@{LATEST_IMAGE_DIGEST}
-```
-
- For example:
- ```sh
- bloxstaking/key-vault@sha256:3e79257fde9890af1af628b0f0b46bfbdee43ef9956528f22dd503c5bf036f79
- ```
+Use docker run with the latest verified image digest:
+<!-- /CMD_START_MARKER/ -->
+<!-- /CMD_END_MARKER/ -->
 
 ## How to build from source (development purposes)?
 
-  1. Build the images and run the containers:
+1. Build the images and run the containers:
 
-        ```sh
-        $ docker-compose up -d --build
-        ```
+      ```sh
+      $ docker-compose up -d --build
+      ```
 
-  2. Execute the container
+2. Execute the container
 
-        ```sh
-        $ docker-compose exec vault bash
-        ```
+      ```sh
+      $ docker-compose exec vault bash
+      ```
 
-  3. Read the root token
- 
-        ```sh
-        $ docker-compose exec -T vault cat /data/keys/vault.root.token
-        ```
-        
-## Endpoints 
+3. Read the root token
+
+      ```sh
+      $ docker-compose exec -T vault cat /data/keys/vault.root.token
+      ```
+
+## Endpoints
 
 
 ### GET VERSION
@@ -278,59 +267,59 @@ path "ethereum/+/storage/slashing" {
 
 ## How to use policies?
 
-  1. Create a new policy named admin:
+1. Create a new policy named admin:
 
-        ```sh
-        $ vault policy write admin policies/admin-policy.hcl
-        ```
+      ```sh
+      $ vault policy write admin policies/admin-policy.hcl
+      ```
 
-  2. Create a token attached to admin policy:
+2. Create a token attached to admin policy:
 
-        ```sh
-        $ vault token create -policy="admin"
-        ```
+      ```sh
+      $ vault token create -policy="admin"
+      ```
 
-  3. Create a new policy named signer:
- 
-        ```sh
-        $ vault policy write signer policies/signer-policy.hcl
-        ```
+3. Create a new policy named signer:
 
-  4. Create a token attached to signer policy:
+      ```sh
+      $ vault policy write signer policies/signer-policy.hcl
+      ```
 
-        ```sh
-        $ vault token create -policy="signer"
-        ```
+4. Create a token attached to signer policy:
+
+      ```sh
+      $ vault token create -policy="signer"
+      ```
 
 ## About testing
 
-There are 2 types of tests in the project: end-to-end and unit ones. 
+There are 2 types of tests in the project: end-to-end and unit ones.
 In order to run all tests including e2e ones you will need to do the following command:
 ```bash
 $ make test
 ``` 
 
 New e2e tests should be placed in `./e2e/tests` directory and implement `E2E` interface.
-Use the current format to add new tests. 
+Use the current format to add new tests.
 
 
 ## Release Version
 
 versions are published to dockerhub based on tags.
-before publishing a tag update docker compose image to the to be pushed tag 
+before publishing a tag update docker compose image to the to be pushed tag
 
 ## Multinetworks
 
 The plugin supports multiple Ethereum networks. All available networks are defined in `./config/vault-plugin.sh`.
 New networks could be defined by the following steps:
 
-1. Enable secrets for a new network in `./config/vault-plugin.sh`. 
-    Example
+1. Enable secrets for a new network in `./config/vault-plugin.sh`.
+   Example
     ```bash
     $ vault secrets enable \
         -path=ethereum/pyrmont \
         -description="Eth Signing Wallet - Pyrmont Test Network" \
-        -plugin-name=ethsign plugin > /dev/null 2>&1
+        -plugin-name=ethsign plugin > /dev/null 2>  &1
     ```
 
 2. Update policies `./policies/admin-policy.hcl` and `./policies/signer-policy.hcl` by adding a definition with a new network in the path.

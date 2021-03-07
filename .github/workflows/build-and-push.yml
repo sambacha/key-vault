@@ -93,13 +93,32 @@ jobs:
 
       - name: Create local changes
         run: |
-          start_marker="<!-- /DIGEST_START_MARKER/ -->"
-          end_marker="<!-- /DIGEST_END_MARKER/ -->"
-          sed -i '\%'"$start_marker"'%,\%'"$end_marker"'%c\
-          '"$start_marker"'\
-          '\`\`\`"${{ steps.prep.outputs.tags }}"\`\`\`'\
+          runCMD="ֿֿ$ docker run -d --restart unless-stopped --cap-add=IPC_LOCK --name=key_vault\\\\\ \\
+            -v \$\(pwd\)/data:/data -v \$\(pwd\)/policies:/policies -p 8200:8200\\\\\ \\
+            -e VAULT_ADDR='http://127.0.0.1:8200/' -e VAULT_API_ADDR='http://127.0.0.1:8200/'\\\\\ \\
+            -e VAULT_CLIENT_TIMEOUT='30s' -e UNSEAL=true bloxstaking/key-vault@${{ steps.docker_build.outputs.digest }}"
+          start_marker_cmd="<!-- /CMD_START_MARKER/ -->"
+          end_marker_cmd="<!-- /CMD_END_MARKER/ -->"
+          start_marker_digest="<!-- /DIGEST_START_MARKER/ -->"
+          end_marker_digest="<!-- /DIGEST_END_MARKER/ -->"
+          start_marker_tag="<!-- /TAG_START_MARKER/ -->"
+          end_marker_tag="<!-- /TAG_END_MARKER/ -->"
+          sed -i '\%'"$start_marker_cmd"'%,\%'"$end_marker_cmd"'%c\
+          '"$start_marker_cmd"'\
+          '\`\`\`sh'\
+          '"${runCMD}"'\
+          '\`\`\`'\
+          '"$end_marker_cmd"'' README.md
+
+          sed -i '\%'"$start_marker_digest"'%,\%'"$end_marker_digest"'%c\
+          '"$start_marker_digest"'\
           '\`\`\`"${{ steps.docker_build.outputs.digest }}"\`\`\`'\
-          '"$end_marker"'' README.md
+          '"$end_marker_digest"'' README.md
+
+          sed -i '\%'"$start_marker_tag"'%,\%'"$end_marker_tag"'%c\
+          '"$start_marker_tag"'\
+          '\`\`\`"${{ steps.prep.outputs.tags }}"\`\`\`'\
+          '"$end_marker_tag"'' README.md
 
       - name: Commit files
         run: |
