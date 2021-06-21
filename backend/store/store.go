@@ -18,17 +18,15 @@ import (
 // Paths
 const (
 	WalletDataPath = "wallet/data"
-
-	AccountBase = "wallet/accounts/"
-	AccountPath = AccountBase + "%s"
+	AccountBase    = "wallet/accounts/"
+	AccountPath    = AccountBase + "%s"
 )
 
 // HashicorpVaultStore implements store.Store interface using Vault.
 type HashicorpVaultStore struct {
-	storage logical.Storage
-	ctx     context.Context
-	network core.Network
-
+	storage            logical.Storage
+	ctx                context.Context
+	network            core.Network
 	encryptor          encryptor.Encryptor
 	encryptionPassword []byte
 }
@@ -42,62 +40,123 @@ func NewHashicorpVaultStore(ctx context.Context, storage logical.Storage, networ
 	}
 }
 
+// FromInMemoryStoreSeedless adds only one account to existing accounts if it doesn't exists yet - in a seedless mode
+func FromInMemoryStoreSeedless(ctx context.Context, newStorage *inmemory.InMemStore, existingStorage logical.Storage) (*HashicorpVaultStore, error) {
+	// Get list of existing accounts
+	existingAccounts, err := existingStorage.List(ctx, AccountBase)
+	if err != nil {
+		return nil, err
+	}
+
+	// Iterate over accounts to understand if there's already existing ones
+	newAccounts, err := newStorage.ListAccounts()
+	if err != nil {
+		return nil, errors.Wrap(err, "Can not get accounts from request")
+	}
+
+	if len(newAccounts) == 0 {
+		return nil, errors.Errorf("There should be one new account in payload")
+	}
+
+	// Get new Account from request
+	newAccount := newAccounts[0]
+	newAccountId := newAccount.ID().String()
+
+	// Check if this newAccount is not exists in KV yet
+	for _, existingAccountId := range existingAccounts {
+		if existingAccountId == newAccountId {
+			return nil, errors.Errorf("Account already exists: %s", existingAccountId)
+		}
+	}
+
+	// Create new store
+	hashicorpVaultStore := NewHashicorpVaultStore(ctx, existingStorage, newStorage.Network())
+
+	// Open existing wallet?
+	_, err = hashicorpVaultStore.OpenWallet()
+	if err != nil {
+		return nil, errors.Wrap(err, "Can not open wallet")
+	}
+
+	// Adding validator to the wallet
+	err = hashicorpVaultStore.SaveAccount(newAccount)
+	if err != nil {
+		return nil, err
+	}
+
+	// Highest attestation
+	if val := newStorage.RetrieveHighestAttestation(newAccount.ValidatorPublicKey()); val != nil {
+		if err := hashicorpVaultStore.SaveHighestAttestation(newAccount.ValidatorPublicKey(), val); err != nil {
+			return nil, errors.Wrap(err, "failed to save highest attestation")
+		}
+	}
+
+	// Highest proposal
+	if val := newStorage.RetrieveHighestProposal(newAccount.ValidatorPublicKey()); val != nil {
+		if err := hashicorpVaultStore.SaveHighestProposal(newAccount.ValidatorPublicKey(), val); err != nil {
+			return nil, errors.Wrap(err, "failed to save highest proposal")
+		}
+	}
+
+	return hashicorpVaultStore, nil
+}
+
 // FromInMemoryStore creates the HashicorpVaultStore based on the given in-memory store.
-func FromInMemoryStore(ctx context.Context, inMem *inmemory.InMemStore, storage logical.Storage) (*HashicorpVaultStore, error) {
+func FromInMemoryStore(ctx context.Context, newStorage *inmemory.InMemStore, existingStorage logical.Storage) (*HashicorpVaultStore, error) {
 	// first delete old data
 	// delete all accounts
-	res, err := storage.List(ctx, AccountBase)
+	res, err := existingStorage.List(ctx, AccountBase)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, accountID := range res {
 		path := fmt.Sprintf(AccountPath, accountID)
-		if err := storage.Delete(ctx, path); err != nil {
+		if err := existingStorage.Delete(ctx, path); err != nil {
 			return nil, err
 		}
 	}
 
-	if err := storage.Delete(ctx, WalletDataPath); err != nil {
+	if err := existingStorage.Delete(ctx, WalletDataPath); err != nil {
 		return nil, err
 	}
 
-	if err := storage.Delete(ctx, AccountBase); err != nil {
+	if err := existingStorage.Delete(ctx, AccountBase); err != nil {
 		return nil, err
 	}
 
-	if err := storage.Delete(ctx, WalletHighestAttestationPath); err != nil {
+	if err := existingStorage.Delete(ctx, WalletHighestAttestationPath); err != nil {
 		return nil, err
 	}
 
-	if err := storage.Delete(ctx, WalletHighestProposalsBase); err != nil {
+	if err := existingStorage.Delete(ctx, WalletHighestProposalsBase); err != nil {
 		return nil, err
 	}
 
 	// Create new store
-	newStore := NewHashicorpVaultStore(ctx, storage, inMem.Network())
+	newHashicorpVaultStore := NewHashicorpVaultStore(ctx, existingStorage, newStorage.Network())
 
 	// Save wallet
-	wallet, err := inMem.OpenWallet()
+	wallet, err := newStorage.OpenWallet()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to open wallet")
 	}
 
-	if err := newStore.SaveWallet(wallet); err != nil {
+	if err := newHashicorpVaultStore.SaveWallet(wallet); err != nil {
 		return nil, errors.Wrap(err, "failed to save wallet")
 	}
 
 	// Save accounts
 	for _, acc := range wallet.Accounts() {
-		if err := newStore.SaveAccount(acc); err != nil {
+		if err := newHashicorpVaultStore.SaveAccount(acc); err != nil {
 			return nil, errors.Wrap(err, "failed to save account")
 		}
 	}
 
 	// save highest att.
 	for _, acc := range wallet.Accounts() {
-		if val := inMem.RetrieveHighestAttestation(acc.ValidatorPublicKey()); val != nil {
-			if err := newStore.SaveHighestAttestation(acc.ValidatorPublicKey(), val); err != nil {
+		if val := newStorage.RetrieveHighestAttestation(acc.ValidatorPublicKey()); val != nil {
+			if err := newHashicorpVaultStore.SaveHighestAttestation(acc.ValidatorPublicKey(), val); err != nil {
 				return nil, errors.Wrap(err, "failed to save highest attestation")
 			}
 		}
@@ -105,14 +164,14 @@ func FromInMemoryStore(ctx context.Context, inMem *inmemory.InMemStore, storage 
 
 	// save highest proposal.
 	for _, acc := range wallet.Accounts() {
-		if val := inMem.RetrieveHighestProposal(acc.ValidatorPublicKey()); val != nil {
-			if err := newStore.SaveHighestProposal(acc.ValidatorPublicKey(), val); err != nil {
+		if val := newStorage.RetrieveHighestProposal(acc.ValidatorPublicKey()); val != nil {
+			if err := newHashicorpVaultStore.SaveHighestProposal(acc.ValidatorPublicKey(), val); err != nil {
 				return nil, errors.Wrap(err, "failed to save highest proposal")
 			}
 		}
 	}
 
-	return newStore, nil
+	return newHashicorpVaultStore, nil
 }
 
 // Name returns the name of the store.
