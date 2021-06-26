@@ -34,67 +34,52 @@ type HashicorpVaultStore struct {
 // NewHashicorpVaultStore is the constructor of HashicorpVaultStore.
 func NewHashicorpVaultStore(ctx context.Context, storage logical.Storage, network core.Network) *HashicorpVaultStore {
 	return &HashicorpVaultStore{
-		storage: storage,
-		network: network,
-		ctx:     ctx,
+		storage	: storage,
+		network	: network,
+		ctx		: ctx,
 	}
 }
 
-// FromInMemoryStoreSeedless adds only one account to existing accounts if it doesn't exists yet - in a seedless mode
-func FromInMemoryStoreSeedless(ctx context.Context, newStorage *inmemory.InMemStore, existingStorage logical.Storage) (*HashicorpVaultStore, error) {
-	// Get list of existing accounts
-	existingAccounts, err := existingStorage.List(ctx, AccountBase)
+// UpdateAccounts creates the HashicorpVaultStore based on the given in-memory store.
+func UpdateAccounts(newStorage *inmemory.InMemStore, existingWallet core.Wallet, hashicorpVaultStore *HashicorpVaultStore) (*HashicorpVaultStore, error) {
+	// Open wallet from new storage to read new accounts
+	newWallet, err := newStorage.OpenWallet()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to open wallet of new storage")
 	}
 
-	// Iterate over accounts to understand if there's already existing ones
-	newAccounts, err := newStorage.ListAccounts()
-	if err != nil {
-		return nil, errors.Wrap(err, "Can not get accounts from request")
-	}
-
-	if len(newAccounts) == 0 {
-		return nil, errors.Errorf("There should be one new account in payload")
-	}
-
-	// Get new Account from request
-	newAccount := newAccounts[0]
-	newAccountId := newAccount.ID().String()
-
-	// Check if this newAccount is not exists in KV yet
-	for _, existingAccountId := range existingAccounts {
-		if existingAccountId == newAccountId {
-			return nil, errors.Errorf("Account already exists: %s", existingAccountId)
+	// Save new accounts
+	for _, newAccount := range newWallet.Accounts() {
+		// Check if account already exists and don't change it
+		// TODO: how to handle the same account name with index but different public keys?
+		existingAccount, _ := existingWallet.AccountByPublicKey(string(newAccount.ValidatorPublicKey()))
+		if existingAccount != nil {
+			continue
 		}
-	}
 
-	// Create new store
-	hashicorpVaultStore := NewHashicorpVaultStore(ctx, existingStorage, newStorage.Network())
-
-	// Open existing wallet?
-	_, err = hashicorpVaultStore.OpenWallet()
-	if err != nil {
-		return nil, errors.Wrap(err, "Can not open wallet")
-	}
-
-	// Adding validator to the wallet
-	err = hashicorpVaultStore.SaveAccount(newAccount)
-	if err != nil {
-		return nil, err
-	}
-
-	// Highest attestation
-	if val := newStorage.RetrieveHighestAttestation(newAccount.ValidatorPublicKey()); val != nil {
-		if err := hashicorpVaultStore.SaveHighestAttestation(newAccount.ValidatorPublicKey(), val); err != nil {
-			return nil, errors.Wrap(err, "failed to save highest attestation")
+		// Add validator account in wallet
+		err := existingWallet.AddValidatorAccount(newAccount)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to save account")
 		}
-	}
 
-	// Highest proposal
-	if val := newStorage.RetrieveHighestProposal(newAccount.ValidatorPublicKey()); val != nil {
-		if err := hashicorpVaultStore.SaveHighestProposal(newAccount.ValidatorPublicKey(), val); err != nil {
-			return nil, errors.Wrap(err, "failed to save highest proposal")
+		// Save account in vault
+		if err := hashicorpVaultStore.SaveAccount(newAccount); err != nil {
+			return nil, errors.Wrap(err, "failed to save account")
+		}
+
+		// Save highest attestation
+		if val := newStorage.RetrieveHighestAttestation(newAccount.ValidatorPublicKey()); val != nil {
+			if err := hashicorpVaultStore.SaveHighestAttestation(newAccount.ValidatorPublicKey(), val); err != nil {
+				return nil, errors.Wrap(err, "failed to save highest attestation")
+			}
+		}
+
+		// Save highest proposal
+		if val := newStorage.RetrieveHighestProposal(newAccount.ValidatorPublicKey()); val != nil {
+			if err := hashicorpVaultStore.SaveHighestProposal(newAccount.ValidatorPublicKey(), val); err != nil {
+				return nil, errors.Wrap(err, "failed to save highest proposal")
+			}
 		}
 	}
 
