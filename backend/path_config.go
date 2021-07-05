@@ -36,9 +36,9 @@ func configPaths(b *backend) []*framework.Path {
 					Type: framework.TypeString,
 					Description: `Ethereum network - can be one of the following values:
 					mainnet - MainNet Network
-					pyrmont - Pyrmont Test Network`,
+					prater - Prater Test Network`,
 					AllowedValues: []interface{}{
-						string(core.PyrmontNetwork),
+						string(core.PraterNetwork),
 						string(core.MainNetwork),
 					},
 				},

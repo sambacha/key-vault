@@ -36,7 +36,7 @@ func (test *ProposalReferenceSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	storage := setup.UpdateStorage(t, core.PyrmontNetwork, true, core.NDWallet, _byteArray("5470813f7deef638dc531188ca89e36976d536f680e89849cd9077fd096e20bc"))
+	storage := setup.UpdateStorage(t, core.PraterNetwork, true, core.NDWallet, _byteArray("5470813f7deef638dc531188ca89e36976d536f680e89849cd9077fd096e20bc"))
 	// Get wallet
 	wallet, err := storage.OpenWallet()
 	require.NoError(t, err)
@@ -49,7 +49,7 @@ func (test *ProposalReferenceSigning) Run(t *testing.T) {
 	domain := _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, blk)
 	require.NoError(t, err)
-	sig, err := setup.Sign("sign", req, core.PyrmontNetwork)
+	sig, err := setup.Sign("sign", req, core.PraterNetwork)
 	require.NoError(t, err)
 
 	expectedSig := _byteArray("911ac2f6d74039279f16eee4cc46f4c6eea0ef9d18f0d9739b407c150c07ccb104c1c4b034ad46b25719bafc22fad05205975393000ea09636f5ce427814e2fe12ea72041099cc7f6ec249e504992dbf65e968ab448ddf4e124cbcbc722829b5")

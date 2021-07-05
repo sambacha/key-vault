@@ -59,7 +59,7 @@ This endpoint will get a version of key-vault.
 
 #### Sample Response
 
-The example below shows output for a query path of `/ethereum/pyrmont/version`.
+The example below shows output for a query path of `/ethereum/prater/version`.
 
 ```
 {
@@ -87,7 +87,7 @@ This endpoint will list all accounts of key-vault.
 
 #### Sample Response
 
-The example below shows output for a query path of `/ethereum/pyrmont/accounts` when there is 1 account.
+The example below shows output for a query path of `/ethereum/prater/accounts` when there is 1 account.
 
 ```
 {
@@ -122,7 +122,7 @@ This endpoint will update the storage.
 
 #### Sample Response
 
-The example below shows output for a query path of `/ethereum/pyrmont/storage`.
+The example below shows output for a query path of `/ethereum/prater/storage`.
 
 ```
 {
@@ -152,7 +152,7 @@ This endpoint will update the storage.
 
 #### Sample Response
 
-The example below shows output for a query path of `/ethereum/pyrmont/storage/slashing`.
+The example below shows output for a query path of `/ethereum/prater/storage/slashing`.
 
 ```
 {
@@ -217,8 +217,8 @@ The plugin's endpoint paths are designed such that admin-level access policies v
 Use the following policy to assign to a signer level access token, with the abilities to list accounts and sign transactions.
 
 ```
-# Ability to list pyrmont wallet accounts ("list")
-path "ethereum/pyrmont/accounts" {
+# Ability to list prater wallet accounts ("list")
+path "ethereum/prater/accounts" {
   capabilities = ["list"]
 }
 
@@ -242,8 +242,8 @@ path "ethereum/+/version" {
 Use the following policy to assign to a admin level access token, with the full ability to update storage, list accounts and sign transactions.
 
 ```
-# Ability to list pyrmont wallet accounts ("list")
-path "ethereum/pyrmont/accounts" {
+# Ability to list prater wallet accounts ("list")
+path "ethereum/prater/accounts" {
   capabilities = ["list"]
 }
 
@@ -325,8 +325,8 @@ New networks could be defined by the following steps:
    Example
     ```bash
     $ vault secrets enable \
-        -path=ethereum/pyrmont \
-        -description="Eth Signing Wallet - Pyrmont Test Network" \
+        -path=ethereum/prater \
+        -description="Eth Signing Wallet - Prater Test Network" \
         -plugin-name=ethsign plugin > /dev/null 2>  &1
     ```
 

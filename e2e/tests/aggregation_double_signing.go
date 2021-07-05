@@ -28,7 +28,7 @@ func (test *AggregationDoubleSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	store := setup.UpdateStorage(t, core.PyrmontNetwork, true, core.HDWallet, nil)
+	store := setup.UpdateStorage(t, core.PraterNetwork, true, core.HDWallet, nil)
 	account := shared.RetrieveAccount(t, store)
 	pubKey := account.ValidatorPublicKey()
 
@@ -47,10 +47,10 @@ func (test *AggregationDoubleSigning) Run(t *testing.T) {
 	}
 	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
 	req, err := test.serializedReq(pubKey, nil, domain, agg)
-	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PraterNetwork)
 	require.NoError(t, err)
 
-	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PraterNetwork)
 	require.NoError(t, err)
 }
 

@@ -22,7 +22,7 @@ func _byteArray(input string) []byte {
 
 func baseKeyVault(seed []byte, t *testing.T) (*inmemory.InMemStore, core.Wallet, []core.ValidatorAccount) {
 	// store
-	inMemStore := inmemory.NewInMemStore(core.PyrmontNetwork)
+	inMemStore := inmemory.NewInMemStore(core.PraterNetwork)
 	// seed
 	// create keyvault in a normal in mem store
 	options := &ethkeymanager.KeyVaultOptions{}

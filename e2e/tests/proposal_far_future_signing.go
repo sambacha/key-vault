@@ -29,17 +29,17 @@ func (test *ProposalFarFutureSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	storage := setup.UpdateStorage(t, core.PyrmontNetwork, true, core.HDWallet, nil)
+	storage := setup.UpdateStorage(t, core.PraterNetwork, true, core.HDWallet, nil)
 	account := shared.RetrieveAccount(t, storage)
 	require.NotNil(t, account)
 	pubKeyBytes := account.ValidatorPublicKey()
 
 	blk := referenceBlock(t)
-	blk.Slot = core.PyrmontNetwork.EstimatedCurrentSlot() + 200
+	blk.Slot = core.PraterNetwork.EstimatedCurrentSlot() + 200
 	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, blk)
 	require.NoError(t, err)
-	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PraterNetwork)
 	require.NotNil(t, err)
 	expectedErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: proposed block slot too far into the future\\n\\n\"}}")
 	require.EqualError(t, err, expectedErr, fmt.Sprintf("actual: %s\n", err.Error()))

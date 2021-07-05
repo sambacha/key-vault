@@ -28,7 +28,7 @@ func (test *AggregationReferenceSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	storage := setup.UpdateStorage(t, core.PyrmontNetwork, true, core.NDWallet, _byteArray("6327b1e58c41d60dd7c3c8b9634204255707c2d12e2513c345001d8926745eea"))
+	storage := setup.UpdateStorage(t, core.PraterNetwork, true, core.NDWallet, _byteArray("6327b1e58c41d60dd7c3c8b9634204255707c2d12e2513c345001d8926745eea"))
 	// Get wallet
 	wallet, err := storage.OpenWallet()
 	require.NoError(t, err)
@@ -45,7 +45,7 @@ func (test *AggregationReferenceSigning) Run(t *testing.T) {
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, agg)
 
 	// Send sign attestation request
-	sig, err := setup.Sign("sign", req, core.PyrmontNetwork)
+	sig, err := setup.Sign("sign", req, core.PraterNetwork)
 	require.NoError(t, err)
 	expectedSig := _byteArray("8bf29e58a5b594415ce220c3a9f0d64a4cfa44397f92138f8f31849100149e18e0418ed0cb6068f38909b01e9950d7360a8ba1504bd7451c74add42acd82b148ac0b5f3687c429cc571b96307a8902e9976a24747ad68ad21e372302236aab25")
 	require.EqualValues(t, expectedSig, sig)

@@ -29,7 +29,7 @@ func (test *AttestationNoSlashingDataSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	storage := setup.UpdateStorage(t, core.PyrmontNetwork, false, core.HDWallet, nil)
+	storage := setup.UpdateStorage(t, core.PraterNetwork, false, core.HDWallet, nil)
 	account := shared.RetrieveAccount(t, storage)
 	require.NotNil(t, account)
 	pubKeyBytes := account.ValidatorPublicKey()
@@ -52,7 +52,7 @@ func (test *AttestationNoSlashingDataSigning) Run(t *testing.T) {
 	// Send sign attestation request
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, att)
 	require.NoError(t, err)
-	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PraterNetwork)
 	expectedErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: highest attestation data is nil, can't determine if attestation is slashable\\n\\n\"}}")
 	require.EqualError(t, err, expectedErr, fmt.Sprintf("actual: %s\n", err.Error()))
 }

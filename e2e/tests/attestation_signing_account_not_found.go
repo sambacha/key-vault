@@ -27,7 +27,7 @@ func (test *AttestationSigningAccountNotFound) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	setup.UpdateStorage(t, core.PyrmontNetwork, true, core.HDWallet, nil)
+	setup.UpdateStorage(t, core.PraterNetwork, true, core.HDWallet, nil)
 
 	// sign
 	att := &eth.AttestationData{
@@ -49,7 +49,7 @@ func (test *AttestationSigningAccountNotFound) Run(t *testing.T) {
 	require.NoError(t, err)
 
 	// send
-	res, err := setup.Sign("sign", req, core.PyrmontNetwork)
+	res, err := setup.Sign("sign", req, core.PraterNetwork)
 	require.Error(t, err)
 	require.IsType(t, &e2e.ServiceError{}, err)
 	require.EqualValues(t, "1 error occurred:\n\t* failed to sign: account not found\n\n", err.(*e2e.ServiceError).ErrorValue())

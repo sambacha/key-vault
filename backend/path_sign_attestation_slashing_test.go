@@ -77,7 +77,7 @@ func reqObject(att *eth.AttestationData, domain []byte, pubKey []byte) map[strin
 }
 
 func updateWithBasicHighestAtt(storage logical.Storage) error {
-	s := store.NewHashicorpVaultStore(context.Background(), storage, core.PyrmontNetwork)
+	s := store.NewHashicorpVaultStore(context.Background(), storage, core.PraterNetwork)
 	pubKey, _ := hex.DecodeString("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")
 	return s.SaveHighestAttestation(pubKey, &eth.AttestationData{
 		Source: &eth.Checkpoint{
