@@ -29,7 +29,7 @@ func (test *ProposalDoubleSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	store := setup.UpdateStorage(t, core.PyrmontNetwork, true, core.HDWallet, nil)
+	store := setup.UpdateStorage(t, core.PraterNetwork, true, core.HDWallet, nil)
 	account := shared.RetrieveAccount(t, store)
 	pubKey := account.ValidatorPublicKey()
 
@@ -38,14 +38,14 @@ func (test *ProposalDoubleSigning) Run(t *testing.T) {
 	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
 	req, err := test.serializedReq(pubKey, nil, domain, blk)
 	require.NoError(t, err)
-	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PraterNetwork)
 	require.NoError(t, err)
 
 	// Sign and save the slashable proposal
 	blk.ParentRoot = _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0d")
 	req, err = test.serializedReq(pubKey, nil, domain, blk)
 	require.NoError(t, err)
-	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PraterNetwork)
 	require.Error(t, err, "did not slash")
 	require.IsType(t, &e2e.ServiceError{}, err)
 

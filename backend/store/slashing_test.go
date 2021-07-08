@@ -47,7 +47,7 @@ func testBlock() *eth.BeaconBlock {
 }
 
 func getSlashingStorage() core.SlashingStore {
-	return store.NewHashicorpVaultStore(context.Background(), &logical.InmemStorage{}, core.PyrmontNetwork)
+	return store.NewHashicorpVaultStore(context.Background(), &logical.InmemStorage{}, core.PraterNetwork)
 }
 
 func TestSavingProposal(t *testing.T) {

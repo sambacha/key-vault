@@ -32,7 +32,7 @@ func keyVault(storage core.Storage) (*eth2keymanager.KeyVault, error) {
 }
 
 func getWalletStorage() core.Storage {
-	return store.NewHashicorpVaultStore(context.Background(), getStorage(), core.PyrmontNetwork)
+	return store.NewHashicorpVaultStore(context.Background(), getStorage(), core.PraterNetwork)
 }
 
 func TestOpeningAccounts(t *testing.T) {

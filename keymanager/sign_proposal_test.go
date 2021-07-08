@@ -31,7 +31,7 @@ func TestSignProposal(t *testing.T) {
 		Location:    s.URL,
 		AccessToken: DefaultAccessToken,
 		PubKey:      "a3862121db5914d7272b0b705e6e3c5336b79e316735661873566245207329c30f9a33d4fb5f5857fc6fd0a368186972",
-		Network:     "pyrmont",
+		Network:     "prater",
 	})
 	require.NoError(t, err)
 
@@ -39,7 +39,7 @@ func TestSignProposal(t *testing.T) {
 		protect.Lock()
 		currentMethod = func(writer http.ResponseWriter, request *http.Request) {
 			require.Equal(t, http.MethodPost, request.Method)
-			require.Equal(t, "/v1/ethereum/pyrmont/accounts/sign", request.URL.Path)
+			require.Equal(t, "/v1/ethereum/prater/accounts/sign", request.URL.Path)
 
 			var reqBody map[string]interface{}
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&reqBody))

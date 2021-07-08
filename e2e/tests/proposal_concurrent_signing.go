@@ -30,7 +30,7 @@ func (test *ProposalConcurrentSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	store := setup.UpdateStorage(t, core.PyrmontNetwork, true, core.HDWallet, nil)
+	store := setup.UpdateStorage(t, core.PraterNetwork, true, core.HDWallet, nil)
 	account := shared.RetrieveAccount(t, store)
 	pubKey := account.ValidatorPublicKey()
 
@@ -57,7 +57,7 @@ func (test *ProposalConcurrentSigning) runSlashableProposal(t *testing.T, cnt *i
 	req, err := test.serializedReq(pubKey, nil, domain, blk)
 	require.NoError(t, err)
 
-	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PraterNetwork)
 	if err == nil {
 		atomic.AddInt64(cnt, 1)
 	}

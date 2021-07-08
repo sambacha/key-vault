@@ -30,7 +30,7 @@ func _byteArray32(input string) []byte {
 }
 
 func baseInmemStorage() (*inmemory.InMemStore, uuid.UUID, error) {
-	inMemStore := inmemory.NewInMemStore(core.PyrmontNetwork)
+	inMemStore := inmemory.NewInMemStore(core.PraterNetwork)
 
 	// wallet
 	wallet := hd.NewWallet(&core.WalletContext{Storage: inMemStore})
@@ -103,7 +103,7 @@ func TestStorage(t *testing.T) {
 		res, err := b.HandleRequest(context.Background(), req)
 		require.NoError(tt, err)
 		require.True(tt, res.Data["status"].(bool))
-		return store.NewHashicorpVaultStore(context.Background(), req.Storage, core.PyrmontNetwork)
+		return store.NewHashicorpVaultStore(context.Background(), req.Storage, core.PraterNetwork)
 	}
 
 	t.Run("verify wallet and account", func(t *testing.T) {

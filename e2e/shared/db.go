@@ -28,7 +28,7 @@ func BaseInmemStorage(t *testing.T, minimalSlashingData bool, walletType core.Wa
 	err := core.InitBLS()
 	require.NoError(t, err)
 
-	store := inmemory.NewInMemStore(core.PyrmontNetwork)
+	store := inmemory.NewInMemStore(core.PraterNetwork)
 
 	// wallet
 	walletCtx := &core.WalletContext{Storage: store}

@@ -32,7 +32,7 @@ func (test *AggregationSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	storage := setup.UpdateStorage(t, core.PyrmontNetwork, true, core.HDWallet, nil)
+	storage := setup.UpdateStorage(t, core.PraterNetwork, true, core.HDWallet, nil)
 	account := shared.RetrieveAccount(t, storage)
 	require.NotNil(t, account)
 	pubKeyBytes := account.ValidatorPublicKey()
@@ -58,14 +58,14 @@ func (test *AggregationSigning) Run(t *testing.T) {
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, agg)
 
 	// Sign data
-	protector := slashingprotection.NewNormalProtection(inmemory.NewInMemStore(core.PyrmontNetwork))
+	protector := slashingprotection.NewNormalProtection(inmemory.NewInMemStore(core.PraterNetwork))
 	var signer signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
 
 	res, err := signer.SignAggregateAndProof(agg, domain, pubKeyBytes)
 	require.NoError(t, err)
 
 	// Send sign attestation request
-	sig, err := setup.Sign("sign", req, core.PyrmontNetwork)
+	sig, err := setup.Sign("sign", req, core.PraterNetwork)
 	require.NoError(t, err)
 
 	require.EqualValues(t, res, sig)

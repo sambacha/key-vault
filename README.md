@@ -6,11 +6,11 @@
 
 Latest verified image digest hosted on Docker Hub.
 <!-- /TAG_START_MARKER/ -->
-```bloxstaking/key-vault-rc:v1.1.1,bloxstaking/key-vault-rc:latest```
+```bloxstaking/key-vault-rc:v2.0.0,bloxstaking/key-vault-rc:latest```
 <!-- /TAG_END_MARKER/ -->
 Use this hash when you `docker run` the image.
 <!-- /DIGEST_START_MARKER/ -->
-```sha256:2565ec28fb04b68af97faf400aee830f2b205a6803a050ea4ddeddf47e1005c2```
+```sha256:8d70fd3ac93846d01fae3f2d482cc3ed1e0c17c459bb0cc0f39617633c7530d1```
 <!-- /DIGEST_END_MARKER/ -->
 
 ## How to run?
@@ -21,7 +21,7 @@ Use docker run with the latest verified image digest:
 ֿֿ$ docker run -d --restart unless-stopped --cap-add=IPC_LOCK --name=key_vault\ 
   -v $(pwd)/data:/data -v $(pwd)/policies:/policies -p 8200:8200\ 
   -e VAULT_ADDR='http://127.0.0.1:8200/' -e VAULT_API_ADDR='http://127.0.0.1:8200/'\ 
-  -e VAULT_CLIENT_TIMEOUT='30s' -e UNSEAL=true bloxstaking/key-vault@sha256:2565ec28fb04b68af97faf400aee830f2b205a6803a050ea4ddeddf47e1005c2
+  -e VAULT_CLIENT_TIMEOUT='30s' -e UNSEAL=true bloxstaking/key-vault@sha256:8d70fd3ac93846d01fae3f2d482cc3ed1e0c17c459bb0cc0f39617633c7530d1
 ```
 <!-- /CMD_END_MARKER/ -->
 
@@ -59,7 +59,7 @@ This endpoint will get a version of key-vault.
 
 #### Sample Response
 
-The example below shows output for a query path of `/ethereum/pyrmont/version`.
+The example below shows output for a query path of `/ethereum/prater/version`.
 
 ```
 {
@@ -87,7 +87,7 @@ This endpoint will list all accounts of key-vault.
 
 #### Sample Response
 
-The example below shows output for a query path of `/ethereum/pyrmont/accounts` when there is 1 account.
+The example below shows output for a query path of `/ethereum/prater/accounts` when there is 1 account.
 
 ```
 {
@@ -122,7 +122,7 @@ This endpoint will update the storage.
 
 #### Sample Response
 
-The example below shows output for a query path of `/ethereum/pyrmont/storage`.
+The example below shows output for a query path of `/ethereum/prater/storage`.
 
 ```
 {
@@ -152,7 +152,7 @@ This endpoint will update the storage.
 
 #### Sample Response
 
-The example below shows output for a query path of `/ethereum/pyrmont/storage/slashing`.
+The example below shows output for a query path of `/ethereum/prater/storage/slashing`.
 
 ```
 {
@@ -217,8 +217,8 @@ The plugin's endpoint paths are designed such that admin-level access policies v
 Use the following policy to assign to a signer level access token, with the abilities to list accounts and sign transactions.
 
 ```
-# Ability to list pyrmont wallet accounts ("list")
-path "ethereum/pyrmont/accounts" {
+# Ability to list prater wallet accounts ("list")
+path "ethereum/prater/accounts" {
   capabilities = ["list"]
 }
 
@@ -242,8 +242,8 @@ path "ethereum/+/version" {
 Use the following policy to assign to a admin level access token, with the full ability to update storage, list accounts and sign transactions.
 
 ```
-# Ability to list pyrmont wallet accounts ("list")
-path "ethereum/pyrmont/accounts" {
+# Ability to list prater wallet accounts ("list")
+path "ethereum/prater/accounts" {
   capabilities = ["list"]
 }
 
@@ -325,8 +325,8 @@ New networks could be defined by the following steps:
    Example
     ```bash
     $ vault secrets enable \
-        -path=ethereum/pyrmont \
-        -description="Eth Signing Wallet - Pyrmont Test Network" \
+        -path=ethereum/prater \
+        -description="Eth Signing Wallet - Prater Test Network" \
         -plugin-name=ethsign plugin > /dev/null 2>  &1
     ```
 

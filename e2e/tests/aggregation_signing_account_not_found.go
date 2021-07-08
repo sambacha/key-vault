@@ -27,7 +27,7 @@ func (test *AggregationSigningAccountNotFound) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	setup.UpdateStorage(t, core.PyrmontNetwork, true, core.HDWallet, nil)
+	setup.UpdateStorage(t, core.PraterNetwork, true, core.HDWallet, nil)
 
 	agg := &ethpb.AggregateAttestationAndProof{
 		AggregatorIndex: 0,
@@ -44,7 +44,7 @@ func (test *AggregationSigningAccountNotFound) Run(t *testing.T) {
 	}
 	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
 	req, err := test.serializedReq(make([]byte, 48), nil, domain, agg)
-	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PraterNetwork)
 	require.Error(t, err)
 	require.IsType(t, &e2e.ServiceError{}, err)
 	require.EqualValues(t, "1 error occurred:\n\t* failed to sign: account not found\n\n", err.(*e2e.ServiceError).ErrorValue())
