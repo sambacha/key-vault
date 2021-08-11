@@ -29,7 +29,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflag
 #
 # STEP 3: Get vault image and copy the plugin
 #
-FROM vault:1.6.1 AS runner
+FROM vault:1.8.1 AS runner
 
 # Download dependencies
 RUN apk -v --update --no-cache add \
@@ -55,6 +55,8 @@ WORKDIR /
 
 # Expose port 8200
 EXPOSE 8200
+
+HEALTHCHECK --interval=30s --timeout=30s --start-period=120s CMD curl -f -k https://127.0.0.1:8200/v1/sys/health || bash -c 'kill -s 15 -1 && (sleep 10; kill -s 9 -1)'
 
 # Run vault
 CMD ["bash", "/vault/config/entrypoint.sh"]
