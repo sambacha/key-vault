@@ -2,13 +2,15 @@ package tests
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"testing"
+
+	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/signer"
 	slashingprotection "github.com/bloxapp/eth2-key-manager/slashing_protection"
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/shared/bytesutil"
 	"github.com/stretchr/testify/require"
 
@@ -88,7 +90,7 @@ func (test *AttestationSigning) serializedReq(pk, root, domain []byte, attestati
 		Object:          &validatorpb.SignRequest_AttestationData{AttestationData: attestation},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}

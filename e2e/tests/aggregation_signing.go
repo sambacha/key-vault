@@ -2,10 +2,12 @@ package tests
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"testing"
 
-	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+
+	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/bloxapp/eth2-key-manager/signer"
 
@@ -79,7 +81,7 @@ func (test *AggregationSigning) serializedReq(pk, root, domain []byte, agg *ethp
 		Object:          &validatorpb.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: agg},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}

@@ -2,10 +2,12 @@ package tests
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"testing"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/stretchr/testify/require"
@@ -64,7 +66,7 @@ func (test *AttestationSigningAccountNotFound) serializedReq(pk, root, domain []
 		Object:          &validatorpb.SignRequest_AttestationData{AttestationData: attestation},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}

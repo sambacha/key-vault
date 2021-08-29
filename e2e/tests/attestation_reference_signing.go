@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 	"github.com/stretchr/testify/require"
 
@@ -40,7 +40,7 @@ func (test *AttestationReferenceSigning) Run(t *testing.T) {
 	// Decode attestation
 	attestationDataByts := _byteArray("1a203a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b2222122000000000000000000000000000000000000000000000000000000000000000002a24080212203a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b")
 	att := &eth.AttestationData{}
-	require.NoError(t, att.Unmarshal(attestationDataByts))
+	require.NoError(t, att.UnmarshalSSZ(attestationDataByts))
 	domain := _byteArray32("0100000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
 
 	// Send sign attestation request

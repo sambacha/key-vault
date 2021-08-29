@@ -2,10 +2,12 @@ package tests
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"testing"
 
-	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+
+	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/e2e"
@@ -40,7 +42,7 @@ func (test *AggregationReferenceSigning) Run(t *testing.T) {
 	// decode object
 	agg := &ethpb.AggregateAttestationAndProof{}
 	aggAttByts := _byteArray("08161260a1167cdbebeae876b3fa82d4f4c35fc3dc4706c7ae20cee359919fdbc93a2588c3f7a15c80d12a20c78ac6381a9fe35d06f6b8ae7e95fb87fa2195511bd53ce6f385aa71dda52b38771f954348a57acad9dde225da614c50c02173314417b0961ad1010a0109126a1a20eade62f0457b2fdf48e7d3fc4b60736688286be7c7a3ac4c9a16a5e0600bd9e42222122068656c6c6f2d776f726c640000000000000000000000000000000000000000002a221220eade62f0457b2fdf48e7d3fc4b60736688286be7c7a3ac4c9a16a5e0600bd9e41a60b101ab9cd396472716e5334ecbaf797078452117d73596bc5893480ae48f94eee6d5d7dfd67dad69969771f73b75c10816ce412a385cb85cb556d23649d5587cfc7758d95ee5b0ad33ae1a23ecad7fc08a86eba222497d7ed123a46b893393cd")
-	require.NoError(t, agg.Unmarshal(aggAttByts))
+	require.NoError(t, json.Unmarshal(aggAttByts, agg))
 	domain := _byteArray32("060000008c84cda94176cc2b1268357c57c3160131874a4408e155b0db826d11")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, agg)
 
@@ -59,7 +61,7 @@ func (test *AggregationReferenceSigning) serializedReq(pk, root, domain []byte, 
 		Object:          &validatorpb.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: agg},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}

@@ -2,15 +2,18 @@ package tests
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"math/rand"
 	"strconv"
 	"sync"
 	"sync/atomic"
 	"testing"
 
+	types "github.com/prysmaticlabs/eth2-types"
+	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+
 	"github.com/bloxapp/eth2-key-manager/core"
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/e2e"
@@ -52,10 +55,10 @@ func (test *AttestationConcurrentSigning) runSlashableAttestation(t *testing.T, 
 	wg.Add(1)
 	defer wg.Done()
 
-	randomCommittee := func() uint64 {
+	randomCommittee := func() types.CommitteeIndex {
 		max := 1000
 		min := 2
-		return uint64(rand.Intn(max-min) + min)
+		return types.CommitteeIndex(rand.Intn(max-min) + min)
 	}
 
 	att := &eth.AttestationData{
@@ -90,7 +93,7 @@ func (test *AttestationConcurrentSigning) serializedReq(pk, root, domain []byte,
 		Object:          &validatorpb.SignRequest_AttestationData{AttestationData: attestation},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}

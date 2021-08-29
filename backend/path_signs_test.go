@@ -3,11 +3,11 @@ package backend
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"testing"
 
-	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
 
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/stretchr/testify/require"
@@ -48,7 +48,7 @@ func basicAggregationAndProofDataWithOps(undefinedPubKey bool) map[string]interf
 		req.PublicKey = _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcd")
 	}
 
-	byts, _ := req.Marshal()
+	byts, _ := json.Marshal(req)
 	return map[string]interface{}{
 		"sign_req": hex.EncodeToString(byts),
 	}

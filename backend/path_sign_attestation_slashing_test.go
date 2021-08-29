@@ -3,12 +3,13 @@ package backend
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"testing"
 
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/hashicorp/vault/sdk/logical"
@@ -70,7 +71,7 @@ func reqObject(att *eth.AttestationData, domain []byte, pubKey []byte) map[strin
 		Object:          &validatorpb.SignRequest_AttestationData{AttestationData: att},
 	}
 
-	byts, _ := req.Marshal()
+	byts, _ := json.Marshal(req)
 	return map[string]interface{}{
 		"sign_req": hex.EncodeToString(byts),
 	}

@@ -2,11 +2,14 @@ package tests
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"testing"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	types "github.com/prysmaticlabs/eth2-types"
+	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/stretchr/testify/require"
@@ -48,8 +51,8 @@ func (test *AttestationFarFutureSigning) testFarFuture(
 	t *testing.T,
 	setup *e2e.BaseSetup,
 	pubKeyBytes []byte,
-	source uint64,
-	target uint64,
+	source types.Epoch,
+	target types.Epoch,
 	expectedErr string,
 ) {
 	att := &eth.AttestationData{
@@ -83,7 +86,7 @@ func (test *AttestationFarFutureSigning) serializedReq(pk, root, domain []byte, 
 		Object:          &validatorpb.SignRequest_AttestationData{AttestationData: attestation},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}

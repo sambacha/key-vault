@@ -2,12 +2,15 @@ package tests
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"testing"
+
+	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
 
 	"github.com/bloxapp/eth2-key-manager/signer"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	slashingprotection "github.com/bloxapp/eth2-key-manager/slashing_protection"
@@ -49,7 +52,7 @@ func (test *ProposalSigning) Run(t *testing.T) {
 	protector := slashingprotection.NewNormalProtection(storage)
 	var signer signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
 
-	res, err := signer.SignBeaconBlock(blk, domain, pubKeyBytes)
+	res, err := signer.SignBeaconBlock(wrapper.WrappedPhase0BeaconBlock(blk), domain, pubKeyBytes)
 	require.NoError(t, err)
 
 	// Send sign attestation request
@@ -67,7 +70,7 @@ func (test *ProposalSigning) serializedReq(pk, root, domain []byte, blk *eth.Bea
 		Object:          &validatorpb.SignRequest_Block{Block: blk},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}
