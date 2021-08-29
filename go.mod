@@ -59,9 +59,9 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.30.0 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
-	github.com/prysmaticlabs/eth2-types v0.0.0-20210712152240-10d33f6e0661 // indirect
+	github.com/prysmaticlabs/eth2-types v0.0.0-20210712152240-10d33f6e0661
 	github.com/prysmaticlabs/go-ssz v0.0.0-20210121151755-f6208871c388 // indirect
-	github.com/prysmaticlabs/prysm v1.4.3
+	github.com/prysmaticlabs/prysm v1.4.2-0.20210827024218-7757b49f067e
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	github.com/wealdtech/go-eth2-types/v2 v2.5.5 // indirect
