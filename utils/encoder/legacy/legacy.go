@@ -1,10 +1,13 @@
 package legacy
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	math_bits "math/bits"
+
+	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
 
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 )
@@ -24,6 +27,8 @@ func (l *Legacy) Encode(obj interface{}) ([]byte, error) {
 		return LegacyAttestationDataMarshal(t)
 	case *eth.BeaconBlock:
 		return LegacyBeaconBlockMarshal(t)
+	case *validatorpb.SignRequest:
+		return json.Marshal(t)
 	}
 	return nil, errors.New("type not supported")
 }
@@ -34,6 +39,8 @@ func (l *Legacy) Decode(data []byte, v interface{}) error {
 		return LegacyAttestationDataUnMarshal(t, data)
 	case *eth.BeaconBlock:
 		return LegacyBeaconBlockUnMarshal(t, data)
+	case *validatorpb.SignRequest:
+		return json.Unmarshal(data, t)
 	}
 	return errors.New("type not supported")
 }

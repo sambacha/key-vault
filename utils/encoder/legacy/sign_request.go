@@ -1,6 +1,8 @@
 package legacy
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 
@@ -9,6 +11,119 @@ import (
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
 )
+
+type SignRequest_Block struct {
+	Block *eth.BeaconBlock `protobuf:"bytes,101,opt,name=block,proto3,oneof" json:"block,omitempty"`
+}
+type SignRequest_AttestationData struct {
+	AttestationData *eth.AttestationData `protobuf:"bytes,102,opt,name=attestation_data,json=attestationData,proto3,oneof" json:"attestation_data,omitempty"`
+}
+type SignRequest_AggregateAttestationAndProof struct {
+	AggregateAttestationAndProof *eth.AggregateAttestationAndProof `protobuf:"bytes,103,opt,name=aggregate_attestation_and_proof,json=aggregateAttestationAndProof,proto3,oneof" json:"aggregate_attestation_and_proof,omitempty"`
+}
+type SignRequest_Exit struct {
+	Exit *eth.VoluntaryExit `protobuf:"bytes,104,opt,name=exit,proto3,oneof" json:"exit,omitempty"`
+}
+type SignRequest_Slot struct {
+	Slot uint64 `protobuf:"varint,105,opt,name=slot,proto3,oneof" json:"slot,omitempty"`
+}
+type SignRequest_Epoch struct {
+	Epoch uint64 `protobuf:"varint,106,opt,name=epoch,proto3,oneof" json:"epoch,omitempty"`
+}
+
+func (*SignRequest_Block) isSignRequest_Object()                                {}
+func (*SignRequest_Block) MarshalTo([]byte) (int, error)                        { return 0, nil }
+func (*SignRequest_Block) Size() int                                            { return 0 }
+func (*SignRequest_AttestationData) isSignRequest_Object()                      {}
+func (*SignRequest_AttestationData) MarshalTo([]byte) (int, error)              { return 0, nil }
+func (*SignRequest_AttestationData) Size() int                                  { return 0 }
+func (*SignRequest_AggregateAttestationAndProof) isSignRequest_Object()         {}
+func (*SignRequest_AggregateAttestationAndProof) MarshalTo([]byte) (int, error) { return 0, nil }
+func (*SignRequest_AggregateAttestationAndProof) Size() int                     { return 0 }
+func (*SignRequest_Exit) isSignRequest_Object()                                 {}
+func (*SignRequest_Exit) MarshalTo([]byte) (int, error)                         { return 0, nil }
+func (*SignRequest_Exit) Size() int                                             { return 0 }
+func (*SignRequest_Slot) isSignRequest_Object()                                 {}
+func (*SignRequest_Slot) MarshalTo([]byte) (int, error)                         { return 0, nil }
+func (*SignRequest_Slot) Size() int                                             { return 0 }
+func (*SignRequest_Epoch) isSignRequest_Object()                                {}
+func (*SignRequest_Epoch) MarshalTo([]byte) (int, error)                        { return 0, nil }
+func (*SignRequest_Epoch) Size() int                                            { return 0 }
+
+type isSignRequest_Object interface {
+	isSignRequest_Object()
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type signRequestJsonLegacy struct {
+	PublicKey       []byte `protobuf:"bytes,1,opt,name=public_key,json=publicKey,proto3" json:"public_key,omitempty"`
+	SigningRoot     []byte `protobuf:"bytes,2,opt,name=signing_root,json=signingRoot,proto3" json:"signing_root,omitempty"`
+	SignatureDomain []byte `protobuf:"bytes,3,opt,name=signature_domain,json=signatureDomain,proto3" json:"signature_domain,omitempty"`
+	// Types that are valid to be assigned to Object:
+	//	*SignRequest_Block
+	//	*SignRequest_AttestationData
+	//	*SignRequest_AggregateAttestationAndProof
+	//	*SignRequest_Exit
+	//	*SignRequest_Slot
+	//	*SignRequest_Epoch
+	Object isSignRequest_Object `protobuf_oneof:"object"`
+}
+
+func LegacySignRequestJsonUnMarshal(m *validatorpb.SignRequest, dAtA []byte) error {
+	l := &signRequestJsonLegacy{}
+	if err := json.Unmarshal(dAtA, l); err != nil {
+		return err
+	}
+
+	m.PublicKey = l.PublicKey
+	m.SigningRoot = l.SigningRoot
+	m.SignatureDomain = l.SignatureDomain
+	if l.Object == nil {
+		return nil
+	}
+	switch t := l.Object.(type) {
+	case *SignRequest_Block:
+		m.Object = &validatorpb.SignRequest_Block{Block: t.Block}
+	case *SignRequest_AttestationData:
+		m.Object = &validatorpb.SignRequest_AttestationData{AttestationData: t.AttestationData}
+	case *SignRequest_Slot:
+		m.Object = &validatorpb.SignRequest_Slot{Slot: types.Slot(t.Slot)}
+	case *SignRequest_Epoch:
+		m.Object = &validatorpb.SignRequest_Epoch{Epoch: types.Epoch(t.Epoch)}
+	case *SignRequest_AggregateAttestationAndProof:
+		m.Object = &validatorpb.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: t.AggregateAttestationAndProof}
+	default:
+		return errors.New("unsupported type")
+	}
+	return nil
+}
+
+func LegacySignRequestJsonMarshal(m *validatorpb.SignRequest) ([]byte, error) {
+	l := &signRequestJsonLegacy{
+		PublicKey:       m.PublicKey,
+		SigningRoot:     m.SigningRoot,
+		SignatureDomain: m.SignatureDomain,
+	}
+	if m.Object == nil {
+		return json.Marshal(l)
+	}
+	switch m.GetObject().(type) {
+	case *validatorpb.SignRequest_Block:
+		l.Object = &SignRequest_Block{Block: m.GetBlock()}
+	case *validatorpb.SignRequest_BlockV2:
+		return nil, errors.New("unsupported type")
+	case *validatorpb.SignRequest_AttestationData:
+		l.Object = &SignRequest_AttestationData{AttestationData: m.GetAttestationData()}
+	case *validatorpb.SignRequest_Slot:
+		l.Object = &SignRequest_Slot{Slot: uint64(m.GetSlot())}
+	case *validatorpb.SignRequest_Epoch:
+		l.Object = &SignRequest_Epoch{Epoch: uint64(m.GetEpoch())}
+	case *validatorpb.SignRequest_AggregateAttestationAndProof:
+		l.Object = &SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: m.GetAggregateAttestationAndProof()}
+	}
+	return json.Marshal(l)
+}
 
 func LegacySignRequestUnMarshal(m *validatorpb.SignRequest, dAtA []byte) error {
 	l := len(dAtA)
