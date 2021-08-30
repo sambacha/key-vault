@@ -8,6 +8,7 @@ require (
 	github.com/docker/go-connections v0.4.0
 	github.com/form3tech-oss/jwt-go v3.2.1+incompatible // indirect
 	github.com/getsentry/sentry-go v0.11.0
+	github.com/gogo/protobuf v1.3.2
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-cleanhttp v0.5.2
 	github.com/hashicorp/go-hclog v0.16.2
@@ -19,9 +20,13 @@ require (
 	github.com/pborman/uuid v1.2.1
 	github.com/pkg/errors v0.9.1
 	github.com/prysmaticlabs/eth2-types v0.0.0-20210303084904-c9735a06829d
+	github.com/prysmaticlabs/ethereumapis v0.0.0-20210828200228-86b9f0edae61 // indirect
+	github.com/prysmaticlabs/go-bitfield v0.0.0-20210809151128-385d8c5e3fb7
 	github.com/prysmaticlabs/prysm v1.4.3
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
+	google.golang.org/genproto v0.0.0-20210426193834-eac7f76ac494
+	google.golang.org/grpc v1.37.0
 )
 
 replace github.com/ethereum/go-ethereum => github.com/prysmaticlabs/bazel-go-ethereum v0.0.0-20210707101027-e8523651bf6f
