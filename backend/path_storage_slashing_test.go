@@ -22,26 +22,14 @@ func TestSlashingStorage_Read(t *testing.T) {
 	require.NoError(t, err)
 	publicKey := hex.EncodeToString(account.ValidatorPublicKey())
 
-	attestation := &eth.AttestationData{
-		Slot:            123123,
-		BeaconBlockRoot: []byte{1, 2, 3},
-		CommitteeIndex:  1,
-		Source: &eth.Checkpoint{
-			Root:  []byte{1, 2, 3},
-			Epoch: 123,
-		},
-		Target: &eth.Checkpoint{
-			Root:  []byte{1, 2, 3},
-			Epoch: 123,
-		},
-	}
-	proposal := &eth.BeaconBlock{
-		Slot:          123123,
-		ProposerIndex: 1,
-		ParentRoot:    []byte{1, 2, 3},
-		StateRoot:     []byte{1, 2, 3},
-		Body:          &eth.BeaconBlockBody{},
-	}
+	attestationDataSSZ := _byteArray("000000000000000000000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b0000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b")
+	blockSSZ := _byteArray("010000000000000055000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776badd5cb7e6a4bffd8ce7fe9697aed511661861e312ad546dcf5480159698f47a554000000a2c156a4bc9439f1d85f922f2abaa96e830f1c526101211bdb7d16f4ad9490a0302fc5adb089c05b5f16fd465962f47c04fc2b81a94d135a07c1613db61511c17284b51fafab984e56d3411e16e45f5068f146d9412f91d31ab0f237eac3d745a4e544482366bc9d5386f1cd0c4bf837327605620bf40c5514d51dfcadd14a4a8000000000000000a4e544482366bc9d5386f1cd0c4bf837327605620bf40c5514d51dfcadd14a4a0000000000000000000000000000000000000000000000000000000000000000dc000000dc000000dc000000c5010000c501000004000000e4000000000000000000000000000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b97b6f271ac364b041cd465f32fa7ffa19f5a811f1e6e14713f93e06537ef827d382bac72f0990b84f83cd9bbe0062815020086bf27b9ced172cc6add8ba5197991cf634d18666f5d43df6f09180ce20a357e4d05b2784409e32147f1042986e31f")
+
+	attestation := &eth.AttestationData{}
+	require.NoError(t, attestation.UnmarshalSSZ(attestationDataSSZ))
+
+	proposal := &eth.BeaconBlock{}
+	require.NoError(t, proposal.UnmarshalSSZ(blockSSZ))
 
 	t.Run("successfully read slashing history", func(t *testing.T) {
 		ctx := context.Background()
@@ -63,7 +51,11 @@ func TestSlashingStorage_Read(t *testing.T) {
 		var slashingHistory SlashingHistory
 		err = json.Unmarshal(data, &slashingHistory)
 		require.NoError(t, err)
-		require.EqualValues(t, attestation, slashingHistory.HighestAttestation)
-		require.EqualValues(t, proposal, slashingHistory.HighestProposal)
+		decodedAttSSZ, err := slashingHistory.HighestAttestation.MarshalSSZ()
+		require.NoError(t, err)
+		decodedProposalSSZ, err := slashingHistory.HighestProposal.MarshalSSZ()
+		require.NoError(t, err)
+		require.EqualValues(t, attestationDataSSZ, decodedAttSSZ)
+		require.EqualValues(t, blockSSZ, decodedProposalSSZ)
 	})
 }

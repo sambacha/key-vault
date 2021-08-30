@@ -6,25 +6,34 @@ import (
 )
 
 func (m *BeaconBlock) ToNewPrysm() *eth.BeaconBlock {
-	ret := &eth.BeaconBlock{
-		Slot:          types.Slot(m.Slot),
-		ProposerIndex: types.ValidatorIndex(m.ProposerIndex),
-		ParentRoot:    m.ParentRoot,
-		StateRoot:     m.StateRoot,
-		Body: &eth.BeaconBlockBody{
-			RandaoReveal: m.Body.RandaoReveal,
-			Eth1Data: &eth.Eth1Data{
-				DepositRoot:  m.Body.Eth1Data.DepositRoot,
-				DepositCount: m.Body.Eth1Data.DepositCount,
-				BlockHash:    m.Body.Eth1Data.BlockHash,
-			},
-			Graffiti:          m.Body.Graffiti,
-			ProposerSlashings: make([]*eth.ProposerSlashing, 0),
-			AttesterSlashings: make([]*eth.AttesterSlashing, 0),
-			Attestations:      make([]*eth.Attestation, 0),
-			Deposits:          make([]*eth.Deposit, 0),
-			VoluntaryExits:    make([]*eth.SignedVoluntaryExit, 0),
+	ret := &eth.BeaconBlock{}
+	m.ToPrysm(ret)
+	return ret
+}
+
+func (m *BeaconBlock) ToPrysm(ret *eth.BeaconBlock) {
+	ret.Slot = types.Slot(m.Slot)
+	ret.ProposerIndex = types.ValidatorIndex(m.ProposerIndex)
+	ret.ParentRoot = m.ParentRoot
+	ret.StateRoot = m.StateRoot
+
+	if m.Body == nil {
+		return
+	}
+
+	ret.Body = &eth.BeaconBlockBody{
+		RandaoReveal: m.Body.RandaoReveal,
+		Eth1Data: &eth.Eth1Data{
+			DepositRoot:  m.Body.Eth1Data.DepositRoot,
+			DepositCount: m.Body.Eth1Data.DepositCount,
+			BlockHash:    m.Body.Eth1Data.BlockHash,
 		},
+		Graffiti:          m.Body.Graffiti,
+		ProposerSlashings: make([]*eth.ProposerSlashing, 0),
+		AttesterSlashings: make([]*eth.AttesterSlashing, 0),
+		Attestations:      make([]*eth.Attestation, 0),
+		Deposits:          make([]*eth.Deposit, 0),
+		VoluntaryExits:    make([]*eth.SignedVoluntaryExit, 0),
 	}
 
 	for _, prop := range m.Body.ProposerSlashings {
@@ -96,7 +105,6 @@ func (m *BeaconBlock) ToNewPrysm() *eth.BeaconBlock {
 			Signature: exit.Signature,
 		})
 	}
-	return ret
 }
 
 func NewBeaconBlockFromNewPrysm(newPrysm *eth.BeaconBlock) *BeaconBlock {
@@ -105,20 +113,25 @@ func NewBeaconBlockFromNewPrysm(newPrysm *eth.BeaconBlock) *BeaconBlock {
 		ProposerIndex: uint64(newPrysm.ProposerIndex),
 		ParentRoot:    newPrysm.ParentRoot,
 		StateRoot:     newPrysm.StateRoot,
-		Body: &BeaconBlockBody{
-			RandaoReveal: newPrysm.Body.RandaoReveal,
-			Eth1Data: &Eth1Data{
-				DepositRoot:  newPrysm.Body.Eth1Data.DepositRoot,
-				DepositCount: newPrysm.Body.Eth1Data.DepositCount,
-				BlockHash:    newPrysm.Body.Eth1Data.BlockHash,
-			},
-			Graffiti:          newPrysm.Body.Graffiti,
-			ProposerSlashings: make([]*ProposerSlashing, 0),
-			AttesterSlashings: make([]*AttesterSlashing, 0),
-			Attestations:      make([]*Attestation, 0),
-			Deposits:          make([]*Deposit, 0),
-			VoluntaryExits:    make([]*SignedVoluntaryExit, 0),
+	}
+
+	if newPrysm.Body == nil {
+		return ret
+	}
+
+	ret.Body = &BeaconBlockBody{
+		RandaoReveal: newPrysm.Body.RandaoReveal,
+		Eth1Data: &Eth1Data{
+			DepositRoot:  newPrysm.Body.Eth1Data.DepositRoot,
+			DepositCount: newPrysm.Body.Eth1Data.DepositCount,
+			BlockHash:    newPrysm.Body.Eth1Data.BlockHash,
 		},
+		Graffiti:          newPrysm.Body.Graffiti,
+		ProposerSlashings: make([]*ProposerSlashing, 0),
+		AttesterSlashings: make([]*AttesterSlashing, 0),
+		Attestations:      make([]*Attestation, 0),
+		Deposits:          make([]*Deposit, 0),
+		VoluntaryExits:    make([]*SignedVoluntaryExit, 0),
 	}
 
 	for _, prop := range newPrysm.Body.ProposerSlashings {

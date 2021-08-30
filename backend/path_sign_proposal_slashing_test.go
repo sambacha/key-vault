@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+
 	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
 
 	bytesutil2 "github.com/prysmaticlabs/prysm/shared/bytesutil"
@@ -46,7 +48,7 @@ func basicProposalDataWithOps(undefinedPubKey bool, differentStateRoot bool, dif
 		req.PublicKey = _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcd")
 	}
 
-	byts, _ := json.Marshal(req)
+	byts, _ := encoderv2.New().Encode(req)
 	return map[string]interface{}{
 		"sign_req": hex.EncodeToString(byts),
 	}

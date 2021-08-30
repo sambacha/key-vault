@@ -3,7 +3,6 @@ package backend
 import (
 	"context"
 	"encoding/hex"
-	"encoding/json"
 	"sync"
 
 	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
@@ -61,7 +60,7 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 	}
 
 	signReq := &validatorpb.SignRequest{}
-	if err := json.Unmarshal(reqByts, signReq); err != nil {
+	if err := b.encoder.Decode(reqByts, signReq); err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal sign request")
 	}
 

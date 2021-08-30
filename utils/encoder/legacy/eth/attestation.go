@@ -6,34 +6,48 @@ import (
 )
 
 func NewAttestationDataFromNewPrysm(newPrysm *eth.AttestationData) *AttestationData {
-	return &AttestationData{
+	ret := &AttestationData{
 		Slot:            uint64(newPrysm.Slot),
 		CommitteeIndex:  uint64(newPrysm.CommitteeIndex),
 		BeaconBlockRoot: newPrysm.BeaconBlockRoot,
-		Source: &Checkpoint{
+	}
+
+	if newPrysm.Source != nil {
+		ret.Source = &Checkpoint{
 			Epoch: uint64(newPrysm.Source.Epoch),
 			Root:  newPrysm.Source.Root,
-		},
-		Target: &Checkpoint{
+		}
+	}
+	if newPrysm.Target != nil {
+		ret.Target = &Checkpoint{
 			Epoch: uint64(newPrysm.Target.Epoch),
 			Root:  newPrysm.Target.Root,
-		},
+		}
 	}
+	return ret
 }
 
 func (m *AttestationData) ToNewPrysm() *eth.AttestationData {
-	return &eth.AttestationData{
-		Slot:            types.Slot(m.Slot),
-		CommitteeIndex:  types.CommitteeIndex(m.CommitteeIndex),
-		BeaconBlockRoot: m.BeaconBlockRoot,
-		Source: &eth.Checkpoint{
+	ret := &eth.AttestationData{}
+	m.ToPrysm(ret)
+	return ret
+}
+
+func (m *AttestationData) ToPrysm(ret *eth.AttestationData) {
+	ret.Slot = types.Slot(m.Slot)
+	ret.CommitteeIndex = types.CommitteeIndex(m.CommitteeIndex)
+	ret.BeaconBlockRoot = m.BeaconBlockRoot
+	if m.Source != nil {
+		ret.Source = &eth.Checkpoint{
 			Epoch: types.Epoch(m.Source.Epoch),
 			Root:  m.Source.Root,
-		},
-		Target: &eth.Checkpoint{
+		}
+	}
+	if m.Target != nil {
+		ret.Target = &eth.Checkpoint{
 			Epoch: types.Epoch(m.Target.Epoch),
 			Root:  m.Target.Root,
-		},
+		}
 	}
 }
 
