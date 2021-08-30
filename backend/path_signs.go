@@ -62,7 +62,7 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 
 	signReq := &validatorpb.SignRequest{}
 	if err := json.Unmarshal(reqByts, signReq); err != nil {
-		return nil, errors.Wrap(err, "failed to unmarshal sign request SSZ")
+		return nil, errors.Wrap(err, "failed to unmarshal sign request")
 	}
 
 	var sig []byte

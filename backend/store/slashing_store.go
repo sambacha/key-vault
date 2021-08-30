@@ -2,7 +2,6 @@ package store
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
@@ -24,7 +23,7 @@ func (store *HashicorpVaultStore) SaveHighestAttestation(pubKey []byte, attestat
 	}
 
 	path := fmt.Sprintf(WalletHighestAttestationPath+"%s", store.identifierFromKey(pubKey))
-	data, err := json.Marshal(attestation)
+	data, err := store.encoder.Encode(attestation)
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal attestation request")
 	}
@@ -54,7 +53,7 @@ func (store *HashicorpVaultStore) RetrieveHighestAttestation(pubKey []byte) *eth
 	}
 
 	ret := &eth.AttestationData{}
-	if err := json.Unmarshal(entry.Value, ret); err != nil {
+	if err := store.encoder.Decode(entry.Value, ret); err != nil {
 		return nil
 	}
 
@@ -68,7 +67,7 @@ func (store *HashicorpVaultStore) SaveHighestProposal(pubKey []byte, block *eth.
 	}
 
 	path := fmt.Sprintf(WalletHighestProposalsBase, store.identifierFromKey(pubKey))
-	data, err := json.Marshal(block)
+	data, err := store.encoder.Encode(block)
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal proposal request")
 	}
@@ -98,7 +97,7 @@ func (store *HashicorpVaultStore) RetrieveHighestProposal(pubKey []byte) *eth.Be
 	}
 
 	ret := &eth.BeaconBlock{}
-	if err = json.Unmarshal(entry.Value, ret); err != nil {
+	if err = store.encoder.Decode(entry.Value, ret); err != nil {
 		return nil
 	}
 

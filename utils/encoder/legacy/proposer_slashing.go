@@ -1,4 +1,4 @@
-package encoder
+package legacy
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 )
 
-func LegacyAttesterSlashingUnMarshal(m *eth.AttesterSlashing, dAtA []byte) error {
+func LegacyProposerSlashingUnMarshal(m *eth.ProposerSlashing, dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -30,15 +30,15 @@ func LegacyAttesterSlashingUnMarshal(m *eth.AttesterSlashing, dAtA []byte) error
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: AttesterSlashing: wiretype end group for non-group")
+			return fmt.Errorf("proto: ProposerSlashing: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: AttesterSlashing: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ProposerSlashing: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
-		case 1:
+		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Attestation_1", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Header_1", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -65,16 +65,16 @@ func LegacyAttesterSlashingUnMarshal(m *eth.AttesterSlashing, dAtA []byte) error
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Attestation_1 == nil {
-				m.Attestation_1 = &eth.IndexedAttestation{}
+			if m.Header_1 == nil {
+				m.Header_1 = &eth.SignedBeaconBlockHeader{}
 			}
-			if err := LegacyIndexedAttestationUnMarshal(m.Attestation_1, dAtA[iNdEx:postIndex]); err != nil {
+			if err := LegacySignedBlockHeaderUnMarshal(m.Header_1, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
-		case 2:
+		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Attestation_2", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Header_2", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -101,10 +101,10 @@ func LegacyAttesterSlashingUnMarshal(m *eth.AttesterSlashing, dAtA []byte) error
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Attestation_2 == nil {
-				m.Attestation_2 = &eth.IndexedAttestation{}
+			if m.Header_2 == nil {
+				m.Header_2 = &eth.SignedBeaconBlockHeader{}
 			}
-			if err := LegacyIndexedAttestationUnMarshal(m.Attestation_2, dAtA[iNdEx:postIndex]); err != nil {
+			if err := LegacySignedBlockHeaderUnMarshal(m.Header_2, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -134,7 +134,7 @@ func LegacyAttesterSlashingUnMarshal(m *eth.AttesterSlashing, dAtA []byte) error
 	return nil
 }
 
-func attesterSlashing_marshalToSizedBuffer(m *eth.AttesterSlashing, dAtA []byte) (int, error) {
+func proposerSlashing_marshalToSizedBuffer(m *eth.ProposerSlashing, dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -143,9 +143,21 @@ func attesterSlashing_marshalToSizedBuffer(m *eth.AttesterSlashing, dAtA []byte)
 	//	i -= len(m.XXX_unrecognized)
 	//	copy(dAtA[i:], m.XXX_unrecognized)
 	//}
-	if m.Attestation_2 != nil {
+	if m.Header_2 != nil {
 		{
-			size, err := indexedAttestation_marshalToSizedBuffer(m.Attestation_2, dAtA[:i])
+			size, err := signedBlockHeader_marshalToSizedBuffer(m.Header_2, dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintBeaconBlock(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Header_1 != nil {
+		{
+			size, err := signedBlockHeader_marshalToSizedBuffer(m.Header_1, dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -155,33 +167,21 @@ func attesterSlashing_marshalToSizedBuffer(m *eth.AttesterSlashing, dAtA []byte)
 		i--
 		dAtA[i] = 0x12
 	}
-	if m.Attestation_1 != nil {
-		{
-			size, err := indexedAttestation_marshalToSizedBuffer(m.Attestation_1, dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintBeaconBlock(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0xa
-	}
 	return len(dAtA) - i, nil
 }
 
-func attesterSlashing_size(m *eth.AttesterSlashing) (n int) {
+func proposerSlashing_size(m *eth.ProposerSlashing) (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if m.Attestation_1 != nil {
-		l = indexedAttestation_size(m.Attestation_1)
+	if m.Header_1 != nil {
+		l = signedBlockHeader_size(m.Header_1)
 		n += 1 + l + sovBeaconBlock(uint64(l))
 	}
-	if m.Attestation_2 != nil {
-		l = indexedAttestation_size(m.Attestation_2)
+	if m.Header_2 != nil {
+		l = signedBlockHeader_size(m.Header_2)
 		n += 1 + l + sovBeaconBlock(uint64(l))
 	}
 	//if m.XXX_unrecognized != nil {

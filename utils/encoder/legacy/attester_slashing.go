@@ -1,4 +1,4 @@
-package encoder
+package legacy
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 )
 
-func LegacyETH1UnMarshal(m *eth.Eth1Data, dAtA []byte) error {
+func LegacyAttesterSlashingUnMarshal(m *eth.AttesterSlashing, dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -30,17 +30,17 @@ func LegacyETH1UnMarshal(m *eth.Eth1Data, dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: Eth1Data: wiretype end group for non-group")
+			return fmt.Errorf("proto: AttesterSlashing: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: Eth1Data: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: AttesterSlashing: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field DepositRoot", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Attestation_1", wireType)
 			}
-			var byteLen int
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowBeaconBlock
@@ -50,50 +50,33 @@ func LegacyETH1UnMarshal(m *eth.Eth1Data, dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				byteLen |= int(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if byteLen < 0 {
+			if msglen < 0 {
 				return ErrInvalidLengthBeaconBlock
 			}
-			postIndex := iNdEx + byteLen
+			postIndex := iNdEx + msglen
 			if postIndex < 0 {
 				return ErrInvalidLengthBeaconBlock
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.DepositRoot = append(m.DepositRoot[:0], dAtA[iNdEx:postIndex]...)
-			if m.DepositRoot == nil {
-				m.DepositRoot = []byte{}
+			if m.Attestation_1 == nil {
+				m.Attestation_1 = &eth.IndexedAttestation{}
+			}
+			if err := LegacyIndexedAttestationUnMarshal(m.Attestation_1, dAtA[iNdEx:postIndex]); err != nil {
+				return err
 			}
 			iNdEx = postIndex
 		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field DepositCount", wireType)
-			}
-			m.DepositCount = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowBeaconBlock
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.DepositCount |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field BlockHash", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Attestation_2", wireType)
 			}
-			var byteLen int
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowBeaconBlock
@@ -103,24 +86,26 @@ func LegacyETH1UnMarshal(m *eth.Eth1Data, dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				byteLen |= int(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if byteLen < 0 {
+			if msglen < 0 {
 				return ErrInvalidLengthBeaconBlock
 			}
-			postIndex := iNdEx + byteLen
+			postIndex := iNdEx + msglen
 			if postIndex < 0 {
 				return ErrInvalidLengthBeaconBlock
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.BlockHash = append(m.BlockHash[:0], dAtA[iNdEx:postIndex]...)
-			if m.BlockHash == nil {
-				m.BlockHash = []byte{}
+			if m.Attestation_2 == nil {
+				m.Attestation_2 = &eth.IndexedAttestation{}
+			}
+			if err := LegacyIndexedAttestationUnMarshal(m.Attestation_2, dAtA[iNdEx:postIndex]); err != nil {
+				return err
 			}
 			iNdEx = postIndex
 		default:
@@ -149,7 +134,7 @@ func LegacyETH1UnMarshal(m *eth.Eth1Data, dAtA []byte) error {
 	return nil
 }
 
-func eth1data_marshalToSizedBuffer(m *eth.Eth1Data, dAtA []byte) (int, error) {
+func attesterSlashing_marshalToSizedBuffer(m *eth.AttesterSlashing, dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -158,43 +143,45 @@ func eth1data_marshalToSizedBuffer(m *eth.Eth1Data, dAtA []byte) (int, error) {
 	//	i -= len(m.XXX_unrecognized)
 	//	copy(dAtA[i:], m.XXX_unrecognized)
 	//}
-	if len(m.BlockHash) > 0 {
-		i -= len(m.BlockHash)
-		copy(dAtA[i:], m.BlockHash)
-		i = encodeVarintBeaconBlock(dAtA, i, uint64(len(m.BlockHash)))
+	if m.Attestation_2 != nil {
+		{
+			size, err := indexedAttestation_marshalToSizedBuffer(m.Attestation_2, dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintBeaconBlock(dAtA, i, uint64(size))
+		}
 		i--
-		dAtA[i] = 0x1a
+		dAtA[i] = 0x12
 	}
-	if m.DepositCount != 0 {
-		i = encodeVarintBeaconBlock(dAtA, i, uint64(m.DepositCount))
-		i--
-		dAtA[i] = 0x10
-	}
-	if len(m.DepositRoot) > 0 {
-		i -= len(m.DepositRoot)
-		copy(dAtA[i:], m.DepositRoot)
-		i = encodeVarintBeaconBlock(dAtA, i, uint64(len(m.DepositRoot)))
+	if m.Attestation_1 != nil {
+		{
+			size, err := indexedAttestation_marshalToSizedBuffer(m.Attestation_1, dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintBeaconBlock(dAtA, i, uint64(size))
+		}
 		i--
 		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
 
-func eth1data_size(m *eth.Eth1Data) (n int) {
+func attesterSlashing_size(m *eth.AttesterSlashing) (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.DepositRoot)
-	if l > 0 {
+	if m.Attestation_1 != nil {
+		l = indexedAttestation_size(m.Attestation_1)
 		n += 1 + l + sovBeaconBlock(uint64(l))
 	}
-	if m.DepositCount != 0 {
-		n += 1 + sovBeaconBlock(uint64(m.DepositCount))
-	}
-	l = len(m.BlockHash)
-	if l > 0 {
+	if m.Attestation_2 != nil {
+		l = indexedAttestation_size(m.Attestation_2)
 		n += 1 + l + sovBeaconBlock(uint64(l))
 	}
 	//if m.XXX_unrecognized != nil {

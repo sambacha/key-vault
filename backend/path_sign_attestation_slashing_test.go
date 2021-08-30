@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
@@ -106,7 +105,6 @@ func TestAttestationSlashing(t *testing.T) {
 
 		req.Data = basicAttestationData()
 		res, err := b.HandleRequest(context.Background(), req)
-		fmt.Printf("res %#v\n", res)
 		require.NoError(t, err)
 		require.NotNil(t, res.Data)
 		require.Equal(t,

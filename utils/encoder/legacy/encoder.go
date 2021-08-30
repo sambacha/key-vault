@@ -1,4 +1,4 @@
-package encoder
+package legacy
 
 import (
 	"fmt"
@@ -14,6 +14,10 @@ var (
 	ErrInvalidLengthBeaconBlock        = fmt.Errorf("proto: negative length found during unmarshaling")
 	ErrIntOverflowBeaconBlock          = fmt.Errorf("proto: integer overflow")
 	ErrUnexpectedEndOfGroupBeaconBlock = fmt.Errorf("proto: unexpected end of group")
+
+	ErrInvalidLengthKeymanager        = fmt.Errorf("proto: negative length found during unmarshaling")
+	ErrIntOverflowKeymanager          = fmt.Errorf("proto: integer overflow")
+	ErrUnexpectedEndOfGroupKeymanager = fmt.Errorf("proto: unexpected end of group")
 )
 
 func encodeVarintAttestation(dAtA []byte, offset int, v uint64) int {

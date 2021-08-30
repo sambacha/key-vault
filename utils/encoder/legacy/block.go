@@ -1,4 +1,4 @@
-package encoder
+package legacy
 
 import (
 	"fmt"
@@ -8,132 +8,17 @@ import (
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 )
 
-func LegacySignedBlockHeaderUnMarshal(m *eth.SignedBeaconBlockHeader, dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowBeaconBlock
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: SignedBeaconBlockHeader: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: SignedBeaconBlockHeader: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Header", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowBeaconBlock
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthBeaconBlock
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthBeaconBlock
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.Header == nil {
-				m.Header = &eth.BeaconBlockHeader{}
-			}
-			if err := LegacyBlockHeaderUnMarshal(m.Header, dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Signature", wireType)
-			}
-			var byteLen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowBeaconBlock
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				byteLen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if byteLen < 0 {
-				return ErrInvalidLengthBeaconBlock
-			}
-			postIndex := iNdEx + byteLen
-			if postIndex < 0 {
-				return ErrInvalidLengthBeaconBlock
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Signature = append(m.Signature[:0], dAtA[iNdEx:postIndex]...)
-			if m.Signature == nil {
-				m.Signature = []byte{}
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipBeaconBlock(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthBeaconBlock
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthBeaconBlock
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			//m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
+func LegacyBeaconBlockMarshal(m *eth.BeaconBlock) ([]byte, error) {
+	size := beaconBlock_size(m)
+	dAtA := make([]byte, size)
+	n, err := beaconBlock_marshalToSizedBuffer(m, dAtA[:size])
+	if err != nil {
+		return nil, err
 	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
+	return dAtA[:n], nil
 }
 
-func LegacyBlockHeaderUnMarshal(m *eth.BeaconBlockHeader, dAtA []byte) error {
+func LegacyBeaconBlockUnMarshal(m *eth.BeaconBlock, dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -156,10 +41,10 @@ func LegacyBlockHeaderUnMarshal(m *eth.BeaconBlockHeader, dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: BeaconBlockHeader: wiretype end group for non-group")
+			return fmt.Errorf("proto: BeaconBlock: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: BeaconBlockHeader: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: BeaconBlock: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -270,9 +155,9 @@ func LegacyBlockHeaderUnMarshal(m *eth.BeaconBlockHeader, dAtA []byte) error {
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field BodyRoot", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Body", wireType)
 			}
-			var byteLen int
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowBeaconBlock
@@ -282,24 +167,26 @@ func LegacyBlockHeaderUnMarshal(m *eth.BeaconBlockHeader, dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				byteLen |= int(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if byteLen < 0 {
+			if msglen < 0 {
 				return ErrInvalidLengthBeaconBlock
 			}
-			postIndex := iNdEx + byteLen
+			postIndex := iNdEx + msglen
 			if postIndex < 0 {
 				return ErrInvalidLengthBeaconBlock
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.BodyRoot = append(m.BodyRoot[:0], dAtA[iNdEx:postIndex]...)
-			if m.BodyRoot == nil {
-				m.BodyRoot = []byte{}
+			if m.Body == nil {
+				m.Body = &eth.BeaconBlockBody{}
+			}
+			if err := LegacyBeaconBlockBodyUnMarshal(m.Body, dAtA[iNdEx:postIndex]); err != nil {
+				return err
 			}
 			iNdEx = postIndex
 		default:
@@ -328,7 +215,7 @@ func LegacyBlockHeaderUnMarshal(m *eth.BeaconBlockHeader, dAtA []byte) error {
 	return nil
 }
 
-func signedBlockHeader_marshalToSizedBuffer(m *eth.SignedBeaconBlockHeader, dAtA []byte) (int, error) {
+func beaconBlock_marshalToSizedBuffer(m *eth.BeaconBlock, dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -337,41 +224,15 @@ func signedBlockHeader_marshalToSizedBuffer(m *eth.SignedBeaconBlockHeader, dAtA
 	//	i -= len(m.XXX_unrecognized)
 	//	copy(dAtA[i:], m.XXX_unrecognized)
 	//}
-	if len(m.Signature) > 0 {
-		i -= len(m.Signature)
-		copy(dAtA[i:], m.Signature)
-		i = encodeVarintBeaconBlock(dAtA, i, uint64(len(m.Signature)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if m.Header != nil {
+	if m.Body != nil {
 		{
-			size, err := blockHeader_marshalToSizedBuffer(m.Header, dAtA[:i])
+			size, err := beaconBlockBody_marshalToSizedBuffer(m.Body, dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
 			i -= size
 			i = encodeVarintBeaconBlock(dAtA, i, uint64(size))
 		}
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func blockHeader_marshalToSizedBuffer(m *eth.BeaconBlockHeader, dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	//if m.XXX_unrecognized != nil {
-	//	i -= len(m.XXX_unrecognized)
-	//	copy(dAtA[i:], m.XXX_unrecognized)
-	//}
-	if len(m.BodyRoot) > 0 {
-		i -= len(m.BodyRoot)
-		copy(dAtA[i:], m.BodyRoot)
-		i = encodeVarintBeaconBlock(dAtA, i, uint64(len(m.BodyRoot)))
 		i--
 		dAtA[i] = 0x2a
 	}
@@ -402,27 +263,7 @@ func blockHeader_marshalToSizedBuffer(m *eth.BeaconBlockHeader, dAtA []byte) (in
 	return len(dAtA) - i, nil
 }
 
-func signedBlockHeader_size(m *eth.SignedBeaconBlockHeader) (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Header != nil {
-		l = blockHeader_size(m.Header)
-		n += 1 + l + sovBeaconBlock(uint64(l))
-	}
-	l = len(m.Signature)
-	if l > 0 {
-		n += 1 + l + sovBeaconBlock(uint64(l))
-	}
-	//if m.XXX_unrecognized != nil {
-	//	n += len(m.XXX_unrecognized)
-	//}
-	return n
-}
-
-func blockHeader_size(m *eth.BeaconBlockHeader) (n int) {
+func beaconBlock_size(m *eth.BeaconBlock) (n int) {
 	if m == nil {
 		return 0
 	}
@@ -442,8 +283,8 @@ func blockHeader_size(m *eth.BeaconBlockHeader) (n int) {
 	if l > 0 {
 		n += 1 + l + sovBeaconBlock(uint64(l))
 	}
-	l = len(m.BodyRoot)
-	if l > 0 {
+	if m.Body != nil {
+		l = beaconBlockBody_size(m.Body)
 		n += 1 + l + sovBeaconBlock(uint64(l))
 	}
 	//if m.XXX_unrecognized != nil {
