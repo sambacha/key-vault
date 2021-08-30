@@ -7,121 +7,35 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-/**
-blk := &ethpb.BeaconBlock{
-		Slot:12,
-		ProposerIndex:122,
-		ParentRoot: []byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-		StateRoot:[]byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-		Body: &ethpb.BeaconBlockBody{
-			RandaoReveal:         make([]byte, 96),
-			Eth1Data:             &ethpb.Eth1Data{
-				DepositRoot:          []byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-				DepositCount:         12,
-				BlockHash:            []byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-			},
-			Graffiti:             []byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-			ProposerSlashings:    []*ethpb.ProposerSlashing{
-				{
-					Header_1:             &ethpb.SignedBeaconBlockHeader{
-						Header:              &ethpb.BeaconBlockHeader{
-							Slot:12,
-							ProposerIndex:33,
-							ParentRoot: []byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-							StateRoot: []byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-							BodyRoot:[]byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-						},
-						Signature:            make([]byte, 96),
-					},
-					Header_2:               &ethpb.SignedBeaconBlockHeader{
-						Header:              &ethpb.BeaconBlockHeader{
-							Slot:12,
-							ProposerIndex:33,
-							ParentRoot: []byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-							StateRoot: []byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-							BodyRoot:[]byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-						},
-						Signature:            make([]byte, 96),
-					},
-				},
-			},
-			AttesterSlashings:    []*ethpb.AttesterSlashing{
-				{
-					Attestation_1: &ethpb.IndexedAttestation{
-						AttestingIndices:     []uint64{1,2,3},
-						Data:                 &ethpb.AttestationData{
-							Slot:12,
-							CommitteeIndex:1,
-							BeaconBlockRoot:[]byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-							Source: &ethpb.Checkpoint{
-								Epoch:1,
-								Root:[]byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-							},
-							Target:&ethpb.Checkpoint{
-								Epoch:1,
-								Root:[]byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-							},
-						},
-						Signature:            make([]byte, 96),
-					},
-				},
-			},
-			Attestations:         []*ethpb.Attestation{
-				{
-					AggregationBits: bitfield.NewBitlist(12),
-					Data:&ethpb.AttestationData{
-						Slot:12,
-						CommitteeIndex:1,
-						BeaconBlockRoot:[]byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-						Source: &ethpb.Checkpoint{
-							Epoch:1,
-							Root:[]byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-						},
-						Target:&ethpb.Checkpoint{
-							Epoch:1,
-							Root:[]byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-						},
-					},
-					Signature: make([]byte, 96),
-				},
-			},
-			Deposits:             []*ethpb.Deposit{
-				{
-					Proof: make([][]byte,33),
-					Data: &ethpb.Deposit_Data{
-						PublicKey:             make([]byte, 48),
-						WithdrawalCredentials: []byte{1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,9,9},
-						Amount:                32,
-						Signature:             make([]byte, 96),
-					},
-				},
-			},
-			VoluntaryExits:       []*ethpb.SignedVoluntaryExit{
-				{
-						Exit: &ethpb.VoluntaryExit{
-							Epoch: 12,
-							ValidatorIndex:33,
-						},
-						Signature: make([]byte, 96),
-				},
-			},
-		},
-	}
-*/
+// generated block from https://github.com/prysmaticlabs/prysm/blob/v1.1.0/shared/testutil/block.go#L65
 func TestLegacyBlockMarshal(t *testing.T) {
-	sszAttData := _byteArray("e7030000000000000000000000000000626c6f636b526f6f74000000000000000000000000000000000000000000000064000000000000000000000000000000000000000000000000000000000000000000000000000000c8000000000000000000000000000000000000000000000000000000000000000000000000000000")
-	originalSSZ := eth.AttestationData{}
+	sszAttData := _byteArray("0c000000000000000a00000000000000c26a0752c187df9e835bcea4b2cdf494360860ff589e7c7f30be21917f111bf2dad936bf55f3c4743a6659eb4e9b50f791aa781a9b470b377e156b358e27b205540000008d00ac04a601da595c750b2177f6941785937a014c3783b6eb5663992f591361e73abd2f18f3401679cbfa2ac7dcb5460464eed6368507135e73704336ecadf27dc0f092619754b355a7b796e88e89c76a117ccfcf71e2a5d42cf02429acb040685b310217aa8ed11d15f0ac1df629f3dc95b9e0e8fc550025cb18ae36f8fb732000000000000000685b310217aa8ed11d15f0ac1df629f3dc95b9e0e8fc550025cb18ae36f8fb730000000000000000000000000000000000000000000000000000000000000000dc000000dc000000dc000000c5010000c501000004000000e40000000b000000000000000000000000000000c26a0752c187df9e835bcea4b2cdf494360860ff589e7c7f30be21917f111bf2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c26a0752c187df9e835bcea4b2cdf494360860ff589e7c7f30be21917f111bf2aff989b94be8ed7d2b49f493328c6e4957c3a0b32568bc7f1a68dfb28f8c37c7254c8817281ed4770ea4b555f765e25b0887b515c8eb48e56ae94fb51ab005b7d60639ea96203c03233fe3fbdd45b4791bab4f2a8e0012ae3b43a4455849e53303")
+	originalSSZ := eth.BeaconBlock{}
 	require.NoError(t, originalSSZ.UnmarshalSSZ(sszAttData))
 
-	marshalByts := _byteArray("08e7071a20626c6f636b526f6f74000000000000000000000000000000000000000000000022240864122000000000000000000000000000000000000000000000000000000000000000002a2508c80112200000000000000000000000000000000000000000000000000000000000000000")
-	marshaled := &eth.AttestationData{}
-	require.NoError(t, LegacyAttestationDataUnMarshal(marshaled, marshalByts))
+	marshalByts := _byteArray("080c100a1a20c26a0752c187df9e835bcea4b2cdf494360860ff589e7c7f30be21917f111bf22220dad936bf55f3c4743a6659eb4e9b50f791aa781a9b470b377e156b358e27b2052aa2030a608d00ac04a601da595c750b2177f6941785937a014c3783b6eb5663992f591361e73abd2f18f3401679cbfa2ac7dcb5460464eed6368507135e73704336ecadf27dc0f092619754b355a7b796e88e89c76a117ccfcf71e2a5d42cf02429acb04012460a20685b310217aa8ed11d15f0ac1df629f3dc95b9e0e8fc550025cb18ae36f8fb7310201a20685b310217aa8ed11d15f0ac1df629f3dc95b9e0e8fc550025cb18ae36f8fb731a20000000000000000000000000000000000000000000000000000000000000000032d3010a0103126c080b1a20c26a0752c187df9e835bcea4b2cdf494360860ff589e7c7f30be21917f111bf22222122000000000000000000000000000000000000000000000000000000000000000002a221220c26a0752c187df9e835bcea4b2cdf494360860ff589e7c7f30be21917f111bf21a60aff989b94be8ed7d2b49f493328c6e4957c3a0b32568bc7f1a68dfb28f8c37c7254c8817281ed4770ea4b555f765e25b0887b515c8eb48e56ae94fb51ab005b7d60639ea96203c03233fe3fbdd45b4791bab4f2a8e0012ae3b43a4455849e533")
+	marshaled := &eth.BeaconBlock{}
+	require.NoError(t, LegacyBeaconBlockUnMarshal(marshaled, marshalByts))
+
+	// marshal and unmarshal
+	remarshalByts, err := LegacyBeaconBlockMarshal(marshaled)
+	require.NoError(t, err)
+	remarshaled := &eth.BeaconBlock{}
+	require.NoError(t, LegacyBeaconBlockUnMarshal(remarshaled, remarshalByts))
 
 	// verify
 	require.EqualValues(t, originalSSZ.Slot, marshaled.Slot)
-	require.EqualValues(t, originalSSZ.Target.Epoch, marshaled.Target.Epoch)
-	require.EqualValues(t, originalSSZ.Target.Root, marshaled.Target.Root)
-	require.EqualValues(t, originalSSZ.Source.Epoch, marshaled.Source.Epoch)
-	require.EqualValues(t, originalSSZ.Source.Root, marshaled.Source.Root)
-	require.EqualValues(t, originalSSZ.BeaconBlockRoot, marshaled.BeaconBlockRoot)
+	require.EqualValues(t, remarshaled.Slot, marshaled.Slot)
+
+	require.EqualValues(t, originalSSZ.ParentRoot, marshaled.ParentRoot)
+	require.EqualValues(t, remarshaled.ParentRoot, marshaled.ParentRoot)
+
+	require.EqualValues(t, originalSSZ.ProposerIndex, marshaled.ProposerIndex)
+	require.EqualValues(t, remarshaled.ProposerIndex, marshaled.ProposerIndex)
+
+	require.EqualValues(t, originalSSZ.StateRoot, marshaled.StateRoot)
+	require.EqualValues(t, remarshaled.StateRoot, marshaled.StateRoot)
+
+	require.EqualValues(t, originalSSZ.Body.Attestations[0].Signature, marshaled.Body.Attestations[0].Signature)
+	require.EqualValues(t, remarshaled.Body.Attestations[0].Signature, marshaled.Body.Attestations[0].Signature)
 }

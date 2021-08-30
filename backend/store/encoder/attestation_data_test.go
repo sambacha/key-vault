@@ -22,11 +22,28 @@ func TestLegacyAttestationDataMarshal(t *testing.T) {
 	marshaled := &eth.AttestationData{}
 	require.NoError(t, LegacyAttestationDataUnMarshal(marshaled, marshalByts))
 
+	// marshal and unmarshal
+	remarshalByts, err := LegacyAttestationDataMarshal(marshaled)
+	require.NoError(t, err)
+	remarshaled := &eth.AttestationData{}
+	require.NoError(t, LegacyAttestationDataUnMarshal(remarshaled, remarshalByts))
+
 	// verify
 	require.EqualValues(t, originalSSZ.Slot, marshaled.Slot)
+	require.EqualValues(t, remarshaled.Slot, marshaled.Slot)
+
 	require.EqualValues(t, originalSSZ.Target.Epoch, marshaled.Target.Epoch)
+	require.EqualValues(t, remarshaled.Target.Epoch, marshaled.Target.Epoch)
+
 	require.EqualValues(t, originalSSZ.Target.Root, marshaled.Target.Root)
+	require.EqualValues(t, remarshaled.Target.Root, marshaled.Target.Root)
+
 	require.EqualValues(t, originalSSZ.Source.Epoch, marshaled.Source.Epoch)
+	require.EqualValues(t, remarshaled.Source.Epoch, marshaled.Source.Epoch)
+
 	require.EqualValues(t, originalSSZ.Source.Root, marshaled.Source.Root)
+	require.EqualValues(t, remarshaled.Source.Root, marshaled.Source.Root)
+
 	require.EqualValues(t, originalSSZ.BeaconBlockRoot, marshaled.BeaconBlockRoot)
+	require.EqualValues(t, remarshaled.BeaconBlockRoot, marshaled.BeaconBlockRoot)
 }
