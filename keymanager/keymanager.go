@@ -8,11 +8,18 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+
+	encoder2 "github.com/bloxapp/key-vault/utils/encoder"
+
+	"github.com/prysmaticlabs/prysm/shared/event"
+
+	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+
 	"github.com/pkg/errors"
 
 	"github.com/bloxapp/key-vault/backend"
 
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 	"github.com/prysmaticlabs/prysm/shared/bls"
 	"github.com/prysmaticlabs/prysm/validator/keymanager"
 	"github.com/sirupsen/logrus"
@@ -42,6 +49,7 @@ type KeyManager struct {
 	pubKey        [48]byte
 	network       string
 	httpClient    *http.Client
+	encoder       encoder2.IEncoder
 
 	log *logrus.Entry
 }
@@ -72,6 +80,7 @@ func NewKeyManager(log *logrus.Entry, opts *Config) (*KeyManager, error) {
 		originPubKey:  opts.PubKey,
 		pubKey:        bytex.ToBytes48(decodedPubKey),
 		network:       opts.Network,
+		encoder:       encoderv2.New(),
 		httpClient: httpex.CreateClient(log, func(resp *http.Response, err error, numTries int) (*http.Response, error) {
 			if err == nil {
 				return resp, nil
@@ -114,7 +123,7 @@ func (km *KeyManager) Sign(_ context.Context, req *validatorpb.SignRequest) (bls
 		return nil, ErrNoSuchKey
 	}
 
-	byts, err := req.Marshal()
+	byts, err := km.encoder.Encode(req)
 	if err != nil {
 		return nil, err
 	}
@@ -186,5 +195,9 @@ func (km *KeyManager) sendRequest(method, path string, reqBody interface{}, resp
 		return NewGenericError(err, "failed to decode response body")
 	}
 
+	return nil
+}
+
+func (km *KeyManager) SubscribeAccountChanges(pubKeysChan chan [][48]byte) event.Subscription {
 	return nil
 }

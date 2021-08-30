@@ -8,6 +8,8 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+
 	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
 
 	"github.com/hashicorp/vault/sdk/logical"
@@ -51,7 +53,7 @@ func TestSignProposal(t *testing.T) {
 			valByts, err := hex.DecodeString(val.(string))
 			require.NoError(t, err)
 			req := &validatorpb.SignRequest{}
-			require.NoError(t, json.Unmarshal(valByts, req))
+			require.NoError(t, encoderv2.New().Decode(valByts, req))
 
 			require.EqualValues(t, _byteArray("a3862121db5914d7272b0b705e6e3c5336b79e316735661873566245207329c30f9a33d4fb5f5857fc6fd0a368186972"), req.PublicKey)
 			require.EqualValues(t, _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"), req.SignatureDomain)
