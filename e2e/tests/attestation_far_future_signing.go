@@ -2,9 +2,10 @@ package tests
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"testing"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
 	types "github.com/prysmaticlabs/eth2-types"
 	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
@@ -57,7 +58,7 @@ func (test *AttestationFarFutureSigning) testFarFuture(
 ) {
 	att := &eth.AttestationData{
 		Slot:            core.PyrmontNetwork.EstimatedCurrentSlot() + 1000,
-		CommitteeIndex:  2,
+		CommitteeIndex:  types.CommitteeIndex(2),
 		BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
 		Source: &eth.Checkpoint{
 			Epoch: source,
@@ -86,7 +87,7 @@ func (test *AttestationFarFutureSigning) serializedReq(pk, root, domain []byte, 
 		Object:          &validatorpb.SignRequest_AttestationData{AttestationData: attestation},
 	}
 
-	byts, err := json.Marshal(req)
+	byts, err := encoderv2.New().Encode(req)
 	if err != nil {
 		return nil, err
 	}

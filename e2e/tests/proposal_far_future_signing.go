@@ -2,9 +2,10 @@ package tests
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"testing"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
 	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
 
@@ -55,7 +56,7 @@ func (test *ProposalFarFutureSigning) serializedReq(pk, root, domain []byte, blk
 		Object:          &validatorpb.SignRequest_Block{Block: blk},
 	}
 
-	byts, err := json.Marshal(req)
+	byts, err := encoderv2.New().Encode(req)
 	if err != nil {
 		return nil, err
 	}

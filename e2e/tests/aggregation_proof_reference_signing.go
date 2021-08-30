@@ -4,7 +4,11 @@ import (
 	"encoding/hex"
 	"testing"
 
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+
+	types "github.com/prysmaticlabs/eth2-types"
+	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -53,10 +57,10 @@ func (test *AggregationProofReferenceSigning) serializedReq(pk, root, domain []b
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &validatorpb.SignRequest_Slot{Slot: slot},
+		Object:          &validatorpb.SignRequest_Slot{Slot: types.Slot(slot)},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := encoderv2.New().Encode(req)
 	if err != nil {
 		return nil, err
 	}

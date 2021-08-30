@@ -2,12 +2,13 @@ package tests
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"math/rand"
 	"strconv"
 	"sync"
 	"sync/atomic"
 	"testing"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
 	types "github.com/prysmaticlabs/eth2-types"
 	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
@@ -62,15 +63,15 @@ func (test *AttestationConcurrentSigning) runSlashableAttestation(t *testing.T, 
 	}
 
 	att := &eth.AttestationData{
-		Slot:            284115,
+		Slot:            types.Slot(284115),
 		CommitteeIndex:  randomCommittee(),
 		BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
 		Source: &eth.Checkpoint{
-			Epoch: 77,
+			Epoch: types.Epoch(77),
 			Root:  _byteArray32("7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d"),
 		},
 		Target: &eth.Checkpoint{
-			Epoch: 78,
+			Epoch: types.Epoch(78),
 			Root:  _byteArray32("17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0"),
 		},
 	}
@@ -93,7 +94,7 @@ func (test *AttestationConcurrentSigning) serializedReq(pk, root, domain []byte,
 		Object:          &validatorpb.SignRequest_AttestationData{AttestationData: attestation},
 	}
 
-	byts, err := json.Marshal(req)
+	byts, err := encoderv2.New().Encode(req)
 	if err != nil {
 		return nil, err
 	}
