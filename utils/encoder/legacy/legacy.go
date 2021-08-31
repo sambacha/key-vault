@@ -26,11 +26,11 @@ func New() *Legacy {
 func (l *Legacy) Encode(obj interface{}) ([]byte, error) {
 	switch t := obj.(type) {
 	case *newPrysm.AttestationData:
-		return json.Marshal(oldPrysm.NewAttestationDataFromNewPrysm(t))
+		return oldPrysm.NewAttestationDataFromNewPrysm(t).Marshal()
 	case oldPrysm.AttestationData:
 		return t.Marshal()
 	case *newPrysm.BeaconBlock:
-		return json.Marshal(oldPrysm.NewBeaconBlockFromNewPrysm(t))
+		return oldPrysm.NewBeaconBlockFromNewPrysm(t).Marshal()
 	case oldPrysm.BeaconBlock:
 		return t.Marshal()
 	case *validatorpb.SignRequest:
@@ -50,7 +50,7 @@ func (l *Legacy) Decode(data []byte, v interface{}) error {
 	switch t := v.(type) {
 	case *newPrysm.AttestationData:
 		toDecode := oldPrysm.NewAttestationDataFromNewPrysm(t)
-		if err := json.Unmarshal(data, toDecode); err != nil {
+		if err := toDecode.Unmarshal(data); err != nil {
 			return err
 		}
 		toDecode.ToPrysm(t)
@@ -59,7 +59,7 @@ func (l *Legacy) Decode(data []byte, v interface{}) error {
 		return t.Unmarshal(data)
 	case *newPrysm.BeaconBlock:
 		toDecode := oldPrysm.NewBeaconBlockFromNewPrysm(t)
-		if err := json.Unmarshal(data, toDecode); err != nil {
+		if err := toDecode.Unmarshal(data); err != nil {
 			return err
 		}
 		toDecode.ToPrysm(t)
