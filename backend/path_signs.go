@@ -103,8 +103,12 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 			sig, err = simpleSigner.SignEpoch(t.Epoch, signReq.SignatureDomain, signReq.PublicKey)
 		case *models.SignRequest_AggregateAttestationAndProof:
 			sig, err = simpleSigner.SignAggregateAndProof(t.AggregateAttestationAndProof, signReq.SignatureDomain, signReq.PublicKey)
-		case nil:
-			break
+		case *models.SignRequest_SyncCommitteeMessage:
+			sig, err = simpleSigner.SignSyncCommittee(t.Root, signReq.SignatureDomain, signReq.PublicKey)
+		case *models.SignRequest_SyncAggregatorSelectionData:
+			sig, err = simpleSigner.SignSyncCommitteeSelectionData(t.SyncAggregatorSelectionData, signReq.SignatureDomain, signReq.PublicKey)
+		case *models.SignRequest_ContributionAndProof:
+			sig, err = simpleSigner.SignSyncCommitteeContributionAndProof(t.ContributionAndProof, signReq.SignatureDomain, signReq.PublicKey)
 		default:
 			return errors.Errorf("sign request: not supported")
 		}

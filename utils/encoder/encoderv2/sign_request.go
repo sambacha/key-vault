@@ -128,58 +128,58 @@ func decodeSignRequest(data []byte, sr *models.SignRequest) error {
 	}
 
 	switch toDecode.ObjectType {
-	case "*sign_request.SignRequest_AttestationData":
+	case "*models.SignRequest_AttestationData":
 		data := &eth.AttestationData{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
 		sr.Object = &models.SignRequest_AttestationData{AttestationData: data}
 		break
-	case "*sign_request.SignRequest_Block":
+	case "*models.SignRequest_Block":
 		data := &eth.BeaconBlock{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
 		sr.Object = &models.SignRequest_Block{Block: data}
 		break
-	case "*sign_request.SignRequest_BlockV2":
+	case "*models.SignRequest_BlockV2":
 		data := &eth.BeaconBlockAltair{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
 		sr.Object = &models.SignRequest_BlockV2{BlockV2: data}
 		break
-	case "*sign_request.SignRequest_Slot":
+	case "*models.SignRequest_Slot":
 		data := types.Slot(1)
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
 		sr.Object = &models.SignRequest_Slot{Slot: data}
 		break
-	case "*sign_request.SignRequest_Epoch":
+	case "*models.SignRequest_Epoch":
 		data := types.Epoch(1)
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
 		sr.Object = &models.SignRequest_Epoch{Epoch: data}
 		break
-	case "*sign_request.SignRequest_AggregateAttestationAndProof":
+	case "*models.SignRequest_AggregateAttestationAndProof":
 		data := &eth.AggregateAttestationAndProof{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
 		sr.Object = &models.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: data}
 		break
-	case "*sign_request.SignRequest_SyncCommitteeMessage":
+	case "*models.SignRequest_SyncCommitteeMessage":
 		sr.Object = &models.SignRequest_SyncCommitteeMessage{Root: toDecode.Data}
-	case "*sign_request.SignRequest_SyncAggregatorSelectionData":
+	case "*models.SignRequest_SyncAggregatorSelectionData":
 		data := &eth.SyncAggregatorSelectionData{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
 		sr.Object = &models.SignRequest_SyncAggregatorSelectionData{SyncAggregatorSelectionData: data}
 		break
-	case "*sign_request.SignRequest_ContributionAndProof":
+	case "*models.SignRequest_ContributionAndProof":
 		data := &eth.ContributionAndProof{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
