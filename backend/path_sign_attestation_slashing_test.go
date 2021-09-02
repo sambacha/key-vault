@@ -5,9 +5,9 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+	"github.com/bloxapp/key-vault/keymanager/models"
 
-	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
@@ -64,11 +64,11 @@ func basicAttestationDataWithOps(differentPubKey, differentBlockRoot, differentS
 }
 
 func reqObject(att *eth.AttestationData, domain []byte, pubKey []byte) map[string]interface{} {
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       pubKey,
 		SigningRoot:     nil,
 		SignatureDomain: domain,
-		Object:          &validatorpb.SignRequest_AttestationData{AttestationData: att},
+		Object:          &models.SignRequest_AttestationData{AttestationData: att},
 	}
 
 	byts, _ := encoderv2.New().Encode(req)

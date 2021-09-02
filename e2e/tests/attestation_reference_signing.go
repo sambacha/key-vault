@@ -4,8 +4,9 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/bloxapp/key-vault/keymanager/models"
+
 	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
 
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/stretchr/testify/require"
@@ -55,11 +56,11 @@ func (test *AttestationReferenceSigning) Run(t *testing.T) {
 }
 
 func (test *AttestationReferenceSigning) serializedReq(pk, root, domain []byte, attestation *eth.AttestationData) (map[string]interface{}, error) {
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &validatorpb.SignRequest_AttestationData{AttestationData: attestation},
+		Object:          &models.SignRequest_AttestationData{AttestationData: attestation},
 	}
 
 	byts, err := encoderv2.New().Encode(req)

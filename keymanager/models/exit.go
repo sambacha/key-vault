@@ -1,4 +1,4 @@
-package sign_request
+package models
 
 import eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 

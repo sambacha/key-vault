@@ -4,9 +4,9 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/prysmaticlabs/go-bitfield"
+	"github.com/bloxapp/key-vault/keymanager/models"
 
-	"github.com/bloxapp/key-vault/utils/encoder/encoderv2/sign_request"
+	"github.com/prysmaticlabs/go-bitfield"
 
 	types "github.com/prysmaticlabs/eth2-types"
 
@@ -26,18 +26,18 @@ func TestV2(t *testing.T) {
 		attData := &eth.AttestationData{}
 		require.NoError(t, attData.UnmarshalSSZ(attestationDataByts))
 
-		req := &sign_request.SignRequest{
+		req := &models.SignRequest{
 			PublicKey:       []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 1},
 			SigningRoot:     make([]byte, 32),
 			SignatureDomain: make([]byte, 32),
-			Object:          &sign_request.SignRequest_AttestationData{AttestationData: attData},
+			Object:          &models.SignRequest_AttestationData{AttestationData: attData},
 		}
 
 		enc := New()
 		byts, err := enc.Encode(req)
 		require.NoError(t, err)
 
-		decoded := &sign_request.SignRequest{}
+		decoded := &models.SignRequest{}
 		enc.Decode(byts, decoded)
 		byts, err = decoded.GetAttestationData().MarshalSSZ()
 		require.NoError(t, err)
@@ -49,18 +49,18 @@ func TestV2(t *testing.T) {
 		data := &eth.BeaconBlock{}
 		require.NoError(t, data.UnmarshalSSZ(dataByts))
 
-		req := &sign_request.SignRequest{
+		req := &models.SignRequest{
 			PublicKey:       []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 1},
 			SigningRoot:     make([]byte, 32),
 			SignatureDomain: make([]byte, 32),
-			Object:          &sign_request.SignRequest_Block{Block: data},
+			Object:          &models.SignRequest_Block{Block: data},
 		}
 
 		enc := New()
 		byts, err := enc.Encode(req)
 		require.NoError(t, err)
 
-		decoded := &sign_request.SignRequest{}
+		decoded := &models.SignRequest{}
 		enc.Decode(byts, decoded)
 		byts, err = decoded.GetBlock().MarshalSSZ()
 		require.NoError(t, err)
@@ -72,18 +72,18 @@ func TestV2(t *testing.T) {
 		data := &eth.BeaconBlockAltair{}
 		require.NoError(t, data.UnmarshalSSZ(dataByts))
 
-		req := &sign_request.SignRequest{
+		req := &models.SignRequest{
 			PublicKey:       []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 1},
 			SigningRoot:     make([]byte, 32),
 			SignatureDomain: make([]byte, 32),
-			Object:          &sign_request.SignRequest_BlockV2{BlockV2: data},
+			Object:          &models.SignRequest_BlockV2{BlockV2: data},
 		}
 
 		enc := New()
 		byts, err := enc.Encode(req)
 		require.NoError(t, err)
 
-		decoded := &sign_request.SignRequest{}
+		decoded := &models.SignRequest{}
 		enc.Decode(byts, decoded)
 		byts, err = decoded.GetBlockV2().MarshalSSZ()
 		require.NoError(t, err)
@@ -95,18 +95,18 @@ func TestV2(t *testing.T) {
 		data := &eth.BeaconBlockAltair{}
 		require.NoError(t, data.UnmarshalSSZ(dataByts))
 
-		req := &sign_request.SignRequest{
+		req := &models.SignRequest{
 			PublicKey:       []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 1},
 			SigningRoot:     make([]byte, 32),
 			SignatureDomain: make([]byte, 32),
-			Object:          &sign_request.SignRequest_BlockV2{BlockV2: data},
+			Object:          &models.SignRequest_BlockV2{BlockV2: data},
 		}
 
 		enc := New()
 		byts, err := enc.Encode(req)
 		require.NoError(t, err)
 
-		decoded := &sign_request.SignRequest{}
+		decoded := &models.SignRequest{}
 		enc.Decode(byts, decoded)
 		byts, err = decoded.GetBlockV2().MarshalSSZ()
 		require.NoError(t, err)
@@ -114,61 +114,61 @@ func TestV2(t *testing.T) {
 		require.EqualValues(t, []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 1}, decoded.PublicKey)
 	})
 	t.Run("slot", func(t *testing.T) {
-		req := &sign_request.SignRequest{
+		req := &models.SignRequest{
 			PublicKey:       []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 1},
 			SigningRoot:     make([]byte, 32),
 			SignatureDomain: make([]byte, 32),
-			Object:          &sign_request.SignRequest_Slot{Slot: 2},
+			Object:          &models.SignRequest_Slot{Slot: 2},
 		}
 
 		enc := New()
 		byts, err := enc.Encode(req)
 		require.NoError(t, err)
 
-		decoded := &sign_request.SignRequest{}
+		decoded := &models.SignRequest{}
 		enc.Decode(byts, decoded)
 		require.EqualValues(t, types.Slot(2), decoded.GetSlot())
 		require.EqualValues(t, []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 1}, decoded.PublicKey)
 	})
 	t.Run("epoch", func(t *testing.T) {
-		req := &sign_request.SignRequest{
+		req := &models.SignRequest{
 			PublicKey:       []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 1},
 			SigningRoot:     make([]byte, 32),
 			SignatureDomain: make([]byte, 32),
-			Object:          &sign_request.SignRequest_Epoch{Epoch: 2},
+			Object:          &models.SignRequest_Epoch{Epoch: 2},
 		}
 
 		enc := New()
 		byts, err := enc.Encode(req)
 		require.NoError(t, err)
 
-		decoded := &sign_request.SignRequest{}
+		decoded := &models.SignRequest{}
 		enc.Decode(byts, decoded)
 		require.EqualValues(t, types.Epoch(2), decoded.GetEpoch())
 		require.EqualValues(t, []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 1}, decoded.PublicKey)
 	})
 	t.Run("sync committee", func(t *testing.T) {
-		req := &sign_request.SignRequest{
+		req := &models.SignRequest{
 			PublicKey:       []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 1},
 			SigningRoot:     make([]byte, 32),
 			SignatureDomain: make([]byte, 32),
-			Object:          &sign_request.SignRequest_SyncCommitteeMessage{Root: []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 1}},
+			Object:          &models.SignRequest_SyncCommitteeMessage{Root: []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 1}},
 		}
 
 		enc := New()
 		byts, err := enc.Encode(req)
 		require.NoError(t, err)
 
-		decoded := &sign_request.SignRequest{}
+		decoded := &models.SignRequest{}
 		enc.Decode(byts, decoded)
 		require.EqualValues(t, []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 1}, decoded.GetSyncCommitteeMessage())
 	})
 	t.Run("sync aggregator", func(t *testing.T) {
-		req := &sign_request.SignRequest{
+		req := &models.SignRequest{
 			PublicKey:       []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 1},
 			SigningRoot:     make([]byte, 32),
 			SignatureDomain: make([]byte, 32),
-			Object: &sign_request.SignRequest_SyncAggregatorSelectionData{
+			Object: &models.SignRequest_SyncAggregatorSelectionData{
 				SyncAggregatorSelectionData: &eth.SyncAggregatorSelectionData{
 					Slot:              types.Slot(12),
 					SubcommitteeIndex: 44,
@@ -180,17 +180,17 @@ func TestV2(t *testing.T) {
 		byts, err := enc.Encode(req)
 		require.NoError(t, err)
 
-		decoded := &sign_request.SignRequest{}
+		decoded := &models.SignRequest{}
 		enc.Decode(byts, decoded)
 		require.EqualValues(t, 12, decoded.GetSyncAggregatorSelectionData().Slot)
 		require.EqualValues(t, 44, decoded.GetSyncAggregatorSelectionData().SubcommitteeIndex)
 	})
 	t.Run("sync contribution proof", func(t *testing.T) {
-		req := &sign_request.SignRequest{
+		req := &models.SignRequest{
 			PublicKey:       []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 1},
 			SigningRoot:     make([]byte, 32),
 			SignatureDomain: make([]byte, 32),
-			Object: &sign_request.SignRequest_ContributionAndProof{
+			Object: &models.SignRequest_ContributionAndProof{
 				ContributionAndProof: &eth.ContributionAndProof{
 					AggregatorIndex: types.ValidatorIndex(12),
 					SelectionProof:  make([]byte, 96),
@@ -209,7 +209,7 @@ func TestV2(t *testing.T) {
 		byts, err := enc.Encode(req)
 		require.NoError(t, err)
 
-		decoded := &sign_request.SignRequest{}
+		decoded := &models.SignRequest{}
 		enc.Decode(byts, decoded)
 		require.EqualValues(t, 12, decoded.GetContributionAndProof().AggregatorIndex)
 		require.EqualValues(t, make([]byte, 96), decoded.GetContributionAndProof().SelectionProof)

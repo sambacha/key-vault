@@ -1,4 +1,4 @@
-package sign_request
+package models
 
 import (
 	types "github.com/prysmaticlabs/eth2-types"

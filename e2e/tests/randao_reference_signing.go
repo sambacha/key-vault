@@ -4,9 +4,10 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/bloxapp/key-vault/keymanager/models"
+
 	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 	types "github.com/prysmaticlabs/eth2-types"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/stretchr/testify/require"
@@ -49,11 +50,11 @@ func (test *RandaoReferenceSigning) Run(t *testing.T) {
 }
 
 func (test *RandaoReferenceSigning) serializedReq(pk, root, domain []byte, epoch uint64) (map[string]interface{}, error) {
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &validatorpb.SignRequest_Epoch{Epoch: types.Epoch(epoch)},
+		Object:          &models.SignRequest_Epoch{Epoch: types.Epoch(epoch)},
 	}
 
 	byts, err := encoderv2.New().Encode(req)
