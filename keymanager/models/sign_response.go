@@ -1,4 +1,4 @@
-package keymanager
+package models
 
 // SignResponse is the vault sign response model.
 type SignResponse struct {

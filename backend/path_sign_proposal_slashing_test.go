@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+	"github.com/bloxapp/key-vault/keymanager/models"
 
-	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
 	bytesutil2 "github.com/prysmaticlabs/prysm/shared/bytesutil"
 
@@ -37,11 +37,11 @@ func basicProposalDataWithOps(undefinedPubKey bool, differentStateRoot bool, dif
 		blk.Body.Graffiti = bytesutil2.Bytes32(10)
 	}
 
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"),
 		SigningRoot:     nil,
 		SignatureDomain: _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac"),
-		Object:          &validatorpb.SignRequest_Block{Block: blk},
+		Object:          &models.SignRequest_Block{Block: blk},
 	}
 
 	if undefinedPubKey {

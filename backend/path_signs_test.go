@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/bloxapp/key-vault/keymanager/models"
+
 	"github.com/prysmaticlabs/go-bitfield"
 
 	types "github.com/prysmaticlabs/eth2-types"
@@ -12,7 +14,6 @@ import (
 	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
 
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/stretchr/testify/require"
@@ -50,11 +51,11 @@ func basicAggregationAndProofDataWithOps(undefinedPubKey bool) map[string]interf
 		},
 	}
 
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"),
 		SigningRoot:     nil,
 		SignatureDomain: _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac"),
-		Object:          &validatorpb.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: agg},
+		Object:          &models.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: agg},
 	}
 
 	if undefinedPubKey {

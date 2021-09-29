@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+	"github.com/bloxapp/key-vault/keymanager/models"
 
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
@@ -69,11 +69,11 @@ func (test *SlashingStorageRead) Run(t *testing.T) {
 }
 
 func (test *SlashingStorageRead) serializedReq(pk, root, domain []byte, blk *eth.BeaconBlock) (map[string]interface{}, error) {
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &validatorpb.SignRequest_Block{Block: blk},
+		Object:          &models.SignRequest_Block{Block: blk},
 	}
 
 	byts, err := json.Marshal(req)

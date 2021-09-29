@@ -4,10 +4,10 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/bloxapp/key-vault/keymanager/models"
+
 	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 	types "github.com/prysmaticlabs/eth2-types"
-
-	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
 
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
@@ -61,11 +61,11 @@ func (test *AttestationSigningAccountNotFound) Run(t *testing.T) {
 }
 
 func (test *AttestationSigningAccountNotFound) serializedReq(pk, root, domain []byte, attestation *eth.AttestationData) (map[string]interface{}, error) {
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &validatorpb.SignRequest_AttestationData{AttestationData: attestation},
+		Object:          &models.SignRequest_AttestationData{AttestationData: attestation},
 	}
 
 	byts, err := encoderv2.New().Encode(req)

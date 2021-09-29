@@ -5,7 +5,8 @@ import (
 	"encoding/hex"
 	"sync"
 
-	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+	"github.com/bloxapp/key-vault/keymanager/models"
+
 	wrapper2 "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
 
 	vault "github.com/bloxapp/eth2-key-manager"
@@ -59,7 +60,7 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 		return nil, errors.Wrap(err, "failed to decode sign request hex")
 	}
 
-	signReq := &validatorpb.SignRequest{}
+	signReq := &models.SignRequest{}
 	if err := b.encoder.Decode(reqByts, signReq); err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal sign request")
 	}
@@ -86,22 +87,28 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 		var simpleSigner signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
 
 		switch t := signReq.GetObject().(type) {
-		case *validatorpb.SignRequest_Block:
+		case *models.SignRequest_Block:
 			sig, err = simpleSigner.SignBeaconBlock(wrapper2.WrappedPhase0BeaconBlock(t.Block), signReq.SignatureDomain, signReq.PublicKey)
-		case *validatorpb.SignRequest_BlockV2:
+		case *models.SignRequest_BlockV2:
 			altairBlk, err := wrapper2.WrappedAltairBeaconBlock(t.BlockV2)
 			if err != nil {
 				return errors.Wrap(err, "failed to wrap altair block")
 			}
 			sig, err = simpleSigner.SignBeaconBlock(altairBlk, signReq.SignatureDomain, signReq.PublicKey)
-		case *validatorpb.SignRequest_AttestationData:
+		case *models.SignRequest_AttestationData:
 			sig, err = simpleSigner.SignBeaconAttestation(t.AttestationData, signReq.SignatureDomain, signReq.PublicKey)
-		case *validatorpb.SignRequest_Slot:
+		case *models.SignRequest_Slot:
 			sig, err = simpleSigner.SignSlot(t.Slot, signReq.SignatureDomain, signReq.PublicKey)
-		case *validatorpb.SignRequest_Epoch:
+		case *models.SignRequest_Epoch:
 			sig, err = simpleSigner.SignEpoch(t.Epoch, signReq.SignatureDomain, signReq.PublicKey)
-		case *validatorpb.SignRequest_AggregateAttestationAndProof:
+		case *models.SignRequest_AggregateAttestationAndProof:
 			sig, err = simpleSigner.SignAggregateAndProof(t.AggregateAttestationAndProof, signReq.SignatureDomain, signReq.PublicKey)
+		case *models.SignRequest_SyncCommitteeMessage:
+			sig, err = simpleSigner.SignSyncCommittee(t.Root, signReq.SignatureDomain, signReq.PublicKey)
+		case *models.SignRequest_SyncAggregatorSelectionData:
+			sig, err = simpleSigner.SignSyncCommitteeSelectionData(t.SyncAggregatorSelectionData, signReq.SignatureDomain, signReq.PublicKey)
+		case *models.SignRequest_ContributionAndProof:
+			sig, err = simpleSigner.SignSyncCommitteeContributionAndProof(t.ContributionAndProof, signReq.SignatureDomain, signReq.PublicKey)
 		default:
 			return errors.Errorf("sign request: not supported")
 		}

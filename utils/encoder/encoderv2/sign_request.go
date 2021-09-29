@@ -5,11 +5,11 @@ import (
 	"errors"
 	"reflect"
 
+	"github.com/bloxapp/key-vault/keymanager/models"
+
 	types "github.com/prysmaticlabs/eth2-types"
 
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-
-	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
 )
 
 type signRequestEncoded struct {
@@ -20,7 +20,7 @@ type signRequestEncoded struct {
 	ObjectType      string
 }
 
-func encodeSignReuqest(sr *validatorpb.SignRequest) ([]byte, error) {
+func encodeSignReuqest(sr *models.SignRequest) ([]byte, error) {
 	toEncode := signRequestEncoded{
 		PublicKey:       sr.PublicKey,
 		SigningRoot:     sr.SigningRoot,
@@ -32,7 +32,7 @@ func encodeSignReuqest(sr *validatorpb.SignRequest) ([]byte, error) {
 	}
 
 	switch t := sr.Object.(type) {
-	case *validatorpb.SignRequest_AttestationData:
+	case *models.SignRequest_AttestationData:
 		byts, err := t.AttestationData.MarshalSSZ()
 		if err != nil {
 			return nil, err
@@ -40,7 +40,7 @@ func encodeSignReuqest(sr *validatorpb.SignRequest) ([]byte, error) {
 		toEncode.Data = byts
 		toEncode.ObjectType = reflect.TypeOf(t).String()
 		break
-	case *validatorpb.SignRequest_Block:
+	case *models.SignRequest_Block:
 		byts, err := t.Block.MarshalSSZ()
 		if err != nil {
 			return nil, err
@@ -48,7 +48,7 @@ func encodeSignReuqest(sr *validatorpb.SignRequest) ([]byte, error) {
 		toEncode.Data = byts
 		toEncode.ObjectType = reflect.TypeOf(t).String()
 		break
-	case *validatorpb.SignRequest_BlockV2:
+	case *models.SignRequest_BlockV2:
 		byts, err := t.BlockV2.MarshalSSZ()
 		if err != nil {
 			return nil, err
@@ -56,7 +56,7 @@ func encodeSignReuqest(sr *validatorpb.SignRequest) ([]byte, error) {
 		toEncode.Data = byts
 		toEncode.ObjectType = reflect.TypeOf(t).String()
 		break
-	case *validatorpb.SignRequest_AggregateAttestationAndProof:
+	case *models.SignRequest_AggregateAttestationAndProof:
 		byts, err := t.AggregateAttestationAndProof.MarshalSSZ()
 		if err != nil {
 			return nil, err
@@ -70,7 +70,7 @@ func encodeSignReuqest(sr *validatorpb.SignRequest) ([]byte, error) {
 		}
 
 		break
-	case *validatorpb.SignRequest_Epoch:
+	case *models.SignRequest_Epoch:
 		byts, err := t.Epoch.MarshalSSZ()
 		if err != nil {
 			return nil, err
@@ -78,8 +78,28 @@ func encodeSignReuqest(sr *validatorpb.SignRequest) ([]byte, error) {
 		toEncode.Data = byts
 		toEncode.ObjectType = reflect.TypeOf(t).String()
 		break
-	case *validatorpb.SignRequest_Slot:
+	case *models.SignRequest_Slot:
 		byts, err := t.Slot.MarshalSSZ()
+		if err != nil {
+			return nil, err
+		}
+		toEncode.Data = byts
+		toEncode.ObjectType = reflect.TypeOf(t).String()
+		break
+	case *models.SignRequest_SyncCommitteeMessage:
+		toEncode.Data = t.Root
+		toEncode.ObjectType = reflect.TypeOf(t).String()
+		break
+	case *models.SignRequest_SyncAggregatorSelectionData:
+		byts, err := t.SyncAggregatorSelectionData.MarshalSSZ()
+		if err != nil {
+			return nil, err
+		}
+		toEncode.Data = byts
+		toEncode.ObjectType = reflect.TypeOf(t).String()
+		break
+	case *models.SignRequest_ContributionAndProof:
+		byts, err := t.ContributionAndProof.MarshalSSZ()
 		if err != nil {
 			return nil, err
 		}
@@ -93,7 +113,7 @@ func encodeSignReuqest(sr *validatorpb.SignRequest) ([]byte, error) {
 	return json.Marshal(toEncode)
 }
 
-func decodeSignRequest(data []byte, sr *validatorpb.SignRequest) error {
+func decodeSignRequest(data []byte, sr *models.SignRequest) error {
 	toDecode := &signRequestEncoded{}
 	if err := json.Unmarshal(data, toDecode); err != nil {
 		return err
@@ -108,47 +128,63 @@ func decodeSignRequest(data []byte, sr *validatorpb.SignRequest) error {
 	}
 
 	switch toDecode.ObjectType {
-	case "*validatorpb.SignRequest_AttestationData":
+	case "*models.SignRequest_AttestationData":
 		data := &eth.AttestationData{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
-		sr.Object = &validatorpb.SignRequest_AttestationData{AttestationData: data}
+		sr.Object = &models.SignRequest_AttestationData{AttestationData: data}
 		break
-	case "*validatorpb.SignRequest_Block":
+	case "*models.SignRequest_Block":
 		data := &eth.BeaconBlock{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
-		sr.Object = &validatorpb.SignRequest_Block{Block: data}
+		sr.Object = &models.SignRequest_Block{Block: data}
 		break
-	case "*validatorpb.SignRequest_BlockV2":
+	case "*models.SignRequest_BlockV2":
 		data := &eth.BeaconBlockAltair{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
-		sr.Object = &validatorpb.SignRequest_BlockV2{BlockV2: data}
+		sr.Object = &models.SignRequest_BlockV2{BlockV2: data}
 		break
-	case "*validatorpb.SignRequest_Slot":
+	case "*models.SignRequest_Slot":
 		data := types.Slot(1)
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
-		sr.Object = &validatorpb.SignRequest_Slot{Slot: data}
+		sr.Object = &models.SignRequest_Slot{Slot: data}
 		break
-	case "*validatorpb.SignRequest_Epoch":
+	case "*models.SignRequest_Epoch":
 		data := types.Epoch(1)
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
-		sr.Object = &validatorpb.SignRequest_Epoch{Epoch: data}
+		sr.Object = &models.SignRequest_Epoch{Epoch: data}
 		break
-	case "*validatorpb.SignRequest_AggregateAttestationAndProof":
+	case "*models.SignRequest_AggregateAttestationAndProof":
 		data := &eth.AggregateAttestationAndProof{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
-		sr.Object = &validatorpb.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: data}
+		sr.Object = &models.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: data}
+		break
+	case "*models.SignRequest_SyncCommitteeMessage":
+		sr.Object = &models.SignRequest_SyncCommitteeMessage{Root: toDecode.Data}
+	case "*models.SignRequest_SyncAggregatorSelectionData":
+		data := &eth.SyncAggregatorSelectionData{}
+		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
+			return err
+		}
+		sr.Object = &models.SignRequest_SyncAggregatorSelectionData{SyncAggregatorSelectionData: data}
+		break
+	case "*models.SignRequest_ContributionAndProof":
+		data := &eth.ContributionAndProof{}
+		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
+			return err
+		}
+		sr.Object = &models.SignRequest_ContributionAndProof{ContributionAndProof: data}
 		break
 	default:
 		return errors.New("sign request unknown object type")

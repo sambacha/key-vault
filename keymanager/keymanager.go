@@ -8,29 +8,23 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/bloxapp/key-vault/keymanager/models"
+
 	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
 	encoder2 "github.com/bloxapp/key-vault/utils/encoder"
-
-	"github.com/prysmaticlabs/prysm/shared/event"
-
-	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
 
 	"github.com/pkg/errors"
 
 	"github.com/bloxapp/key-vault/backend"
 
 	"github.com/prysmaticlabs/prysm/shared/bls"
-	"github.com/prysmaticlabs/prysm/validator/keymanager"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bloxapp/key-vault/utils/bytex"
 	"github.com/bloxapp/key-vault/utils/endpoint"
 	"github.com/bloxapp/key-vault/utils/httpex"
 )
-
-// To make sure V2 implements keymanager.IKeymanager interface
-var _ keymanager.IKeymanager = &KeyManager{}
 
 // Predefined errors
 var (
@@ -118,7 +112,7 @@ func (km *KeyManager) FetchAllValidatingPublicKeys(_ context.Context) ([][48]byt
 }
 
 // Sign implements IKeymanager interface.
-func (km *KeyManager) Sign(_ context.Context, req *validatorpb.SignRequest) (bls.Signature, error) {
+func (km *KeyManager) Sign(_ context.Context, req *models.SignRequest) (bls.Signature, error) {
 	if bytex.ToBytes48(req.GetPublicKey()) != km.pubKey {
 		return nil, ErrNoSuchKey
 	}
@@ -131,7 +125,7 @@ func (km *KeyManager) Sign(_ context.Context, req *validatorpb.SignRequest) (bls
 		"sign_req": hex.EncodeToString(byts),
 	}
 
-	var resp SignResponse
+	var resp models.SignResponse
 	if err := km.sendRequest(http.MethodPost, backend.SignPattern, reqMap, &resp); err != nil {
 		return nil, err
 	}
@@ -195,9 +189,5 @@ func (km *KeyManager) sendRequest(method, path string, reqBody interface{}, resp
 		return NewGenericError(err, "failed to decode response body")
 	}
 
-	return nil
-}
-
-func (km *KeyManager) SubscribeAccountChanges(pubKeysChan chan [][48]byte) event.Subscription {
 	return nil
 }

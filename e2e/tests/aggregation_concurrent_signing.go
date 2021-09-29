@@ -6,15 +6,15 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/bloxapp/key-vault/keymanager/models"
+
 	"github.com/prysmaticlabs/go-bitfield"
 
 	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 	types "github.com/prysmaticlabs/eth2-types"
 
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
-
 	"github.com/bloxapp/eth2-key-manager/core"
+	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/e2e"
@@ -90,11 +90,11 @@ func (test *AggregationConcurrentSigning) Run(t *testing.T) {
 }
 
 func (test *AggregationConcurrentSigning) serializedReq(pk, root, domain []byte, agg *ethpb.AggregateAttestationAndProof) (map[string]interface{}, error) {
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &validatorpb.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: agg},
+		Object:          &models.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: agg},
 	}
 
 	byts, err := encoderv2.New().Encode(req)

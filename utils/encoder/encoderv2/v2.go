@@ -3,7 +3,7 @@ package encoderv2
 import (
 	"errors"
 
-	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+	"github.com/bloxapp/key-vault/keymanager/models"
 
 	newPrysm "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 )
@@ -23,7 +23,7 @@ func (l *V2) Encode(obj interface{}) ([]byte, error) {
 		return t.MarshalSSZ()
 	case *newPrysm.BeaconBlock:
 		return t.MarshalSSZ()
-	case *validatorpb.SignRequest:
+	case *models.SignRequest:
 		return encodeSignReuqest(t)
 	}
 	return nil, errors.New("type not supported")
@@ -36,7 +36,7 @@ func (l *V2) Decode(data []byte, v interface{}) error {
 		return t.UnmarshalSSZ(data)
 	case *newPrysm.BeaconBlock:
 		return t.UnmarshalSSZ(data)
-	case *validatorpb.SignRequest:
+	case *models.SignRequest:
 		return decodeSignRequest(data, t)
 	}
 	return errors.New("type not supported")
