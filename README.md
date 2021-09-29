@@ -10,7 +10,9 @@ Latest verified image digest hosted on Docker Hub.
 <!-- /TAG_END_MARKER/ -->
 Use this hash when you `docker run` the image.
 <!-- /DIGEST_START_MARKER/ -->
-```sha256:8d70fd3ac93846d01fae3f2d482cc3ed1e0c17c459bb0cc0f39617633c7530d1```
+```bloxstaking/key-vault:v1.1.1,bloxstaking/key-vault:latest```
+
+```sha256:5aaa69f81f0b25a327bdaa2a4d628460f829d05068f592278584e59f5a475d10```
 <!-- /DIGEST_END_MARKER/ -->
 
 ## How to run?
