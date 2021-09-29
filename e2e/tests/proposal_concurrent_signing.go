@@ -7,9 +7,12 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+
+	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+
 	"github.com/bloxapp/eth2-key-manager/core"
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/e2e"
@@ -71,7 +74,7 @@ func (test *ProposalConcurrentSigning) serializedReq(pk, root, domain []byte, bl
 		Object:          &validatorpb.SignRequest_Block{Block: blk},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := encoderv2.New().Encode(req)
 	if err != nil {
 		return nil, err
 	}

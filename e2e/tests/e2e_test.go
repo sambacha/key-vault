@@ -19,7 +19,7 @@ var tests = []E2E{
 	&AttestationNoSlashingDataSigning{},
 	&AttestationReferenceSigning{},
 
-	// Aggregation signing
+	//Aggregation signing
 	&AggregationSigning{},
 	&AggregationDoubleSigning{},
 	&AggregationConcurrentSigning{},
@@ -27,7 +27,7 @@ var tests = []E2E{
 	&AggregationReferenceSigning{},
 	&AggregationProofReferenceSigning{},
 
-	//// Proposal signing
+	// Proposal signing
 	&ProposalSigning{},
 	&ProposalDoubleSigning{},
 	&ProposalConcurrentSigning{},

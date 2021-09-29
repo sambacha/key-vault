@@ -4,8 +4,12 @@ import (
 	"encoding/hex"
 	"testing"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+	types "github.com/prysmaticlabs/eth2-types"
+
+	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/stretchr/testify/require"
@@ -31,15 +35,15 @@ func (test *AttestationSigningAccountNotFound) Run(t *testing.T) {
 
 	// sign
 	att := &eth.AttestationData{
-		Slot:            284115,
-		CommitteeIndex:  2,
+		Slot:            types.Slot(284115),
+		CommitteeIndex:  types.CommitteeIndex(2),
 		BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
 		Source: &eth.Checkpoint{
-			Epoch: 5,
+			Epoch: types.Epoch(5),
 			Root:  _byteArray32("7402fdc1ce16d449d637c34a172b349a12b2bae8d6d77e401006594d8057c33d"),
 		},
 		Target: &eth.Checkpoint{
-			Epoch: 6,
+			Epoch: types.Epoch(6),
 			Root:  _byteArray32("17959acc370274756fa5e9fdd7e7adf17204f49cc8457e49438c42c4883cbfb0"),
 		},
 	}
@@ -64,7 +68,7 @@ func (test *AttestationSigningAccountNotFound) serializedReq(pk, root, domain []
 		Object:          &validatorpb.SignRequest_AttestationData{AttestationData: attestation},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := encoderv2.New().Encode(req)
 	if err != nil {
 		return nil, err
 	}

@@ -5,6 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/bloxapp/key-vault/utils/encoder/legacy"
+
+	encoder2 "github.com/bloxapp/key-vault/utils/encoder"
+
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/encryptor"
 	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
@@ -27,6 +31,8 @@ type HashicorpVaultStore struct {
 	storage            logical.Storage
 	ctx                context.Context
 	network            core.Network
+	encoder encoder2.IEncoder
+
 	encryptor          encryptor.Encryptor
 	encryptionPassword []byte
 }
@@ -37,6 +43,7 @@ func NewHashicorpVaultStore(ctx context.Context, storage logical.Storage, networ
 		storage	: storage,
 		network	: network,
 		ctx		: ctx,
+		encoder: legacy.New(),
 	}
 }
 

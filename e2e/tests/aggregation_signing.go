@@ -4,8 +4,14 @@ import (
 	"encoding/hex"
 	"testing"
 
-	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	"github.com/prysmaticlabs/go-bitfield"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+	types "github.com/prysmaticlabs/eth2-types"
+
+	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+
+	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/bloxapp/eth2-key-manager/signer"
 
@@ -42,17 +48,25 @@ func (test *AggregationSigning) Run(t *testing.T) {
 	require.NoError(t, err)
 
 	agg := &ethpb.AggregateAttestationAndProof{
-		AggregatorIndex: 0,
+		AggregatorIndex: types.ValidatorIndex(1),
+		SelectionProof:  make([]byte, 96),
 		Aggregate: &ethpb.Attestation{
-			Data: &ethpb.AttestationData{
-				BeaconBlockRoot: make([]byte, 32),
-				Target:          &ethpb.Checkpoint{Root: make([]byte, 32)},
-				Source:          &ethpb.Checkpoint{Root: make([]byte, 32)},
-			},
+			AggregationBits: bitfield.NewBitlist(12),
 			Signature:       make([]byte, 96),
-			AggregationBits: make([]byte, 1),
+			Data: &ethpb.AttestationData{
+				Slot:            types.Slot(1),
+				CommitteeIndex:  types.CommitteeIndex(12),
+				BeaconBlockRoot: make([]byte, 32),
+				Source: &ethpb.Checkpoint{
+					Epoch: types.Epoch(1),
+					Root:  make([]byte, 32),
+				},
+				Target: &ethpb.Checkpoint{
+					Epoch: types.Epoch(1),
+					Root:  make([]byte, 32),
+				},
+			},
 		},
-		SelectionProof: make([]byte, 96),
 	}
 	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, agg)
@@ -79,7 +93,7 @@ func (test *AggregationSigning) serializedReq(pk, root, domain []byte, agg *ethp
 		Object:          &validatorpb.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: agg},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := encoderv2.New().Encode(req)
 	if err != nil {
 		return nil, err
 	}

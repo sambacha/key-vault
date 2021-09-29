@@ -5,13 +5,15 @@ import (
 	"encoding/hex"
 	"sync"
 
+	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+	wrapper2 "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
+
 	vault "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/signer"
 	slashingprotection "github.com/bloxapp/eth2-key-manager/slashing_protection"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
-	v2 "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
 
 	"github.com/bloxapp/key-vault/backend/store"
 )
@@ -57,9 +59,9 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 		return nil, errors.Wrap(err, "failed to decode sign request hex")
 	}
 
-	signReq := &v2.SignRequest{}
-	if err := signReq.Unmarshal(reqByts); err != nil {
-		return nil, errors.Wrap(err, "failed to unmarshal sign request SSZ")
+	signReq := &validatorpb.SignRequest{}
+	if err := b.encoder.Decode(reqByts, signReq); err != nil {
+		return nil, errors.Wrap(err, "failed to unmarshal sign request")
 	}
 
 	var sig []byte
@@ -84,15 +86,21 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 		var simpleSigner signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
 
 		switch t := signReq.GetObject().(type) {
-		case *v2.SignRequest_Block:
-			sig, err = simpleSigner.SignBeaconBlock(t.Block, signReq.SignatureDomain, signReq.PublicKey)
-		case *v2.SignRequest_AttestationData:
+		case *validatorpb.SignRequest_Block:
+			sig, err = simpleSigner.SignBeaconBlock(wrapper2.WrappedPhase0BeaconBlock(t.Block), signReq.SignatureDomain, signReq.PublicKey)
+		case *validatorpb.SignRequest_BlockV2:
+			altairBlk, err := wrapper2.WrappedAltairBeaconBlock(t.BlockV2)
+			if err != nil {
+				return errors.Wrap(err, "failed to wrap altair block")
+			}
+			sig, err = simpleSigner.SignBeaconBlock(altairBlk, signReq.SignatureDomain, signReq.PublicKey)
+		case *validatorpb.SignRequest_AttestationData:
 			sig, err = simpleSigner.SignBeaconAttestation(t.AttestationData, signReq.SignatureDomain, signReq.PublicKey)
-		case *v2.SignRequest_Slot:
+		case *validatorpb.SignRequest_Slot:
 			sig, err = simpleSigner.SignSlot(t.Slot, signReq.SignatureDomain, signReq.PublicKey)
-		case *v2.SignRequest_Epoch:
+		case *validatorpb.SignRequest_Epoch:
 			sig, err = simpleSigner.SignEpoch(t.Epoch, signReq.SignatureDomain, signReq.PublicKey)
-		case *v2.SignRequest_AggregateAttestationAndProof:
+		case *validatorpb.SignRequest_AggregateAttestationAndProof:
 			sig, err = simpleSigner.SignAggregateAndProof(t.AggregateAttestationAndProof, signReq.SignatureDomain, signReq.PublicKey)
 		default:
 			return errors.Errorf("sign request: not supported")

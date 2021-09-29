@@ -6,6 +6,10 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+
+	encoder2 "github.com/bloxapp/key-vault/utils/encoder"
+
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
@@ -31,6 +35,7 @@ func newBackend(version string, logger *logrus.Logger) *backend {
 		logger:   logger,
 		Version:  version,
 		signLock: make(map[string]*sync.Mutex),
+		encoder:  encoderv2.New(),
 	}
 	b.Backend = &framework.Backend{
 		Help: "",
@@ -59,6 +64,7 @@ type backend struct {
 	logger   *logrus.Logger
 	Version  string
 	signLock map[string]*sync.Mutex
+	encoder  encoder2.IEncoder
 }
 
 // pathExistenceCheck checks if the given path exists
