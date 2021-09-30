@@ -126,14 +126,17 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 }
 
 func (b *backend) lock(pubKeyBytes []byte, cb func() error) error {
+	b.signMapLock.Lock()
 	pubKey := hex.EncodeToString(pubKeyBytes)
 	if _, ok := b.signLock[pubKey]; !ok {
 		b.signLock[pubKey] = &sync.Mutex{}
 	}
+	lock := b.signLock[pubKey]
+	b.signMapLock.Unlock()
 
-	b.signLock[pubKey].Lock()
+	lock.Lock()
 	err := cb()
-	b.signLock[pubKey].Unlock()
+	lock.Unlock()
 
 	return err
 }

@@ -32,10 +32,11 @@ func Factory(version string, logger *logrus.Logger) logical.Factory {
 // newBackend returns the backend
 func newBackend(version string, logger *logrus.Logger) *backend {
 	b := &backend{
-		logger:   logger,
-		Version:  version,
-		signLock: make(map[string]*sync.Mutex),
-		encoder:  encoderv2.New(),
+		logger:      logger,
+		Version:     version,
+		signMapLock: &sync.Mutex{},
+		signLock:    make(map[string]*sync.Mutex),
+		encoder:     encoderv2.New(),
 	}
 	b.Backend = &framework.Backend{
 		Help: "",
@@ -61,10 +62,11 @@ func newBackend(version string, logger *logrus.Logger) *backend {
 // backend implements the Backend for this plugin
 type backend struct {
 	*framework.Backend
-	logger   *logrus.Logger
-	Version  string
-	signLock map[string]*sync.Mutex
-	encoder  encoder2.IEncoder
+	logger      *logrus.Logger
+	Version     string
+	signMapLock *sync.Mutex
+	signLock    map[string]*sync.Mutex
+	encoder     encoder2.IEncoder
 }
 
 // pathExistenceCheck checks if the given path exists
