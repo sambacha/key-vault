@@ -6,19 +6,16 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/bloxapp/key-vault/keymanager/models"
-
-	"github.com/prysmaticlabs/go-bitfield"
-
-	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
-	types "github.com/prysmaticlabs/eth2-types"
-
 	"github.com/bloxapp/eth2-key-manager/core"
+	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/prysmaticlabs/go-bitfield"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/e2e"
 	"github.com/bloxapp/key-vault/e2e/shared"
+	"github.com/bloxapp/key-vault/keymanager/models"
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 )
 
 // AggregationConcurrentSigning tests aggregation signing method concurrently.

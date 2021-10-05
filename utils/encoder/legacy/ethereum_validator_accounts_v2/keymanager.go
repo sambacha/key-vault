@@ -3,9 +3,10 @@ package ethereum_validator_accounts_v2
 import (
 	"errors"
 
-	"github.com/bloxapp/key-vault/utils/encoder/legacy/eth"
 	types "github.com/prysmaticlabs/eth2-types"
 	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+
+	"github.com/bloxapp/key-vault/utils/encoder/legacy/eth"
 )
 
 func NewSignRequestFromNewPrysm(newPrysm *validatorpb.SignRequest) (*SignRequest, error) {

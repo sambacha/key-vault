@@ -4,15 +4,13 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/bloxapp/key-vault/keymanager/models"
-
-	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
-	types "github.com/prysmaticlabs/eth2-types"
-
 	"github.com/bloxapp/eth2-key-manager/core"
+	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/e2e"
+	"github.com/bloxapp/key-vault/keymanager/models"
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 )
 
 // RandaoReferenceSigning tests sign proposal endpoint.
