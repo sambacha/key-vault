@@ -35,8 +35,12 @@ func storagePaths(b *backend) []*framework.Path {
 				},
 			},
 			ExistenceCheck: b.pathExistenceCheck,
-			Callbacks: map[logical.Operation]framework.OperationFunc{
-				logical.CreateOperation: b.pathStorageUpdateV2,
+			Operations: map[logical.Operation]framework.OperationHandler{
+				logical.CreateOperation: &framework.PathOperation{
+					Callback: b.pathStorageUpdateV2,
+					Summary: "sum",
+					Description: "ses",
+				},
 			},
 		},
 	}
