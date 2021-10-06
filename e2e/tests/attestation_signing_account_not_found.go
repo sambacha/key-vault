@@ -6,8 +6,9 @@ import (
 
 	"github.com/bloxapp/key-vault/keymanager/models"
 
-	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 	types "github.com/prysmaticlabs/eth2-types"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
@@ -65,7 +66,7 @@ func (test *AttestationSigningAccountNotFound) serializedReq(pk, root, domain []
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &models.SignRequest_AttestationData{AttestationData: attestation},
+		Object:          &models.SignRequestAttestationData{AttestationData: attestation},
 	}
 
 	byts, err := encoderv2.New().Encode(req)

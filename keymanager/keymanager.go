@@ -35,6 +35,7 @@ var (
 	ErrNoSuchKey          = NewGenericErrorWithMessage("no such key")
 )
 
+// IkeyManager interface contains functions from prysm kv
 type IkeyManager interface {
 	FetchValidatingPublicKeys(_ context.Context) ([][48]byte, error)
 	FetchAllValidatingPublicKeys(_ context.Context) ([][48]byte, error)

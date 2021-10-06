@@ -2,7 +2,6 @@ package tests
 
 import (
 	"encoding/hex"
-	"fmt"
 	"strconv"
 	"testing"
 
@@ -10,8 +9,9 @@ import (
 
 	"github.com/prysmaticlabs/go-bitfield"
 
-	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 	types "github.com/prysmaticlabs/eth2-types"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
@@ -63,6 +63,7 @@ func (test *AggregationConcurrentSigning) Run(t *testing.T) {
 	}
 	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
 	req, err := test.serializedReq(pubKey, nil, domain, agg)
+	require.NoError(t, err)
 	_, err = setup.Sign("sign", req, core.PraterNetwork)
 	require.NoError(t, err)
 
@@ -82,7 +83,7 @@ func (test *AggregationConcurrentSigning) Run(t *testing.T) {
 				require.IsType(t, &e2e.ServiceError{}, err)
 
 				errValue := err.(*e2e.ServiceError).ErrorValue()
-				protected := errValue == fmt.Sprintf("1 error occurred:\n\t* locked\n\n")
+				protected := errValue == "1 error occurred:\n\t* locked\n\n"
 				require.True(t, protected, err.Error())
 			})
 		}
@@ -94,7 +95,7 @@ func (test *AggregationConcurrentSigning) serializedReq(pk, root, domain []byte,
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &models.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: agg},
+		Object:          &models.SignRequestAggregateAttestationAndProof{AggregateAttestationAndProof: agg},
 	}
 
 	byts, err := encoderv2.New().Encode(req)

@@ -12,11 +12,12 @@ import (
 type V2 struct {
 }
 
+// New return v2 struct
 func New() *V2 {
 	return &V2{}
 }
 
-// Encode
+// Encode to ssz format
 func (l *V2) Encode(obj interface{}) ([]byte, error) {
 	switch t := obj.(type) {
 	case *newPrysm.AttestationData:
@@ -29,7 +30,7 @@ func (l *V2) Encode(obj interface{}) ([]byte, error) {
 	return nil, errors.New("type not supported")
 }
 
-// Decode
+// Decode to ssz format
 func (l *V2) Decode(data []byte, v interface{}) error {
 	switch t := v.(type) {
 	case *newPrysm.AttestationData:

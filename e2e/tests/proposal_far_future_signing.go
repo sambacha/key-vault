@@ -44,7 +44,7 @@ func (test *ProposalFarFutureSigning) Run(t *testing.T) {
 	require.NoError(t, err)
 	_, err = setup.Sign("sign", req, core.PraterNetwork)
 	require.NotNil(t, err)
-	expectedErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: proposed block slot too far into the future\\n\\n\"}}")
+	expectedErr := "map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: proposed block slot too far into the future\\n\\n\"}}"
 	require.EqualError(t, err, expectedErr, fmt.Sprintf("actual: %s\n", err.Error()))
 }
 
@@ -53,7 +53,7 @@ func (test *ProposalFarFutureSigning) serializedReq(pk, root, domain []byte, blk
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &models.SignRequest_Block{Block: blk},
+		Object:          &models.SignRequestBlock{Block: blk},
 	}
 
 	byts, err := encoderv2.New().Encode(req)

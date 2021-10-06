@@ -6,8 +6,9 @@ import (
 
 	"github.com/bloxapp/key-vault/keymanager/models"
 
-	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 	types "github.com/prysmaticlabs/eth2-types"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/stretchr/testify/require"
@@ -42,6 +43,7 @@ func (test *RandaoReferenceSigning) Run(t *testing.T) {
 	// Send sign attestation request
 	domain := _byteArray32("0200000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, 0)
+	require.NoError(t, err)
 	sig, err := setup.Sign("sign", req, core.PraterNetwork)
 	require.NoError(t, err)
 
@@ -54,7 +56,7 @@ func (test *RandaoReferenceSigning) serializedReq(pk, root, domain []byte, epoch
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &models.SignRequest_Epoch{Epoch: types.Epoch(epoch)},
+		Object:          &models.SignRequestEpoch{Epoch: types.Epoch(epoch)},
 	}
 
 	byts, err := encoderv2.New().Encode(req)

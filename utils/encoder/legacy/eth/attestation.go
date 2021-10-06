@@ -5,6 +5,7 @@ import (
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 )
 
+// NewAttestationDataFromNewPrysm new AttestationData struct
 func NewAttestationDataFromNewPrysm(newPrysm *eth.AttestationData) *AttestationData {
 	ret := &AttestationData{
 		Slot:            uint64(newPrysm.Slot),
@@ -27,12 +28,14 @@ func NewAttestationDataFromNewPrysm(newPrysm *eth.AttestationData) *AttestationD
 	return ret
 }
 
+// ToNewPrysm returns new AttestationData struct
 func (m *AttestationData) ToNewPrysm() *eth.AttestationData {
 	ret := &eth.AttestationData{}
 	m.ToPrysm(ret)
 	return ret
 }
 
+// ToPrysm returns AttestationData struct
 func (m *AttestationData) ToPrysm(ret *eth.AttestationData) {
 	ret.Slot = types.Slot(m.Slot)
 	ret.CommitteeIndex = types.CommitteeIndex(m.CommitteeIndex)
@@ -51,6 +54,7 @@ func (m *AttestationData) ToPrysm(ret *eth.AttestationData) {
 	}
 }
 
+// NewAggregationAndProofFromNewPrysm returns new AggregateAttestationAndProof  struct
 func NewAggregationAndProofFromNewPrysm(newPrysm *eth.AggregateAttestationAndProof) *AggregateAttestationAndProof {
 	return &AggregateAttestationAndProof{
 		AggregatorIndex: uint64(newPrysm.AggregatorIndex),
@@ -63,6 +67,7 @@ func NewAggregationAndProofFromNewPrysm(newPrysm *eth.AggregateAttestationAndPro
 	}
 }
 
+// ToNewPrysm returns AggregateAttestationAndProof
 func (m *AggregateAttestationAndProof) ToNewPrysm() *eth.AggregateAttestationAndProof {
 	return &eth.AggregateAttestationAndProof{
 		AggregatorIndex: types.ValidatorIndex(m.AggregatorIndex),

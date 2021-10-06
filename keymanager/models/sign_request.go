@@ -5,10 +5,12 @@ import (
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 )
 
+// ISignObject interface
 type ISignObject interface {
-	isSignRequest_Object()
+	isSignRequestObject()
 }
 
+// SignRequest implementing ISignObject
 type SignRequest struct {
 	PublicKey       []byte      `json:"public_key,omitempty"`
 	SigningRoot     []byte      `json:"signing_root,omitempty"`
@@ -16,6 +18,7 @@ type SignRequest struct {
 	Object          ISignObject `json:"object,omitempty"`
 }
 
+// GetPublicKey return publicKey
 func (x *SignRequest) GetPublicKey() []byte {
 	if x != nil {
 		return x.PublicKey
@@ -23,6 +26,7 @@ func (x *SignRequest) GetPublicKey() []byte {
 	return nil
 }
 
+// GetSigningRoot return root bytes
 func (x *SignRequest) GetSigningRoot() []byte {
 	if x != nil {
 		return x.SigningRoot
@@ -30,6 +34,7 @@ func (x *SignRequest) GetSigningRoot() []byte {
 	return nil
 }
 
+// GetSignatureDomain return domain bytes
 func (x *SignRequest) GetSignatureDomain() []byte {
 	if x != nil {
 		return x.SignatureDomain
@@ -37,78 +42,89 @@ func (x *SignRequest) GetSignatureDomain() []byte {
 	return nil
 }
 
-func (m *SignRequest) GetObject() ISignObject {
-	if m != nil {
-		return m.Object
+// GetObject return ISignObject interface
+func (x *SignRequest) GetObject() ISignObject {
+	if x != nil {
+		return x.Object
 	}
 	return nil
 }
 
+// GetBlock return req block
 func (x *SignRequest) GetBlock() *eth.BeaconBlock {
-	if x, ok := x.GetObject().(*SignRequest_Block); ok {
+	if x, ok := x.GetObject().(*SignRequestBlock); ok {
 		return x.Block
 	}
 	return nil
 }
 
+// GetAttestationData return AttestationData
 func (x *SignRequest) GetAttestationData() *eth.AttestationData {
-	if x, ok := x.GetObject().(*SignRequest_AttestationData); ok {
+	if x, ok := x.GetObject().(*SignRequestAttestationData); ok {
 		return x.AttestationData
 	}
 	return nil
 }
 
+// GetAggregateAttestationAndProof return AggregateAttestationAndProof
 func (x *SignRequest) GetAggregateAttestationAndProof() *eth.AggregateAttestationAndProof {
-	if x, ok := x.GetObject().(*SignRequest_AggregateAttestationAndProof); ok {
+	if x, ok := x.GetObject().(*SignRequestAggregateAttestationAndProof); ok {
 		return x.AggregateAttestationAndProof
 	}
 	return nil
 }
 
+// GetExit return VoluntaryExit
 func (x *SignRequest) GetExit() *eth.VoluntaryExit {
-	if x, ok := x.GetObject().(*SignRequest_Exit); ok {
+	if x, ok := x.GetObject().(*SignRequestExit); ok {
 		return x.Exit
 	}
 	return nil
 }
 
+// GetSlot return types slot
 func (x *SignRequest) GetSlot() types.Slot {
-	if x, ok := x.GetObject().(*SignRequest_Slot); ok {
+	if x, ok := x.GetObject().(*SignRequestSlot); ok {
 		return x.Slot
 	}
 	return types.Slot(0)
 }
 
+// GetEpoch return types epoch
 func (x *SignRequest) GetEpoch() types.Epoch {
-	if x, ok := x.GetObject().(*SignRequest_Epoch); ok {
+	if x, ok := x.GetObject().(*SignRequestEpoch); ok {
 		return x.Epoch
 	}
 	return types.Epoch(0)
 }
 
+// GetBlockV2 return altair block
 func (x *SignRequest) GetBlockV2() *eth.BeaconBlockAltair {
-	if x, ok := x.GetObject().(*SignRequest_BlockV2); ok {
+	if x, ok := x.GetObject().(*SignRequestBlockV2); ok {
 		return x.BlockV2
 	}
 	return nil
 }
 
+// GetSyncAggregatorSelectionData return SyncAggregatorSelectionData
 func (x *SignRequest) GetSyncAggregatorSelectionData() *eth.SyncAggregatorSelectionData {
-	if x, ok := x.GetObject().(*SignRequest_SyncAggregatorSelectionData); ok {
+	if x, ok := x.GetObject().(*SignRequestSyncAggregatorSelectionData); ok {
 		return x.SyncAggregatorSelectionData
 	}
 	return nil
 }
 
+// GetContributionAndProof return ContributionAndProof
 func (x *SignRequest) GetContributionAndProof() *eth.ContributionAndProof {
-	if x, ok := x.GetObject().(*SignRequest_ContributionAndProof); ok {
+	if x, ok := x.GetObject().(*SignRequestContributionAndProof); ok {
 		return x.ContributionAndProof
 	}
 	return nil
 }
 
+// GetSyncCommitteeMessage return types SSZBytes
 func (x *SignRequest) GetSyncCommitteeMessage() types.SSZBytes {
-	if x, ok := x.GetObject().(*SignRequest_SyncCommitteeMessage); ok {
+	if x, ok := x.GetObject().(*SignRequestSyncCommitteeMessage); ok {
 		return x.Root
 	}
 	return nil

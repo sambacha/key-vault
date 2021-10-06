@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
+
 	vault "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
 
@@ -18,7 +19,7 @@ import (
 // Endpoints patterns
 const (
 	// StoragePattern is the path pattern for storage endpoint
-	StoragePattern         = "storage"
+	StoragePattern = "storage"
 )
 
 func storagePaths(b *backend) []*framework.Path {
@@ -28,7 +29,7 @@ func storagePaths(b *backend) []*framework.Path {
 			HelpSynopsis:    "Update storage using one or more accounts",
 			HelpDescription: `Manage KeyVault storage`,
 			Fields: map[string]*framework.FieldSchema{
-				"data": &framework.FieldSchema{
+				"data": {
 					Type:        framework.TypeString,
 					Description: "storage to update",
 				},
@@ -55,25 +56,6 @@ func getVaultMemoryStorage(data *framework.FieldData) (*inmemory.InMemStore, err
 		return nil, errors.Wrap(err, "failed to JSON un-marshal storage")
 	}
 	return vaultMemoryStorage, nil
-}
-
-// pathStorageUpdate updates all accounts from new uploaded storage
-func (b *backend) pathStorageUpdate(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
-	vaultMemoryStorage, err := getVaultMemoryStorage(data)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = store.FromInMemoryStore(ctx, vaultMemoryStorage, req.Storage)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to update storage")
-	}
-
-	return &logical.Response{
-		Data: map[string]interface{}{
-			"status": true,
-		},
-	}, nil
 }
 
 // BuildKeyVault building new key vault and wallet if not exists - otherwise return existing ones

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/bloxapp/key-vault/utils/encoder/legacy/ethereum_validator_accounts_v2"
+	"github.com/bloxapp/key-vault/utils/encoder/legacy/ethereumvalidatoraccountsv2"
 
 	oldPrysm "github.com/bloxapp/key-vault/utils/encoder/legacy/eth"
 
@@ -18,6 +18,7 @@ import (
 type Legacy struct {
 }
 
+// New returns new Legacy struct
 func New() *Legacy {
 	return &Legacy{}
 }
@@ -34,12 +35,12 @@ func (l *Legacy) Encode(obj interface{}) ([]byte, error) {
 	case oldPrysm.BeaconBlock:
 		return t.Marshal()
 	case *validatorpb.SignRequest:
-		toEncode, err := ethereum_validator_accounts_v2.NewSignRequestFromNewPrysm(t)
+		toEncode, err := ethereumvalidatoraccountsv2.NewSignRequestFromNewPrysm(t)
 		if err != nil {
 			return nil, err
 		}
 		return json.Marshal(toEncode)
-	case ethereum_validator_accounts_v2.SignRequest:
+	case ethereumvalidatoraccountsv2.SignRequest:
 		return json.Marshal(t)
 	}
 	return nil, errors.New("type not supported")
@@ -67,13 +68,13 @@ func (l *Legacy) Decode(data []byte, v interface{}) error {
 	case *oldPrysm.BeaconBlock:
 		return t.Unmarshal(data)
 	case *validatorpb.SignRequest:
-		toDecode, err := ethereum_validator_accounts_v2.NewSignRequestFromNewPrysm(t)
+		toDecode, err := ethereumvalidatoraccountsv2.NewSignRequestFromNewPrysm(t)
 		if err != nil {
 			return err
 		}
 		return toDecode.Unmarshal(data)
-	case ethereum_validator_accounts_v2.SignRequest:
-		return json.Unmarshal(data, t)
+	case ethereumvalidatoraccountsv2.SignRequest:
+		return json.Unmarshal(data, &t)
 	}
 	return errors.New("type not supported")
 }

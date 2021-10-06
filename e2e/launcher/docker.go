@@ -40,7 +40,7 @@ type Docker struct {
 // New is the constructor of dockerLauncher
 func New(imageName, basePath string) (*Docker, error) {
 	// Create a new client
-	cli, err := client.NewEnvClient()
+	cli, err := client.NewClientWithOpts()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create docker client")
 	}
@@ -105,7 +105,7 @@ func (l *Docker) Launch(ctx context.Context, name string) (*Config, error) {
 	// Retrieve container config
 	containerConfig, err := l.client.ContainerInspect(ctx, cont.ID)
 	if err != nil {
-		l.Stop(ctx, cont.ID)
+		_ = l.Stop(ctx, cont.ID)
 		return nil, errors.Wrapf(err, "failed to inspect container with ID %s", cont.ID)
 	}
 
@@ -125,22 +125,22 @@ func (l *Docker) Launch(ctx context.Context, name string) (*Config, error) {
 		ShowStderr: true,
 	})
 	if err != nil {
-		l.Stop(ctx, cont.ID)
+		_ = l.Stop(ctx, cont.ID)
 		return nil, errors.Wrap(err, "failed to read logs")
 	}
 	defer logsStream.Close()
 
 	// Read logs from stream
 	hdr := make([]byte, 8)
-	timeout := time.Tick(time.Minute * 3)
+	timeout := time.NewTicker(time.Minute * 3)
 	for {
 		var loaded bool
 		select {
-		case <-timeout:
+		case <-timeout.C:
 			return nil, errors.New("failed to read logs: time out")
 		default:
 			if _, err := logsStream.Read(hdr); err != nil {
-				l.Stop(ctx, cont.ID)
+				_ = l.Stop(ctx, cont.ID)
 				return nil, errors.Wrap(err, "failed to read from logs stream")
 			}
 
@@ -148,14 +148,14 @@ func (l *Docker) Launch(ctx context.Context, name string) (*Config, error) {
 			dat := make([]byte, count)
 			_, err = logsStream.Read(dat)
 			if err != nil {
-				l.Stop(ctx, cont.ID)
+				_ = l.Stop(ctx, cont.ID)
 				return nil, errors.Wrap(err, "failed to read from logs stream")
 			}
 
 			dta := strings.ToLower(string(dat))
 			fmt.Println("dta", dta)
 			if strings.Contains(dta, "connection refused") {
-				l.Stop(ctx, cont.ID)
+				_ = l.Stop(ctx, cont.ID)
 				return nil, errors.Errorf("failed to launch instance: %s", string(dat))
 			} else if strings.Contains(dta, "core: successfully reloaded plugin: plugin=ethsign path=ethereum") {
 				loaded = true
@@ -171,10 +171,10 @@ func (l *Docker) Launch(ctx context.Context, name string) (*Config, error) {
 	// Retrieve auth root token
 	tokenData, err := l.inspectExecResp(ctx, cont.ID, []string{"cat", "/data/keys/vault.root.token"})
 	if err != nil {
-		l.Stop(ctx, cont.ID)
+		_ = l.Stop(ctx, cont.ID)
 		return nil, errors.Wrap(err, "failed to read exec command of reading token result")
 	} else if tokenData.exitCode != 0 || len(tokenData.stdErr) > 0 {
-		l.Stop(ctx, cont.ID)
+		_ = l.Stop(ctx, cont.ID)
 		return nil, errors.Errorf("failed to retrieve auth token: exit code %d, error %s", tokenData.exitCode, tokenData.stdErr)
 	}
 

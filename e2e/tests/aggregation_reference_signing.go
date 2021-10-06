@@ -46,6 +46,7 @@ func (test *AggregationReferenceSigning) Run(t *testing.T) {
 	require.NoError(t, agg.UnmarshalSSZ(aggAttByts))
 	domain := _byteArray32("0100000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, agg)
+	require.NoError(t, err)
 
 	// Send sign attestation request
 	sig, err := setup.Sign("sign", req, core.PraterNetwork)
@@ -59,7 +60,7 @@ func (test *AggregationReferenceSigning) serializedReq(pk, root, domain []byte, 
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &models.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: agg},
+		Object:          &models.SignRequestAggregateAttestationAndProof{AggregateAttestationAndProof: agg},
 	}
 
 	byts, err := encoderv2.New().Encode(req)

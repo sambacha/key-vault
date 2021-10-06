@@ -1,7 +1,6 @@
 package shared
 
 import (
-	"encoding/hex"
 	"fmt"
 	"testing"
 
@@ -17,11 +16,6 @@ import (
 
 // AccountIndex is the test account index.
 const AccountIndex = 0
-
-func _byteArray(input string) []byte {
-	res, _ := hex.DecodeString(input)
-	return res
-}
 
 // BaseInmemStorage creates the in-memory storage and creates the base account.
 func BaseInmemStorage(t *testing.T, minimalSlashingData bool, walletType core.WalletType, privKey []byte) (*inmemory.InMemStore, error) {

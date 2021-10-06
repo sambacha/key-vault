@@ -2,8 +2,10 @@ package models
 
 import eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
-type SignRequest_SyncAggregatorSelectionData struct {
+// SignRequestSyncAggregatorSelectionData struct for sign req committiee msg
+type SignRequestSyncAggregatorSelectionData struct {
 	SyncAggregatorSelectionData *eth.SyncAggregatorSelectionData
 }
 
-func (m *SignRequest_SyncAggregatorSelectionData) isSignRequest_Object() {}
+// isSignRequestObject implement interface func
+func (m *SignRequestSyncAggregatorSelectionData) isSignRequestObject() {}

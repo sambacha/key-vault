@@ -2,8 +2,10 @@ package models
 
 import eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
-type SignRequest_AttestationData struct {
+// SignRequestAttestationData struct
+type SignRequestAttestationData struct {
 	AttestationData *eth.AttestationData
 }
 
-func (m *SignRequest_AttestationData) isSignRequest_Object() {}
+// isSignRequestObject implement func
+func (m *SignRequestAttestationData) isSignRequestObject() {}

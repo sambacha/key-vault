@@ -68,7 +68,7 @@ func reqObject(att *eth.AttestationData, domain []byte, pubKey []byte) map[strin
 		PublicKey:       pubKey,
 		SigningRoot:     nil,
 		SignatureDomain: domain,
-		Object:          &models.SignRequest_AttestationData{AttestationData: att},
+		Object:          &models.SignRequestAttestationData{AttestationData: att},
 	}
 
 	byts, _ := encoderv2.New().Encode(req)

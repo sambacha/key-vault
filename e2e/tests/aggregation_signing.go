@@ -8,8 +8,9 @@ import (
 
 	"github.com/prysmaticlabs/go-bitfield"
 
-	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 	types "github.com/prysmaticlabs/eth2-types"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
@@ -70,6 +71,7 @@ func (test *AggregationSigning) Run(t *testing.T) {
 	}
 	domain := _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, agg)
+	require.NoError(t, err)
 
 	// Sign data
 	protector := slashingprotection.NewNormalProtection(inmemory.NewInMemStore(core.PraterNetwork))
@@ -90,7 +92,7 @@ func (test *AggregationSigning) serializedReq(pk, root, domain []byte, agg *ethp
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &models.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: agg},
+		Object:          &models.SignRequestAggregateAttestationAndProof{AggregateAttestationAndProof: agg},
 	}
 
 	byts, err := encoderv2.New().Encode(req)

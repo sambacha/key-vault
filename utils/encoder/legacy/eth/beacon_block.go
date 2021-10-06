@@ -5,12 +5,14 @@ import (
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 )
 
+// ToNewPrysm returns new BeaconBlock
 func (m *BeaconBlock) ToNewPrysm() *eth.BeaconBlock {
 	ret := &eth.BeaconBlock{}
 	m.ToPrysm(ret)
 	return ret
 }
 
+// ToPrysm returns new BeaconBlock
 func (m *BeaconBlock) ToPrysm(ret *eth.BeaconBlock) {
 	ret.Slot = types.Slot(m.Slot)
 	ret.ProposerIndex = types.ValidatorIndex(m.ProposerIndex)
@@ -107,6 +109,7 @@ func (m *BeaconBlock) ToPrysm(ret *eth.BeaconBlock) {
 	}
 }
 
+// NewBeaconBlockFromNewPrysm returns BeaconBlock struct
 func NewBeaconBlockFromNewPrysm(newPrysm *eth.BeaconBlock) *BeaconBlock {
 	ret := &BeaconBlock{
 		Slot:          uint64(newPrysm.Slot),

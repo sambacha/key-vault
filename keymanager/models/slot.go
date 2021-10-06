@@ -2,8 +2,10 @@ package models
 
 import types "github.com/prysmaticlabs/eth2-types"
 
-type SignRequest_Slot struct {
+// SignRequestSlot struct fir sign req slot
+type SignRequestSlot struct {
 	Slot types.Slot
 }
 
-func (m *SignRequest_Slot) isSignRequest_Object() {}
+// isSignRequestObject implementation interface
+func (m *SignRequestSlot) isSignRequestObject() {}

@@ -2,8 +2,10 @@ package models
 
 import eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
-type SignRequest_Exit struct {
+// SignRequestExit struct
+type SignRequestExit struct {
 	Exit *eth.VoluntaryExit
 }
 
-func (m *SignRequest_Exit) isSignRequest_Object() {}
+// isSignRequestObject implement func
+func (m *SignRequestExit) isSignRequestObject() {}

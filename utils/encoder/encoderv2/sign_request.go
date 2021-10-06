@@ -32,31 +32,28 @@ func encodeSignReuqest(sr *models.SignRequest) ([]byte, error) {
 	}
 
 	switch t := sr.Object.(type) {
-	case *models.SignRequest_AttestationData:
+	case *models.SignRequestAttestationData:
 		byts, err := t.AttestationData.MarshalSSZ()
 		if err != nil {
 			return nil, err
 		}
 		toEncode.Data = byts
 		toEncode.ObjectType = reflect.TypeOf(t).String()
-		break
-	case *models.SignRequest_Block:
+	case *models.SignRequestBlock:
 		byts, err := t.Block.MarshalSSZ()
 		if err != nil {
 			return nil, err
 		}
 		toEncode.Data = byts
 		toEncode.ObjectType = reflect.TypeOf(t).String()
-		break
-	case *models.SignRequest_BlockV2:
+	case *models.SignRequestBlockV2:
 		byts, err := t.BlockV2.MarshalSSZ()
 		if err != nil {
 			return nil, err
 		}
 		toEncode.Data = byts
 		toEncode.ObjectType = reflect.TypeOf(t).String()
-		break
-	case *models.SignRequest_AggregateAttestationAndProof:
+	case *models.SignRequestAggregateAttestationAndProof:
 		byts, err := t.AggregateAttestationAndProof.MarshalSSZ()
 		if err != nil {
 			return nil, err
@@ -68,44 +65,37 @@ func encodeSignReuqest(sr *models.SignRequest) ([]byte, error) {
 		if err := ddd.UnmarshalSSZ(byts); err != nil {
 			return nil, err
 		}
-
-		break
-	case *models.SignRequest_Epoch:
+	case *models.SignRequestEpoch:
 		byts, err := t.Epoch.MarshalSSZ()
 		if err != nil {
 			return nil, err
 		}
 		toEncode.Data = byts
 		toEncode.ObjectType = reflect.TypeOf(t).String()
-		break
-	case *models.SignRequest_Slot:
+	case *models.SignRequestSlot:
 		byts, err := t.Slot.MarshalSSZ()
 		if err != nil {
 			return nil, err
 		}
 		toEncode.Data = byts
 		toEncode.ObjectType = reflect.TypeOf(t).String()
-		break
-	case *models.SignRequest_SyncCommitteeMessage:
+	case *models.SignRequestSyncCommitteeMessage:
 		toEncode.Data = t.Root
 		toEncode.ObjectType = reflect.TypeOf(t).String()
-		break
-	case *models.SignRequest_SyncAggregatorSelectionData:
+	case *models.SignRequestSyncAggregatorSelectionData:
 		byts, err := t.SyncAggregatorSelectionData.MarshalSSZ()
 		if err != nil {
 			return nil, err
 		}
 		toEncode.Data = byts
 		toEncode.ObjectType = reflect.TypeOf(t).String()
-		break
-	case *models.SignRequest_ContributionAndProof:
+	case *models.SignRequestContributionAndProof:
 		byts, err := t.ContributionAndProof.MarshalSSZ()
 		if err != nil {
 			return nil, err
 		}
 		toEncode.Data = byts
 		toEncode.ObjectType = reflect.TypeOf(t).String()
-		break
 	default:
 		return nil, errors.New("sign request unknown object type")
 	}
@@ -128,64 +118,56 @@ func decodeSignRequest(data []byte, sr *models.SignRequest) error {
 	}
 
 	switch toDecode.ObjectType {
-	case "*models.SignRequest_AttestationData":
+	case "*models.SignRequestAttestationData":
 		data := &eth.AttestationData{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
-		sr.Object = &models.SignRequest_AttestationData{AttestationData: data}
-		break
-	case "*models.SignRequest_Block":
+		sr.Object = &models.SignRequestAttestationData{AttestationData: data}
+	case "*models.SignRequestBlock":
 		data := &eth.BeaconBlock{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
-		sr.Object = &models.SignRequest_Block{Block: data}
-		break
-	case "*models.SignRequest_BlockV2":
+		sr.Object = &models.SignRequestBlock{Block: data}
+	case "*models.SignRequestBlockV2":
 		data := &eth.BeaconBlockAltair{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
-		sr.Object = &models.SignRequest_BlockV2{BlockV2: data}
-		break
-	case "*models.SignRequest_Slot":
+		sr.Object = &models.SignRequestBlockV2{BlockV2: data}
+	case "*models.SignRequestSlot":
 		data := types.Slot(1)
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
-		sr.Object = &models.SignRequest_Slot{Slot: data}
-		break
-	case "*models.SignRequest_Epoch":
+		sr.Object = &models.SignRequestSlot{Slot: data}
+	case "*models.SignRequestEpoch":
 		data := types.Epoch(1)
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
-		sr.Object = &models.SignRequest_Epoch{Epoch: data}
-		break
-	case "*models.SignRequest_AggregateAttestationAndProof":
+		sr.Object = &models.SignRequestEpoch{Epoch: data}
+	case "*models.SignRequestAggregateAttestationAndProof":
 		data := &eth.AggregateAttestationAndProof{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
-		sr.Object = &models.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: data}
-		break
-	case "*models.SignRequest_SyncCommitteeMessage":
-		sr.Object = &models.SignRequest_SyncCommitteeMessage{Root: toDecode.Data}
-	case "*models.SignRequest_SyncAggregatorSelectionData":
+		sr.Object = &models.SignRequestAggregateAttestationAndProof{AggregateAttestationAndProof: data}
+	case "*models.SignRequestSyncCommitteeMessage":
+		sr.Object = &models.SignRequestSyncCommitteeMessage{Root: toDecode.Data}
+	case "*models.SignRequestSyncAggregatorSelectionData":
 		data := &eth.SyncAggregatorSelectionData{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
-		sr.Object = &models.SignRequest_SyncAggregatorSelectionData{SyncAggregatorSelectionData: data}
-		break
-	case "*models.SignRequest_ContributionAndProof":
+		sr.Object = &models.SignRequestSyncAggregatorSelectionData{SyncAggregatorSelectionData: data}
+	case "*models.SignRequestContributionAndProof":
 		data := &eth.ContributionAndProof{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}
-		sr.Object = &models.SignRequest_ContributionAndProof{ContributionAndProof: data}
-		break
+		sr.Object = &models.SignRequestContributionAndProof{ContributionAndProof: data}
 	default:
 		return errors.New("sign request unknown object type")
 	}

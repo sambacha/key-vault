@@ -32,7 +32,7 @@ func signsPaths(b *backend) []*framework.Path {
 			HelpSynopsis:    "Sign",
 			HelpDescription: `Sign`,
 			Fields: map[string]*framework.FieldSchema{
-				"sign_req": &framework.FieldSchema{
+				"sign_req": {
 					Type:        framework.TypeString,
 					Description: "SSZ Serialized sign request object",
 					Default:     "",
@@ -87,27 +87,30 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 		var simpleSigner signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
 
 		switch t := signReq.GetObject().(type) {
-		case *models.SignRequest_Block:
+		case *models.SignRequestBlock:
 			sig, err = simpleSigner.SignBeaconBlock(wrapper2.WrappedPhase0BeaconBlock(t.Block), signReq.SignatureDomain, signReq.PublicKey)
-		case *models.SignRequest_BlockV2:
+		case *models.SignRequestBlockV2:
 			altairBlk, err := wrapper2.WrappedAltairBeaconBlock(t.BlockV2)
 			if err != nil {
 				return errors.Wrap(err, "failed to wrap altair block")
 			}
 			sig, err = simpleSigner.SignBeaconBlock(altairBlk, signReq.SignatureDomain, signReq.PublicKey)
-		case *models.SignRequest_AttestationData:
+			if err != nil {
+				return errors.Wrap(err, "failed to sign beacon block")
+			}
+		case *models.SignRequestAttestationData:
 			sig, err = simpleSigner.SignBeaconAttestation(t.AttestationData, signReq.SignatureDomain, signReq.PublicKey)
-		case *models.SignRequest_Slot:
+		case *models.SignRequestSlot:
 			sig, err = simpleSigner.SignSlot(t.Slot, signReq.SignatureDomain, signReq.PublicKey)
-		case *models.SignRequest_Epoch:
+		case *models.SignRequestEpoch:
 			sig, err = simpleSigner.SignEpoch(t.Epoch, signReq.SignatureDomain, signReq.PublicKey)
-		case *models.SignRequest_AggregateAttestationAndProof:
+		case *models.SignRequestAggregateAttestationAndProof:
 			sig, err = simpleSigner.SignAggregateAndProof(t.AggregateAttestationAndProof, signReq.SignatureDomain, signReq.PublicKey)
-		case *models.SignRequest_SyncCommitteeMessage:
+		case *models.SignRequestSyncCommitteeMessage:
 			sig, err = simpleSigner.SignSyncCommittee(t.Root, signReq.SignatureDomain, signReq.PublicKey)
-		case *models.SignRequest_SyncAggregatorSelectionData:
+		case *models.SignRequestSyncAggregatorSelectionData:
 			sig, err = simpleSigner.SignSyncCommitteeSelectionData(t.SyncAggregatorSelectionData, signReq.SignatureDomain, signReq.PublicKey)
-		case *models.SignRequest_ContributionAndProof:
+		case *models.SignRequestContributionAndProof:
 			sig, err = simpleSigner.SignSyncCommitteeContributionAndProof(t.ContributionAndProof, signReq.SignatureDomain, signReq.PublicKey)
 		default:
 			return errors.Errorf("sign request: not supported")

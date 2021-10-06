@@ -28,9 +28,9 @@ const (
 
 // HashicorpVaultStore implements store.Store interface using Vault.
 type HashicorpVaultStore struct {
-	storage            logical.Storage
-	ctx                context.Context
-	network            core.Network
+	storage logical.Storage
+	ctx     context.Context
+	network core.Network
 	encoder encoder2.IEncoder
 
 	encryptor          encryptor.Encryptor
@@ -40,9 +40,9 @@ type HashicorpVaultStore struct {
 // NewHashicorpVaultStore is the constructor of HashicorpVaultStore.
 func NewHashicorpVaultStore(ctx context.Context, storage logical.Storage, network core.Network) *HashicorpVaultStore {
 	return &HashicorpVaultStore{
-		storage	: storage,
-		network	: network,
-		ctx		: ctx,
+		storage: storage,
+		network: network,
+		ctx:     ctx,
 		encoder: legacy.New(),
 	}
 }
@@ -276,8 +276,4 @@ func (store *HashicorpVaultStore) freshContext() *core.WalletContext {
 	return &core.WalletContext{
 		Storage: store,
 	}
-}
-
-func (store *HashicorpVaultStore) canEncrypt() bool {
-	return store.encryptor != nil && store.encryptionPassword != nil
 }

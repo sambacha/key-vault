@@ -59,7 +59,7 @@ func TestSignProposal(t *testing.T) {
 			require.EqualValues(t, _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"), req.SignatureDomain)
 
 			// root block
-			actualRoot, err := req.Object.(*models.SignRequest_Block).Block.HashTreeRoot()
+			actualRoot, err := req.Object.(*models.SignRequestBlock).Block.HashTreeRoot()
 			require.NoError(t, err)
 			expectedRoot := _byteArray("c842b15864adc006334b251e1b692f21ae453a1524e8d2224d602a2822949190")
 			require.EqualValues(t, expectedRoot, actualRoot[:])
@@ -137,6 +137,6 @@ func testRequest(t *testing.T) *models.SignRequest {
 		PublicKey:       _byteArray("a3862121db5914d7272b0b705e6e3c5336b79e316735661873566245207329c30f9a33d4fb5f5857fc6fd0a368186972"),
 		SigningRoot:     nil,
 		SignatureDomain: _byteArray32("0000000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459"),
-		Object:          &models.SignRequest_Block{Block: blk},
+		Object:          &models.SignRequestBlock{Block: blk},
 	}
 }

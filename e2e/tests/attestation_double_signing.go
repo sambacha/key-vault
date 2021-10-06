@@ -2,13 +2,13 @@ package tests
 
 import (
 	"encoding/hex"
-	"fmt"
 	"testing"
 
 	"github.com/bloxapp/key-vault/keymanager/models"
 
-	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 	types "github.com/prysmaticlabs/eth2-types"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
@@ -64,7 +64,7 @@ func (test *AttestationDoubleSigning) Run(t *testing.T) {
 	req, err = test.serializedReq(pubKey, nil, domain, att)
 	require.NoError(t, err)
 	_, err = setup.Sign("sign", req, core.PraterNetwork)
-	expectedErr := fmt.Sprintf("1 error occurred:\n\t* failed to sign: slashable attestation (HighestAttestationVote), not signing\n\n")
+	expectedErr := "1 error occurred:\n\t* failed to sign: slashable attestation (HighestAttestationVote), not signing\n\n"
 	require.Error(t, err)
 	require.IsType(t, &e2e.ServiceError{}, err)
 	require.EqualValues(t, expectedErr, err.(*e2e.ServiceError).ErrorValue())
@@ -75,7 +75,7 @@ func (test *AttestationDoubleSigning) serializedReq(pk, root, domain []byte, att
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &models.SignRequest_AttestationData{AttestationData: attestation},
+		Object:          &models.SignRequestAttestationData{AttestationData: attestation},
 	}
 
 	byts, err := encoderv2.New().Encode(req)

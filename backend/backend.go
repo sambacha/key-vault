@@ -3,7 +3,6 @@ package backend
 import (
 	"context"
 	"encoding/hex"
-	"net/http"
 	"sync"
 
 	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
@@ -14,8 +13,6 @@ import (
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-
-	"github.com/bloxapp/key-vault/utils/errorex"
 )
 
 // Factory returns the backend factory
@@ -83,26 +80,4 @@ func (b *backend) pathExistenceCheck(ctx context.Context, req *logical.Request, 
 	}
 
 	return out != nil, nil
-}
-
-// notFoundResponse returns not found error
-func (b *backend) notFoundResponse() (*logical.Response, error) {
-	return logical.RespondWithStatusCode(&logical.Response{
-		Data: map[string]interface{}{
-			"message":     "account not found",
-			"status_code": http.StatusNotFound,
-		},
-	}, nil, http.StatusNotFound)
-}
-
-// prepareErrorResponse prepares error response
-func (b *backend) prepareErrorResponse(originError error) (*logical.Response, error) {
-	switch err := errors.Cause(originError).(type) {
-	case *errorex.ErrBadRequest:
-		return err.ToLogicalResponse()
-	case nil:
-		return nil, nil
-	default:
-		return logical.ErrorResponse(originError.Error()), nil
-	}
 }

@@ -2,8 +2,10 @@ package models
 
 import types "github.com/prysmaticlabs/eth2-types"
 
-type SignRequest_SyncCommitteeMessage struct {
+// SignRequestSyncCommitteeMessage struct for sign req committiee msg
+type SignRequestSyncCommitteeMessage struct {
 	Root types.SSZBytes
 }
 
-func (m *SignRequest_SyncCommitteeMessage) isSignRequest_Object() {}
+// isSignRequestObject implement interface func
+func (m *SignRequestSyncCommitteeMessage) isSignRequestObject() {}

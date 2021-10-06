@@ -45,6 +45,7 @@ func (test *AggregationProofReferenceSigning) Run(t *testing.T) {
 	slot := uint64(0)
 	domain := _byteArray32("050000008c84cda94176cc2b1268357c57c3160131874a4408e155b0db826d11")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, slot)
+	require.NoError(t, err)
 
 	// Send sign attestation request
 	sig, err := setup.Sign("sign", req, core.PraterNetwork)
@@ -58,7 +59,7 @@ func (test *AggregationProofReferenceSigning) serializedReq(pk, root, domain []b
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &models.SignRequest_Slot{Slot: types.Slot(slot)},
+		Object:          &models.SignRequestSlot{Slot: types.Slot(slot)},
 	}
 
 	byts, err := encoderv2.New().Encode(req)

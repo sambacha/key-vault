@@ -60,7 +60,7 @@ func (test *AttestationReferenceSigning) serializedReq(pk, root, domain []byte, 
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &models.SignRequest_AttestationData{AttestationData: attestation},
+		Object:          &models.SignRequestAttestationData{AttestationData: attestation},
 	}
 
 	byts, err := encoderv2.New().Encode(req)

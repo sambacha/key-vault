@@ -49,7 +49,7 @@ func (test *ProposalSigningAccountNotFound) serializedReq(pk, root, domain []byt
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &models.SignRequest_Block{Block: blk},
+		Object:          &models.SignRequestBlock{Block: blk},
 	}
 
 	byts, err := encoderv2.New().Encode(req)

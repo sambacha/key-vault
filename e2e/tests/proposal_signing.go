@@ -69,7 +69,7 @@ func (test *ProposalSigning) serializedReq(pk, root, domain []byte, blk *eth.Bea
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &models.SignRequest_Block{Block: blk},
+		Object:          &models.SignRequestBlock{Block: blk},
 	}
 
 	byts, err := encoderv2.New().Encode(req)

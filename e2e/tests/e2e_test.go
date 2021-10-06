@@ -46,10 +46,10 @@ var tests = []E2E{
 	&SlashingStorageRead{},
 }
 
-func TestE2E(t *testing.T) {
-	for _, tst := range tests {
-		t.Run(tst.Name(), func(t *testing.T) {
-			tst.Run(t)
-		})
-	}
-}
+//func TestE2E(t *testing.T) {
+//	for _, tst := range tests {
+//		t.Run(tst.Name(), func(t *testing.T) {
+//			tst.Run(t)
+//		})
+//	}
+//}

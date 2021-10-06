@@ -54,6 +54,7 @@ func (test *SlashingStorageRead) Run(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = setup.Sign("sign", req, core.PraterNetwork)
+	require.NoError(t, err)
 
 	// Read slashing storage
 	storageBytes, statusCode := setup.ReadSlashingStorage(t, core.PraterNetwork)
@@ -73,7 +74,7 @@ func (test *SlashingStorageRead) serializedReq(pk, root, domain []byte, blk *eth
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &models.SignRequest_Block{Block: blk},
+		Object:          &models.SignRequestBlock{Block: blk},
 	}
 
 	byts, err := json.Marshal(req)
