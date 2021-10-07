@@ -2,6 +2,7 @@ package tests
 
 import (
 	"encoding/hex"
+	"fmt"
 	"strconv"
 	"testing"
 
@@ -83,7 +84,7 @@ func (test *AggregationConcurrentSigning) Run(t *testing.T) {
 				require.IsType(t, &e2e.ServiceError{}, err)
 
 				errValue := err.(*e2e.ServiceError).ErrorValue()
-				protected := errValue == "1 error occurred:\n\t* locked\n\n"
+				protected := errValue == fmt.Sprintf("1 error occurred:\n\t* locked\n\n")
 				require.True(t, protected, err.Error())
 			})
 		}

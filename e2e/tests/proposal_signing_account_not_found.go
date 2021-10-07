@@ -2,6 +2,7 @@ package tests
 
 import (
 	"encoding/hex"
+	"fmt"
 	"testing"
 
 	"github.com/bloxapp/key-vault/keymanager/models"
@@ -41,7 +42,7 @@ func (test *ProposalSigningAccountNotFound) Run(t *testing.T) {
 	_, err = setup.Sign("sign", req, core.PraterNetwork)
 	require.Error(t, err)
 	require.IsType(t, &e2e.ServiceError{}, err)
-	require.EqualValues(t, "1 error occurred:\n\t* failed to sign: account not found\n\n", err.(*e2e.ServiceError).ErrorValue())
+	require.EqualValues(t, fmt.Sprintf("1 error occurred:\n\t* failed to sign: account not found\n\n"), err.(*e2e.ServiceError).ErrorValue())
 }
 
 func (test *ProposalSigningAccountNotFound) serializedReq(pk, root, domain []byte, blk *eth.BeaconBlock) (map[string]interface{}, error) {

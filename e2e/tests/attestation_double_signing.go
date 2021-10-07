@@ -2,6 +2,7 @@ package tests
 
 import (
 	"encoding/hex"
+	"fmt"
 	"testing"
 
 	"github.com/bloxapp/key-vault/keymanager/models"
@@ -64,7 +65,7 @@ func (test *AttestationDoubleSigning) Run(t *testing.T) {
 	req, err = test.serializedReq(pubKey, nil, domain, att)
 	require.NoError(t, err)
 	_, err = setup.Sign("sign", req, core.PraterNetwork)
-	expectedErr := "1 error occurred:\n\t* failed to sign: slashable attestation (HighestAttestationVote), not signing\n\n"
+	expectedErr := fmt.Sprintf("1 error occurred:\n\t* failed to sign: slashable attestation (HighestAttestationVote), not signing\n\n")
 	require.Error(t, err)
 	require.IsType(t, &e2e.ServiceError{}, err)
 	require.EqualValues(t, expectedErr, err.(*e2e.ServiceError).ErrorValue())

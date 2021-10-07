@@ -44,7 +44,7 @@ func (test *ProposalFarFutureSigning) Run(t *testing.T) {
 	require.NoError(t, err)
 	_, err = setup.Sign("sign", req, core.PraterNetwork)
 	require.NotNil(t, err)
-	expectedErr := "map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: proposed block slot too far into the future\\n\\n\"}}"
+	expectedErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: proposed block slot too far into the future\\n\\n\"}}")
 	require.EqualError(t, err, expectedErr, fmt.Sprintf("actual: %s\n", err.Error()))
 }
 

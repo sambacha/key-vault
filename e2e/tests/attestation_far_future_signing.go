@@ -39,8 +39,8 @@ func (test *AttestationFarFutureSigning) Run(t *testing.T) {
 	require.NotNil(t, account)
 	pubKeyBytes := account.ValidatorPublicKey()
 
-	expectedSourceErr := "map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: source epoch too far into the future\\n\\n\"}}"
-	expectedTargetErr := "map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: target epoch too far into the future\\n\\n\"}}"
+	expectedSourceErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: source epoch too far into the future\\n\\n\"}}")
+	expectedTargetErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: target epoch too far into the future\\n\\n\"}}")
 
 	currentEpoch := core.PraterNetwork.EstimatedCurrentEpoch()
 	futureEpoch := core.PraterNetwork.EstimatedCurrentEpoch() + 1000

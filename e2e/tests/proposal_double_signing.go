@@ -2,6 +2,7 @@ package tests
 
 import (
 	"encoding/hex"
+	"fmt"
 	"testing"
 
 	"github.com/bloxapp/key-vault/keymanager/models"
@@ -52,7 +53,7 @@ func (test *ProposalDoubleSigning) Run(t *testing.T) {
 	require.IsType(t, &e2e.ServiceError{}, err)
 
 	errValue := err.(*e2e.ServiceError).ErrorValue()
-	protected := errValue == "1 error occurred:\n\t* failed to sign: slashable proposal (HighestProposalVote), not signing\n\n"
+	protected := errValue == fmt.Sprintf("1 error occurred:\n\t* failed to sign: slashable proposal (HighestProposalVote), not signing\n\n")
 	require.True(t, protected, err.Error())
 }
 
