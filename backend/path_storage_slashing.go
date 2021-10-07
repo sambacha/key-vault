@@ -34,8 +34,10 @@ func storageSlashingDataPaths(b *backend) []*framework.Path {
 			HelpSynopsis:    "Manage slashing storage",
 			HelpDescription: `Manage KeyVault slashing storage`,
 			ExistenceCheck:  b.pathExistenceCheck,
-			Callbacks: map[logical.Operation]framework.OperationFunc{
-				logical.ReadOperation: b.pathMinimalSlashingStorageRead,
+			Operations: map[logical.Operation]framework.OperationHandler{
+				logical.ReadOperation: &framework.PathOperation{
+					Callback: b.pathMinimalSlashingStorageRead,
+				},
 			},
 		},
 	}

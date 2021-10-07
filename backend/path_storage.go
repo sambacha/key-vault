@@ -38,8 +38,6 @@ func storagePaths(b *backend) []*framework.Path {
 			Operations: map[logical.Operation]framework.OperationHandler{
 				logical.CreateOperation: &framework.PathOperation{
 					Callback: b.pathStorageUpdateV2,
-					Summary: "sum",
-					Description: "ses",
 				},
 			},
 		},

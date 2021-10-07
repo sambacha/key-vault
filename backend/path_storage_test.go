@@ -9,7 +9,7 @@ import (
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
-	uuid "github.com/google/uuid"
+	"github.com/google/uuid"
 	"github.com/hashicorp/vault/sdk/logical"
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	bytesutil2 "github.com/prysmaticlabs/prysm/shared/bytesutil"
@@ -100,6 +100,8 @@ func TestStorage(t *testing.T) {
 		req.Data = map[string]interface{}{
 			"data": data,
 		}
+		setupBaseStorage(t, req)
+
 		res, err := b.HandleRequest(context.Background(), req)
 		require.NoError(tt, err)
 		require.True(tt, res.Data["status"].(bool))

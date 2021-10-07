@@ -39,8 +39,10 @@ func signsPaths(b *backend) []*framework.Path {
 				},
 			},
 			ExistenceCheck: b.pathExistenceCheck,
-			Callbacks: map[logical.Operation]framework.OperationFunc{
-				logical.CreateOperation: b.pathSign,
+			Operations: map[logical.Operation]framework.OperationHandler{
+				logical.CreateOperation: &framework.PathOperation{
+					Callback: b.pathSign,
+				},
 			},
 		},
 	}

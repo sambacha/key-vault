@@ -21,8 +21,10 @@ func versionPaths(b *backend) []*framework.Path {
 			HelpDescription: ``,
 			Fields:          map[string]*framework.FieldSchema{},
 			ExistenceCheck:  b.pathExistenceCheck,
-			Callbacks: map[logical.Operation]framework.OperationFunc{
-				logical.ReadOperation: b.pathVersion,
+			Operations: map[logical.Operation]framework.OperationHandler{
+				logical.ReadOperation: &framework.PathOperation{
+					Callback: b.pathVersion,
+				},
 			},
 		},
 	}

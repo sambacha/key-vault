@@ -26,8 +26,10 @@ func accountsPaths(b *backend) []*framework.Path {
 			HelpDescription: ``,
 			Fields:          map[string]*framework.FieldSchema{},
 			ExistenceCheck:  b.pathExistenceCheck,
-			Callbacks: map[logical.Operation]framework.OperationFunc{
-				logical.ListOperation: b.pathWalletAccountsList,
+			Operations: map[logical.Operation]framework.OperationHandler{
+				logical.ListOperation: &framework.PathOperation{
+					Callback: b.pathWalletAccountsList,
+				},
 			},
 		},
 	}
