@@ -5,9 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	vault "github.com/bloxapp/eth2-key-manager"
-	"github.com/bloxapp/eth2-key-manager/core"
-
 	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
@@ -44,80 +41,52 @@ func storagePaths(b *backend) []*framework.Path {
 	}
 }
 
-// getVaultMemoryStorage returns unmarshalled in-memory storage
-func getVaultMemoryStorage(data *framework.FieldData) (*inmemory.InMemStore, error) {
+// buildInMemoryStorage returns unmarshalled in-memory storage
+func buildInMemStore(data *framework.FieldData) (*inmemory.InMemStore, error) {
 	storage := data.Get("data").(string)
 	storageBytes, err := hex.DecodeString(storage)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to HEX decode storage")
 	}
 
-	var vaultMemoryStorage *inmemory.InMemStore
-	err = json.Unmarshal(storageBytes, &vaultMemoryStorage)
+	var inMemStore *inmemory.InMemStore
+	err = json.Unmarshal(storageBytes, &inMemStore)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to JSON un-marshal storage")
 	}
-	return vaultMemoryStorage, nil
+	return inMemStore, nil
 }
 
-// BuildKeyVault building new key vault and wallet if not exists - otherwise return existing ones
-func (b *backend) BuildKeyVault(ctx context.Context, req *logical.Request, data *framework.FieldData) (*inmemory.InMemStore, *store.HashicorpVaultStore, core.Wallet, error) {
-	// Load config
-	config, err := b.readConfig(ctx, req.Storage)
+// pathStorageUpdate updates all accounts from new uploaded storage
+func (b *backend) pathStorageUpdate(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+	inMemStore, err := buildInMemStore(data)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "failed to get config")
+		return nil, errors.Wrap(err, "failed to build in memory store")
 	}
 
-	// Get hashicorp storage
-	hashicorpStorage := store.NewHashicorpVaultStore(ctx, req.Storage, config.Network)
-	options := vault.KeyVaultOptions{}
-	options.SetStorage(hashicorpStorage)
-
-	// Try to get existing wallet
-	var wallet core.Wallet
-
-	// Get memory storage for new posted accounts
-	vaultMemoryStorage, err := getVaultMemoryStorage(data)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	portfolio, err := vault.OpenKeyVault(&options)
-	if err != nil {
-		// If no existing wallet - create new one
-		wallet, err = vaultMemoryStorage.OpenWallet()
-		if err != nil {
-			return nil, nil, nil, errors.Wrap(err, "failed to open new wallet")
-		}
-	} else {
-		// Use existing wallet
-		wallet, err = portfolio.Wallet()
-		if err != nil {
-			return nil, nil, nil, errors.Wrap(err, "failed to retrieve wallet by name")
-		}
-	}
-
-	// Save wallet in key vault
-	err = hashicorpStorage.SaveWallet(wallet)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	return vaultMemoryStorage, hashicorpStorage, wallet, nil
-}
-
-// pathStorageUpdateV2 updates accounts from one account storage
-func (b *backend) pathStorageUpdateV2(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
-	// Build new or use existing key vault with wallet
-	vaultMemoryStorage, hashicorpStorage, wallet, err := b.BuildKeyVault(ctx, req, data)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to build key vault and wallet")
-	}
-
-	// Update accounts
-	_, err = store.UpdateAccounts(vaultMemoryStorage, wallet, hashicorpStorage)
+	_, err = store.FromInMemoryStore(ctx, inMemStore, req.Storage)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to update storage")
+	}
+
+	return &logical.Response{
+		Data: map[string]interface{}{
+			"status": true,
+		},
+	}, nil
+}
+
+// pathStorageUpdateV2 updates storage accounts from new requested storage
+func (b *backend) pathStorageUpdateV2(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+	inMemStore, err := buildInMemStore(data)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to build in memory store")
+	}
+
+	// Update hashicorp store with new account(s)
+	_, err = store.FromInMemoryStoreV2(ctx, inMemStore, req.Storage)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to update storage from in memory")
 	}
 
 	return &logical.Response{
