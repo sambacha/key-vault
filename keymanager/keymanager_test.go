@@ -9,7 +9,7 @@ import (
 
 	"github.com/bloxapp/key-vault/keymanager/models"
 
-	"github.com/prysmaticlabs/prysm/shared/bytesutil"
+	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 

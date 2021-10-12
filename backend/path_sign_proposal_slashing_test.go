@@ -10,7 +10,7 @@ import (
 
 	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
-	bytesutil2 "github.com/prysmaticlabs/prysm/shared/bytesutil"
+	bytesutil2 "github.com/prysmaticlabs/prysm/encoding/bytesutil"
 
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 

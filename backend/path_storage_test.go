@@ -11,8 +11,8 @@ import (
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
 	"github.com/google/uuid"
 	"github.com/hashicorp/vault/sdk/logical"
+	bytesutil2 "github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	bytesutil2 "github.com/prysmaticlabs/prysm/shared/bytesutil"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/backend/store"

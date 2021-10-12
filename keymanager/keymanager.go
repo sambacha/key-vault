@@ -18,7 +18,7 @@ import (
 
 	"github.com/bloxapp/key-vault/backend"
 
-	"github.com/prysmaticlabs/prysm/shared/bls"
+	"github.com/prysmaticlabs/prysm/crypto/bls"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bloxapp/key-vault/utils/bytex"

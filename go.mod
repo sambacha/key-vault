@@ -3,7 +3,7 @@ module github.com/bloxapp/key-vault
 go 1.15
 
 require (
-	github.com/bloxapp/eth2-key-manager v1.1.0-rc.0
+	github.com/bloxapp/eth2-key-manager v1.1.0-rc.5
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200618181300-9dc6525e6118+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/getsentry/sentry-go v0.11.0
@@ -14,7 +14,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.0
 	github.com/hashicorp/vault/api v1.1.1
 	github.com/hashicorp/vault/sdk v0.2.1
-	github.com/herumi/bls-eth-go-binary v0.0.0-20210520070601-31246bfa8ac4
+	github.com/herumi/bls-eth-go-binary v0.0.0-20210917013441-d37c07cfda4e
 	github.com/makasim/sentryhook v0.4.0
 	github.com/pborman/uuid v1.2.1
 	github.com/pkg/errors v0.9.1
@@ -29,4 +29,4 @@ require (
 
 replace github.com/ethereum/go-ethereum => github.com/prysmaticlabs/bazel-go-ethereum v0.0.0-20210707101027-e8523651bf6f
 
-replace github.com/prysmaticlabs/prysm => github.com/prysmaticlabs/prysm v1.4.2-0.20210827024218-7757b49f067e
+replace github.com/prysmaticlabs/prysm => github.com/prysmaticlabs/prysm v1.4.2-0.20211005004110-843ed50e0acc
