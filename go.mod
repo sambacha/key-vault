@@ -3,7 +3,7 @@ module github.com/bloxapp/key-vault
 go 1.15
 
 require (
-	github.com/bloxapp/eth2-key-manager v1.1.0-rc.5
+	github.com/bloxapp/eth2-key-manager v1.1.1
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200618181300-9dc6525e6118+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/getsentry/sentry-go v0.11.0
