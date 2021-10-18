@@ -102,7 +102,3 @@ func main() {
 
 	logrus.Println("unsuccessful: ", unsuccessful)
 }
-
-func runRequest(httpClient *http.Client, targetURL string) {
-	logrus.Println("run request", targetURL)
-}

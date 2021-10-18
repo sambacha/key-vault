@@ -23,23 +23,26 @@ func storagePaths(b *backend) []*framework.Path {
 	return []*framework.Path{
 		{
 			Pattern:         StoragePattern,
-			HelpSynopsis:    "Update storage",
+			HelpSynopsis:    "Update storage using one or more accounts",
 			HelpDescription: `Manage KeyVault storage`,
 			Fields: map[string]*framework.FieldSchema{
-				"data": &framework.FieldSchema{
+				"data": {
 					Type:        framework.TypeString,
 					Description: "storage to update",
 				},
 			},
 			ExistenceCheck: b.pathExistenceCheck,
-			Callbacks: map[logical.Operation]framework.OperationFunc{
-				logical.CreateOperation: b.pathStorageUpdate,
+			Operations: map[logical.Operation]framework.OperationHandler{
+				logical.CreateOperation: &framework.PathOperation{
+					Callback: b.pathStorageUpdate,
+				},
 			},
 		},
 	}
 }
 
-func (b *backend) pathStorageUpdate(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+// buildInMemoryStorage returns unmarshalled in-memory storage
+func buildInMemStore(data *framework.FieldData) (*inmemory.InMemStore, error) {
 	storage := data.Get("data").(string)
 	storageBytes, err := hex.DecodeString(storage)
 	if err != nil {
@@ -51,10 +54,20 @@ func (b *backend) pathStorageUpdate(ctx context.Context, req *logical.Request, d
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to JSON un-marshal storage")
 	}
+	return inMemStore, nil
+}
 
-	_, err = store.FromInMemoryStore(ctx, inMemStore, req.Storage)
+// pathStorageUpdate updates storage accounts from new requested storage
+func (b *backend) pathStorageUpdate(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+	inMemStore, err := buildInMemStore(data)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to update storage")
+		return nil, errors.Wrap(err, "failed to build in memory store")
+	}
+
+	// Update hashicorp store with new account(s)
+	_, err = store.FromInMemoryStoreV2(ctx, inMemStore, req.Storage)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to update storage from in memory")
 	}
 
 	return &logical.Response{

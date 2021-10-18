@@ -4,8 +4,11 @@ import (
 	"encoding/hex"
 	"testing"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	"github.com/bloxapp/key-vault/keymanager/models"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -28,7 +31,7 @@ func (test *AttestationReferenceSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	storage := setup.UpdateStorage(t, core.PyrmontNetwork, true, core.NDWallet, _byteArray("2c083f2c8fc923fa2bd32a70ab72b4b46247e8c1f347adc30b2f8036a355086c"))
+	storage := setup.UpdateStorage(t, core.PraterNetwork, true, core.NDWallet, _byteArray("2c083f2c8fc923fa2bd32a70ab72b4b46247e8c1f347adc30b2f8036a355086c"))
 	// Get wallet
 	wallet, err := storage.OpenWallet()
 	require.NoError(t, err)
@@ -38,29 +41,29 @@ func (test *AttestationReferenceSigning) Run(t *testing.T) {
 	pubKeyBytes := account.ValidatorPublicKey()
 
 	// Decode attestation
-	attestationDataByts := _byteArray("1a203a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b2222122000000000000000000000000000000000000000000000000000000000000000002a24080212203a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b")
+	attestationDataByts := _byteArray("000000000000000000000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b0000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b")
 	att := &eth.AttestationData{}
-	require.NoError(t, att.Unmarshal(attestationDataByts))
+	require.NoError(t, att.UnmarshalSSZ(attestationDataByts))
 	domain := _byteArray32("0100000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
 
 	// Send sign attestation request
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, att)
 	require.NoError(t, err)
-	sig, err := setup.Sign("sign", req, core.PyrmontNetwork)
+	sig, err := setup.Sign("sign", req, core.PraterNetwork)
 	require.NoError(t, err)
 	expectedSig := _byteArray("b4fa352d2d6dbdf884266af7ea0914451929b343527ea6c1737ac93b3dde8b7c98e6ce61d68b7a2e7b7af8f8d0fd429d0bdd5f930b83e6842bf4342d3d1d3d10fc0d15bab7649bb8aa8287ca104a1f79d396ce0217bb5cd3e6503a3bce4c9776")
 	require.EqualValues(t, expectedSig, sig)
 }
 
 func (test *AttestationReferenceSigning) serializedReq(pk, root, domain []byte, attestation *eth.AttestationData) (map[string]interface{}, error) {
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &validatorpb.SignRequest_AttestationData{AttestationData: attestation},
+		Object:          &models.SignRequestAttestationData{AttestationData: attestation},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := encoderv2.New().Encode(req)
 	if err != nil {
 		return nil, err
 	}

@@ -22,7 +22,7 @@ func _byteArray(input string) []byte {
 
 func baseKeyVault(seed []byte, t *testing.T) (*inmemory.InMemStore, core.Wallet, []core.ValidatorAccount) {
 	// store
-	inMemStore := inmemory.NewInMemStore(core.PyrmontNetwork)
+	inMemStore := inmemory.NewInMemStore(core.PraterNetwork)
 	// seed
 	// create keyvault in a normal in mem store
 	options := &ethkeymanager.KeyVaultOptions{}
@@ -71,8 +71,10 @@ func TestImportAndDeleteFromInMem(t *testing.T) {
 	// verify deletion
 	// accounts fetched should no longer match old accounts
 	res, err := oldHashi.OpenAccount(oldInMemAccounts[0].ID())
+	require.NoError(t, err)
 	require.Nil(t, res)
 	res, err = oldHashi.OpenAccount(oldInMemAccounts[1].ID())
+	require.NoError(t, err)
 	require.Nil(t, res)
 
 	// get hasicorp's wallet and accounts

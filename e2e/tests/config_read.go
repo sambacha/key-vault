@@ -31,12 +31,12 @@ func (test *ConfigRead) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// sign and save the valid aggregation
-	configBytes, statusCode := setup.ReadConfig(t, core.PyrmontNetwork)
+	configBytes, statusCode := setup.ReadConfig(t, core.PraterNetwork)
 	require.Equal(t, http.StatusOK, statusCode)
 
 	// parse to json
 	var config configModel
 	err := json.Unmarshal(configBytes, &config)
 	require.NoError(t, err)
-	require.EqualValues(t, core.PyrmontNetwork, config.Data.Network)
+	require.EqualValues(t, core.PraterNetwork, config.Data.Network)
 }

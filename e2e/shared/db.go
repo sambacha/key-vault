@@ -1,11 +1,10 @@
 package shared
 
 import (
-	"encoding/hex"
 	"fmt"
 	"testing"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -18,17 +17,12 @@ import (
 // AccountIndex is the test account index.
 const AccountIndex = 0
 
-func _byteArray(input string) []byte {
-	res, _ := hex.DecodeString(input)
-	return res
-}
-
 // BaseInmemStorage creates the in-memory storage and creates the base account.
 func BaseInmemStorage(t *testing.T, minimalSlashingData bool, walletType core.WalletType, privKey []byte) (*inmemory.InMemStore, error) {
 	err := core.InitBLS()
 	require.NoError(t, err)
 
-	store := inmemory.NewInMemStore(core.PyrmontNetwork)
+	store := inmemory.NewInMemStore(core.PraterNetwork)
 
 	// wallet
 	walletCtx := &core.WalletContext{Storage: store}

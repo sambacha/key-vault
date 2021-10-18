@@ -1,5 +1,5 @@
-# Ability to list pyrmont wallet accounts ("list")
-path "ethereum/pyrmont/accounts" {
+# Ability to list prater wallet accounts ("list")
+path "ethereum/prater/accounts" {
   capabilities = ["list"]
 }
 

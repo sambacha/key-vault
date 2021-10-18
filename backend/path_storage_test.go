@@ -9,10 +9,10 @@ import (
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
 	"github.com/bloxapp/eth2-key-manager/wallets/hd"
-	uuid "github.com/google/uuid"
+	"github.com/google/uuid"
 	"github.com/hashicorp/vault/sdk/logical"
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	bytesutil2 "github.com/prysmaticlabs/prysm/shared/bytesutil"
+	bytesutil2 "github.com/prysmaticlabs/prysm/encoding/bytesutil"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/key-vault/backend/store"
@@ -30,7 +30,7 @@ func _byteArray32(input string) []byte {
 }
 
 func baseInmemStorage() (*inmemory.InMemStore, uuid.UUID, error) {
-	inMemStore := inmemory.NewInMemStore(core.PyrmontNetwork)
+	inMemStore := inmemory.NewInMemStore(core.PraterNetwork)
 
 	// wallet
 	wallet := hd.NewWallet(&core.WalletContext{Storage: inMemStore})
@@ -100,10 +100,12 @@ func TestStorage(t *testing.T) {
 		req.Data = map[string]interface{}{
 			"data": data,
 		}
+		setupBaseStorage(t, req)
+
 		res, err := b.HandleRequest(context.Background(), req)
 		require.NoError(tt, err)
 		require.True(tt, res.Data["status"].(bool))
-		return store.NewHashicorpVaultStore(context.Background(), req.Storage, core.PyrmontNetwork)
+		return store.NewHashicorpVaultStore(context.Background(), req.Storage, core.PraterNetwork)
 	}
 
 	t.Run("verify wallet and account", func(t *testing.T) {

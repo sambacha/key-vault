@@ -4,33 +4,48 @@
 
 ## Latest Image Digest
 
+Latest verified image digest hosted on Docker Hub.
+<!-- /TAG_START_MARKER/ -->
+```bloxstaking/key-vault-rc:v1.2.2,bloxstaking/key-vault-rc:latest```
+<!-- /TAG_END_MARKER/ -->
+Use this hash when you `docker run` the image.
 <!-- /DIGEST_START_MARKER/ -->
-```bloxstaking/key-vault:v1.1.1,bloxstaking/key-vault:latest```
-```sha256:5aaa69f81f0b25a327bdaa2a4d628460f829d05068f592278584e59f5a475d10```
+```sha256:ce4f014d498e60168c275a87be4ec09f34fd3aca8865ef2bf48394792dce6e0a```
 <!-- /DIGEST_END_MARKER/ -->
 
-## How to use this project?
+## How to run?
 
+Use docker run with the latest verified image digest:
+<!-- /CMD_START_MARKER/ -->
+```sh
+ֿֿ$ docker run -d --restart unless-stopped --cap-add=IPC_LOCK --name=key_vault\ 
+  -v $(pwd)/data:/data -v $(pwd)/policies:/policies -p 8200:8200\ 
+  -e VAULT_ADDR='http://127.0.0.1:8200/' -e VAULT_API_ADDR='http://127.0.0.1:8200/'\ 
+  -e VAULT_CLIENT_TIMEOUT='30s' -e UNSEAL=true bloxstaking/key-vault@sha256:ce4f014d498e60168c275a87be4ec09f34fd3aca8865ef2bf48394792dce6e0a
+```
+<!-- /CMD_END_MARKER/ -->
 
-  1. Build the images and run the containers:
+## How to build from source (development purposes)?
 
-        ```sh
-        $ docker-compose up -d --build
-        ```
+1. Build the images and run the containers:
 
-  2. Execute the container
+      ```sh
+      $ docker-compose up -d --build
+      ```
 
-        ```sh
-        $ docker-compose exec vault bash
-        ```
+2. Execute the container
 
-  3. Read the root token
- 
-        ```sh
-        $ docker-compose exec -T vault cat /data/keys/vault.root.token
-        ```
-        
-## Endpoints 
+      ```sh
+      $ docker-compose exec vault bash
+      ```
+
+3. Read the root token
+
+      ```sh
+      $ docker-compose exec -T vault cat /data/keys/vault.root.token
+      ```
+
+## Endpoints
 
 
 ### GET VERSION
@@ -44,7 +59,7 @@ This endpoint will get a version of key-vault.
 
 #### Sample Response
 
-The example below shows output for a query path of `/ethereum/pyrmont/version`.
+The example below shows output for a query path of `/ethereum/prater/version`.
 
 ```
 {
@@ -72,7 +87,7 @@ This endpoint will list all accounts of key-vault.
 
 #### Sample Response
 
-The example below shows output for a query path of `/ethereum/pyrmont/accounts` when there is 1 account.
+The example below shows output for a query path of `/ethereum/prater/accounts` when there is 1 account.
 
 ```
 {
@@ -107,7 +122,7 @@ This endpoint will update the storage.
 
 #### Sample Response
 
-The example below shows output for a query path of `/ethereum/pyrmont/storage`.
+The example below shows output for a query path of `/ethereum/prater/storage`.
 
 ```
 {
@@ -137,7 +152,7 @@ This endpoint will update the storage.
 
 #### Sample Response
 
-The example below shows output for a query path of `/ethereum/pyrmont/storage/slashing`.
+The example below shows output for a query path of `/ethereum/prater/storage/slashing`.
 
 ```
 {
@@ -202,8 +217,8 @@ The plugin's endpoint paths are designed such that admin-level access policies v
 Use the following policy to assign to a signer level access token, with the abilities to list accounts and sign transactions.
 
 ```
-# Ability to list pyrmont wallet accounts ("list")
-path "ethereum/pyrmont/accounts" {
+# Ability to list prater wallet accounts ("list")
+path "ethereum/prater/accounts" {
   capabilities = ["list"]
 }
 
@@ -227,8 +242,8 @@ path "ethereum/+/version" {
 Use the following policy to assign to a admin level access token, with the full ability to update storage, list accounts and sign transactions.
 
 ```
-# Ability to list pyrmont wallet accounts ("list")
-path "ethereum/pyrmont/accounts" {
+# Ability to list prater wallet accounts ("list")
+path "ethereum/prater/accounts" {
   capabilities = ["list"]
 }
 
@@ -260,59 +275,59 @@ path "ethereum/+/storage/slashing" {
 
 ## How to use policies?
 
-  1. Create a new policy named admin:
+1. Create a new policy named admin:
 
-        ```sh
-        $ vault policy write admin policies/admin-policy.hcl
-        ```
+      ```sh
+      $ vault policy write admin policies/admin-policy.hcl
+      ```
 
-  2. Create a token attached to admin policy:
+2. Create a token attached to admin policy:
 
-        ```sh
-        $ vault token create -policy="admin"
-        ```
+      ```sh
+      $ vault token create -policy="admin"
+      ```
 
-  3. Create a new policy named signer:
- 
-        ```sh
-        $ vault policy write signer policies/signer-policy.hcl
-        ```
+3. Create a new policy named signer:
 
-  4. Create a token attached to signer policy:
+      ```sh
+      $ vault policy write signer policies/signer-policy.hcl
+      ```
 
-        ```sh
-        $ vault token create -policy="signer"
-        ```
+4. Create a token attached to signer policy:
+
+      ```sh
+      $ vault token create -policy="signer"
+      ```
 
 ## About testing
 
-There are 2 types of tests in the project: end-to-end and unit ones. 
+There are 2 types of tests in the project: end-to-end and unit ones.
 In order to run all tests including e2e ones you will need to do the following command:
 ```bash
 $ make test
 ``` 
 
 New e2e tests should be placed in `./e2e/tests` directory and implement `E2E` interface.
-Use the current format to add new tests. 
+Use the current format to add new tests.
 
 
 ## Release Version
 
 versions are published to dockerhub based on tags.
-before publishing a tag update docker compose image to the to be pushed tag 
+before publishing a tag update docker compose image to the to be pushed tag
 
 ## Multinetworks
 
 The plugin supports multiple Ethereum networks. All available networks are defined in `./config/vault-plugin.sh`.
 New networks could be defined by the following steps:
 
-1. Enable secrets for a new network in `./config/vault-plugin.sh`. 
-    Example
+1. Enable secrets for a new network in `./config/vault-plugin.sh`.
+   Example
     ```bash
     $ vault secrets enable \
-        -path=ethereum/pyrmont \
-        -description="Eth Signing Wallet - Pyrmont Test Network" \
-        -plugin-name=ethsign plugin > /dev/null 2>&1
+        -path=ethereum/prater \
+        -description="Eth Signing Wallet - Prater Test Network" \
+        -plugin-name=ethsign plugin > /dev/null 2>  &1
     ```
 
 2. Update policies `./policies/admin-policy.hcl` and `./policies/signer-policy.hcl` by adding a definition with a new network in the path.

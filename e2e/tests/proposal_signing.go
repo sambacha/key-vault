@@ -4,10 +4,15 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/bloxapp/key-vault/keymanager/models"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+
+	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
+
 	"github.com/bloxapp/eth2-key-manager/signer"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	slashingprotection "github.com/bloxapp/eth2-key-manager/slashing_protection"
@@ -31,7 +36,7 @@ func (test *ProposalSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	storage := setup.UpdateStorage(t, core.PyrmontNetwork, true, core.HDWallet, nil)
+	storage := setup.UpdateStorage(t, core.PraterNetwork, true, core.HDWallet, nil)
 	account := shared.RetrieveAccount(t, storage)
 	require.NotNil(t, account)
 	pubKeyBytes := account.ValidatorPublicKey()
@@ -49,25 +54,25 @@ func (test *ProposalSigning) Run(t *testing.T) {
 	protector := slashingprotection.NewNormalProtection(storage)
 	var signer signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
 
-	res, err := signer.SignBeaconBlock(blk, domain, pubKeyBytes)
+	res, err := signer.SignBeaconBlock(wrapper.WrappedPhase0BeaconBlock(blk), domain, pubKeyBytes)
 	require.NoError(t, err)
 
 	// Send sign attestation request
-	sig, err := setup.Sign("sign", req, core.PyrmontNetwork)
+	sig, err := setup.Sign("sign", req, core.PraterNetwork)
 	require.NoError(t, err)
 
 	require.Equal(t, res, sig)
 }
 
 func (test *ProposalSigning) serializedReq(pk, root, domain []byte, blk *eth.BeaconBlock) (map[string]interface{}, error) {
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &validatorpb.SignRequest_Block{Block: blk},
+		Object:          &models.SignRequestBlock{Block: blk},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := encoderv2.New().Encode(req)
 	if err != nil {
 		return nil, err
 	}

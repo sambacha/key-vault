@@ -3,15 +3,16 @@ package backend
 import (
 	"context"
 	"encoding/hex"
-	"net/http"
 	"sync"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+
+	encoder2 "github.com/bloxapp/key-vault/utils/encoder"
 
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-
-	"github.com/bloxapp/key-vault/utils/errorex"
 )
 
 // Factory returns the backend factory
@@ -28,9 +29,11 @@ func Factory(version string, logger *logrus.Logger) logical.Factory {
 // newBackend returns the backend
 func newBackend(version string, logger *logrus.Logger) *backend {
 	b := &backend{
-		logger:   logger,
-		Version:  version,
-		signLock: make(map[string]*sync.Mutex),
+		logger:      logger,
+		Version:     version,
+		signMapLock: &sync.Mutex{},
+		signLock:    make(map[string]*sync.Mutex),
+		encoder:     encoderv2.New(),
 	}
 	b.Backend = &framework.Backend{
 		Help: "",
@@ -56,9 +59,11 @@ func newBackend(version string, logger *logrus.Logger) *backend {
 // backend implements the Backend for this plugin
 type backend struct {
 	*framework.Backend
-	logger   *logrus.Logger
-	Version  string
-	signLock map[string]*sync.Mutex
+	logger      *logrus.Logger
+	Version     string
+	signMapLock *sync.Mutex
+	signLock    map[string]*sync.Mutex
+	encoder     encoder2.IEncoder
 }
 
 // pathExistenceCheck checks if the given path exists
@@ -75,26 +80,4 @@ func (b *backend) pathExistenceCheck(ctx context.Context, req *logical.Request, 
 	}
 
 	return out != nil, nil
-}
-
-// notFoundResponse returns not found error
-func (b *backend) notFoundResponse() (*logical.Response, error) {
-	return logical.RespondWithStatusCode(&logical.Response{
-		Data: map[string]interface{}{
-			"message":     "account not found",
-			"status_code": http.StatusNotFound,
-		},
-	}, nil, http.StatusNotFound)
-}
-
-// prepareErrorResponse prepares error response
-func (b *backend) prepareErrorResponse(originError error) (*logical.Response, error) {
-	switch err := errors.Cause(originError).(type) {
-	case *errorex.ErrBadRequest:
-		return err.ToLogicalResponse()
-	case nil:
-		return nil, nil
-	default:
-		return logical.ErrorResponse(originError.Error()), nil
-	}
 }

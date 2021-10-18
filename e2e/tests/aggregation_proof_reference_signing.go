@@ -4,7 +4,12 @@ import (
 	"encoding/hex"
 	"testing"
 
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	"github.com/bloxapp/key-vault/keymanager/models"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+
+	types "github.com/prysmaticlabs/eth2-types"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -27,7 +32,7 @@ func (test *AggregationProofReferenceSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	storage := setup.UpdateStorage(t, core.PyrmontNetwork, true, core.NDWallet, _byteArray("6327b1e58c41d60dd7c3c8b9634204255707c2d12e2513c345001d8926745eea"))
+	storage := setup.UpdateStorage(t, core.PraterNetwork, true, core.NDWallet, _byteArray("6327b1e58c41d60dd7c3c8b9634204255707c2d12e2513c345001d8926745eea"))
 	// Get wallet
 	wallet, err := storage.OpenWallet()
 	require.NoError(t, err)
@@ -40,23 +45,24 @@ func (test *AggregationProofReferenceSigning) Run(t *testing.T) {
 	slot := uint64(0)
 	domain := _byteArray32("050000008c84cda94176cc2b1268357c57c3160131874a4408e155b0db826d11")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, slot)
+	require.NoError(t, err)
 
 	// Send sign attestation request
-	sig, err := setup.Sign("sign", req, core.PyrmontNetwork)
+	sig, err := setup.Sign("sign", req, core.PraterNetwork)
 	require.NoError(t, err)
 	expectedSig := _byteArray("a1167cdbebeae876b3fa82d4f4c35fc3dc4706c7ae20cee359919fdbc93a2588c3f7a15c80d12a20c78ac6381a9fe35d06f6b8ae7e95fb87fa2195511bd53ce6f385aa71dda52b38771f954348a57acad9dde225da614c50c02173314417b096")
 	require.EqualValues(t, expectedSig, sig)
 }
 
 func (test *AggregationProofReferenceSigning) serializedReq(pk, root, domain []byte, slot uint64) (map[string]interface{}, error) {
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &validatorpb.SignRequest_Slot{Slot: slot},
+		Object:          &models.SignRequestSlot{Slot: types.Slot(slot)},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := encoderv2.New().Encode(req)
 	if err != nil {
 		return nil, err
 	}

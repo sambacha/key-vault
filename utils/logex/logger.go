@@ -43,7 +43,6 @@ func Init(opts Options) (*logrus.Logger, error) {
 		break
 	case "json":
 		logger.Formatter = &logrus.JSONFormatter{}
-		break
 	default:
 		return nil, errors.Errorf("undefined logs format: %s", format)
 	}

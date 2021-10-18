@@ -5,8 +5,13 @@ import (
 	"fmt"
 	"testing"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	"github.com/bloxapp/key-vault/keymanager/models"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+
+	types "github.com/prysmaticlabs/eth2-types"
+
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/stretchr/testify/require"
@@ -29,7 +34,7 @@ func (test *AttestationFarFutureSigning) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	storage := setup.UpdateStorage(t, core.PyrmontNetwork, true, core.HDWallet, nil)
+	storage := setup.UpdateStorage(t, core.PraterNetwork, true, core.HDWallet, nil)
 	account := shared.RetrieveAccount(t, storage)
 	require.NotNil(t, account)
 	pubKeyBytes := account.ValidatorPublicKey()
@@ -37,8 +42,8 @@ func (test *AttestationFarFutureSigning) Run(t *testing.T) {
 	expectedSourceErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: source epoch too far into the future\\n\\n\"}}")
 	expectedTargetErr := fmt.Sprintf("map[string]interface {}{\"errors\":[]interface {}{\"1 error occurred:\\n\\t* failed to sign: target epoch too far into the future\\n\\n\"}}")
 
-	currentEpoch := core.PyrmontNetwork.EstimatedCurrentEpoch()
-	futureEpoch := core.PyrmontNetwork.EstimatedCurrentEpoch() + 1000
+	currentEpoch := core.PraterNetwork.EstimatedCurrentEpoch()
+	futureEpoch := core.PraterNetwork.EstimatedCurrentEpoch() + 1000
 	test.testFarFuture(t, setup, pubKeyBytes, futureEpoch, currentEpoch, expectedSourceErr) // far future source
 	test.testFarFuture(t, setup, pubKeyBytes, currentEpoch, futureEpoch, expectedTargetErr) // far future target
 	test.testFarFuture(t, setup, pubKeyBytes, futureEpoch, futureEpoch, expectedTargetErr)  // far future both
@@ -48,13 +53,13 @@ func (test *AttestationFarFutureSigning) testFarFuture(
 	t *testing.T,
 	setup *e2e.BaseSetup,
 	pubKeyBytes []byte,
-	source uint64,
-	target uint64,
+	source types.Epoch,
+	target types.Epoch,
 	expectedErr string,
 ) {
 	att := &eth.AttestationData{
-		Slot:            core.PyrmontNetwork.EstimatedCurrentSlot() + 1000,
-		CommitteeIndex:  2,
+		Slot:            core.PraterNetwork.EstimatedCurrentSlot() + 1000,
+		CommitteeIndex:  types.CommitteeIndex(2),
 		BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
 		Source: &eth.Checkpoint{
 			Epoch: source,
@@ -70,20 +75,20 @@ func (test *AttestationFarFutureSigning) testFarFuture(
 	// Send sign attestation request
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, att)
 	require.NoError(t, err)
-	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PraterNetwork)
 	require.NotNil(t, err)
 	require.EqualError(t, err, expectedErr, fmt.Sprintf("actual: %s\n", err.Error()))
 }
 
 func (test *AttestationFarFutureSigning) serializedReq(pk, root, domain []byte, attestation *eth.AttestationData) (map[string]interface{}, error) {
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &validatorpb.SignRequest_AttestationData{AttestationData: attestation},
+		Object:          &models.SignRequestAttestationData{AttestationData: attestation},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := encoderv2.New().Encode(req)
 	if err != nil {
 		return nil, err
 	}

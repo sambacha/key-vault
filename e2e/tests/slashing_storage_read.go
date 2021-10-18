@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"testing"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	"github.com/bloxapp/key-vault/keymanager/models"
+
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 
@@ -35,7 +36,7 @@ func (test *SlashingStorageRead) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
 	// setup vault with db
-	storage := setup.UpdateStorage(t, core.PyrmontNetwork, true, core.HDWallet, nil)
+	storage := setup.UpdateStorage(t, core.PraterNetwork, true, core.HDWallet, nil)
 	account := shared.RetrieveAccount(t, storage)
 	require.NotNil(t, account)
 	pubKey := account.ValidatorPublicKey()
@@ -52,10 +53,11 @@ func (test *SlashingStorageRead) Run(t *testing.T) {
 	req, err := test.serializedReq(pubKey, nil, domain, blk)
 	require.NoError(t, err)
 
-	_, err = setup.Sign("sign", req, core.PyrmontNetwork)
+	_, err = setup.Sign("sign", req, core.PraterNetwork)
+	require.NoError(t, err)
 
 	// Read slashing storage
-	storageBytes, statusCode := setup.ReadSlashingStorage(t, core.PyrmontNetwork)
+	storageBytes, statusCode := setup.ReadSlashingStorage(t, core.PraterNetwork)
 	require.Equal(t, http.StatusOK, statusCode, string(storageBytes))
 
 	var slashingHistory slashingHistoryModel
@@ -68,14 +70,14 @@ func (test *SlashingStorageRead) Run(t *testing.T) {
 }
 
 func (test *SlashingStorageRead) serializedReq(pk, root, domain []byte, blk *eth.BeaconBlock) (map[string]interface{}, error) {
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &validatorpb.SignRequest_Block{Block: blk},
+		Object:          &models.SignRequestBlock{Block: blk},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}

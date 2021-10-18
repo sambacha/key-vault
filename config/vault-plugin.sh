@@ -13,13 +13,13 @@ vault plugin register \
     secret ethsign
 
 # Enable secrets
-if vault secrets tune ethereum/pyrmont/ ; then
-  echo "the secret at path ethereum/pyrmont already exists"
+if vault secrets tune ethereum/prater/ ; then
+  echo "the secret at path ethereum/prater already exists"
 else
-  echo "Enabling pyrmont plugin..."
+  echo "Enabling prater plugin..."
   vault secrets enable \
-    -path=ethereum/pyrmont \
-    -description="Eth Signing Wallet - Pyrmont Test network" \
+    -path=ethereum/prater \
+    -description="Eth Signing Wallet - Prater Test network" \
     -plugin-name=ethsign plugin
   echo "Enabled plugin"
 fi
@@ -36,10 +36,10 @@ else
 fi
 
 # Configuring networks
-echo "Configuring Pyrmont Test network..."
-vault write ethereum/pyrmont/config \
-    network="pyrmont"
-echo "Configured Pyrmont Test network"
+echo "Configuring Prater Test network..."
+vault write ethereum/prater/config \
+    network="prater"
+echo "Configured Prater Test network"
 
 echo "Configuring MainNet network..."
 vault write ethereum/mainnet/config \
@@ -59,7 +59,7 @@ curl --insecure \
      --header "X-Vault-Token: $TOKEN" \
      --request GET \
      --fail \
-     ${VAULT_SERVER_SCHEMA:-http}://127.0.0.1:8200/v1/ethereum/pyrmont/config
+     ${VAULT_SERVER_SCHEMA:-http}://127.0.0.1:8200/v1/ethereum/prater/config
 
 curl --insecure \
      --header "X-Vault-Token: $TOKEN" \
