@@ -34,7 +34,7 @@ func storagePaths(b *backend) []*framework.Path {
 			ExistenceCheck: b.pathExistenceCheck,
 			Operations: map[logical.Operation]framework.OperationHandler{
 				logical.CreateOperation: &framework.PathOperation{
-					Callback: b.pathStorageUpdateV2,
+					Callback: b.pathStorageUpdate,
 				},
 			},
 		},
@@ -57,27 +57,8 @@ func buildInMemStore(data *framework.FieldData) (*inmemory.InMemStore, error) {
 	return inMemStore, nil
 }
 
-// pathStorageUpdate updates all accounts from new uploaded storage
+// pathStorageUpdate updates storage accounts from new requested storage
 func (b *backend) pathStorageUpdate(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
-	inMemStore, err := buildInMemStore(data)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to build in memory store")
-	}
-
-	_, err = store.FromInMemoryStore(ctx, inMemStore, req.Storage)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to update storage")
-	}
-
-	return &logical.Response{
-		Data: map[string]interface{}{
-			"status": true,
-		},
-	}, nil
-}
-
-// pathStorageUpdateV2 updates storage accounts from new requested storage
-func (b *backend) pathStorageUpdateV2(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
 	inMemStore, err := buildInMemStore(data)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build in memory store")
