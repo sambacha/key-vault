@@ -5,8 +5,13 @@ import (
 	"fmt"
 	"testing"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	"github.com/bloxapp/key-vault/keymanager/models"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+
+	types "github.com/prysmaticlabs/eth2-types"
+
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/stretchr/testify/require"
@@ -48,13 +53,13 @@ func (test *AttestationFarFutureSigning) testFarFuture(
 	t *testing.T,
 	setup *e2e.BaseSetup,
 	pubKeyBytes []byte,
-	source uint64,
-	target uint64,
+	source types.Epoch,
+	target types.Epoch,
 	expectedErr string,
 ) {
 	att := &eth.AttestationData{
 		Slot:            core.PraterNetwork.EstimatedCurrentSlot() + 1000,
-		CommitteeIndex:  2,
+		CommitteeIndex:  types.CommitteeIndex(2),
 		BeaconBlockRoot: _byteArray32("7b5679277ca45ea74e1deebc9d3e8c0e7d6c570b3cfaf6884be144a81dac9a0e"),
 		Source: &eth.Checkpoint{
 			Epoch: source,
@@ -76,14 +81,14 @@ func (test *AttestationFarFutureSigning) testFarFuture(
 }
 
 func (test *AttestationFarFutureSigning) serializedReq(pk, root, domain []byte, attestation *eth.AttestationData) (map[string]interface{}, error) {
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &validatorpb.SignRequest_AttestationData{AttestationData: attestation},
+		Object:          &models.SignRequestAttestationData{AttestationData: attestation},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := encoderv2.New().Encode(req)
 	if err != nil {
 		return nil, err
 	}

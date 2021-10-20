@@ -4,7 +4,11 @@ import (
 	"encoding/hex"
 	"testing"
 
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	"github.com/bloxapp/key-vault/keymanager/models"
+
+	types "github.com/prysmaticlabs/eth2-types"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/stretchr/testify/require"
@@ -39,6 +43,7 @@ func (test *RandaoReferenceSigning) Run(t *testing.T) {
 	// Send sign attestation request
 	domain := _byteArray32("0200000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, 0)
+	require.NoError(t, err)
 	sig, err := setup.Sign("sign", req, core.PraterNetwork)
 	require.NoError(t, err)
 
@@ -47,14 +52,14 @@ func (test *RandaoReferenceSigning) Run(t *testing.T) {
 }
 
 func (test *RandaoReferenceSigning) serializedReq(pk, root, domain []byte, epoch uint64) (map[string]interface{}, error) {
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &validatorpb.SignRequest_Epoch{Epoch: epoch},
+		Object:          &models.SignRequestEpoch{Epoch: types.Epoch(epoch)},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := encoderv2.New().Encode(req)
 	if err != nil {
 		return nil, err
 	}

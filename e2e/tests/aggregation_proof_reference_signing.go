@@ -4,7 +4,12 @@ import (
 	"encoding/hex"
 	"testing"
 
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	"github.com/bloxapp/key-vault/keymanager/models"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+
+	types "github.com/prysmaticlabs/eth2-types"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -40,6 +45,7 @@ func (test *AggregationProofReferenceSigning) Run(t *testing.T) {
 	slot := uint64(0)
 	domain := _byteArray32("050000008c84cda94176cc2b1268357c57c3160131874a4408e155b0db826d11")
 	req, err := test.serializedReq(pubKeyBytes, nil, domain, slot)
+	require.NoError(t, err)
 
 	// Send sign attestation request
 	sig, err := setup.Sign("sign", req, core.PraterNetwork)
@@ -49,14 +55,14 @@ func (test *AggregationProofReferenceSigning) Run(t *testing.T) {
 }
 
 func (test *AggregationProofReferenceSigning) serializedReq(pk, root, domain []byte, slot uint64) (map[string]interface{}, error) {
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &validatorpb.SignRequest_Slot{Slot: slot},
+		Object:          &models.SignRequestSlot{Slot: types.Slot(slot)},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := encoderv2.New().Encode(req)
 	if err != nil {
 		return nil, err
 	}

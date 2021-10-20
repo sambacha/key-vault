@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/bloxapp/key-vault/backend/store"
 )
@@ -34,8 +34,10 @@ func storageSlashingDataPaths(b *backend) []*framework.Path {
 			HelpSynopsis:    "Manage slashing storage",
 			HelpDescription: `Manage KeyVault slashing storage`,
 			ExistenceCheck:  b.pathExistenceCheck,
-			Callbacks: map[logical.Operation]framework.OperationFunc{
-				logical.ReadOperation: b.pathMinimalSlashingStorageRead,
+			Operations: map[logical.Operation]framework.OperationHandler{
+				logical.ReadOperation: &framework.PathOperation{
+					Callback: b.pathMinimalSlashingStorageRead,
+				},
 			},
 		},
 	}

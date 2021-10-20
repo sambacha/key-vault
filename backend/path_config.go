@@ -24,10 +24,16 @@ func configPaths(b *backend) []*framework.Path {
 	return []*framework.Path{
 		{
 			Pattern: ConfigPattern,
-			Callbacks: map[logical.Operation]framework.OperationFunc{
-				logical.CreateOperation: b.pathWriteConfig,
-				logical.UpdateOperation: b.pathWriteConfig,
-				logical.ReadOperation:   b.pathReadConfig,
+			Operations: map[logical.Operation]framework.OperationHandler{
+				logical.CreateOperation: &framework.PathOperation{
+					Callback: b.pathWriteConfig,
+				},
+				logical.UpdateOperation: &framework.PathOperation{
+					Callback: b.pathWriteConfig,
+				},
+				logical.ReadOperation: &framework.PathOperation{
+					Callback: b.pathReadConfig,
+				},
 			},
 			HelpSynopsis:    "Configure the Vault Ethereum plugin.",
 			HelpDescription: "Configure the Vault Ethereum plugin.",

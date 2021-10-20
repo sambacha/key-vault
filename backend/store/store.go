@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	vault "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/encryptor"
 	"github.com/bloxapp/eth2-key-manager/stores/inmemory"
@@ -13,6 +14,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
+
+	encoder2 "github.com/bloxapp/key-vault/utils/encoder"
+	"github.com/bloxapp/key-vault/utils/encoder/legacy"
 )
 
 // Paths
@@ -24,9 +28,11 @@ const (
 
 // HashicorpVaultStore implements store.Store interface using Vault.
 type HashicorpVaultStore struct {
-	storage            logical.Storage
-	ctx                context.Context
-	network            core.Network
+	storage logical.Storage
+	ctx     context.Context
+	network core.Network
+	encoder encoder2.IEncoder
+
 	encryptor          encryptor.Encryptor
 	encryptionPassword []byte
 }
@@ -34,22 +40,45 @@ type HashicorpVaultStore struct {
 // NewHashicorpVaultStore is the constructor of HashicorpVaultStore.
 func NewHashicorpVaultStore(ctx context.Context, storage logical.Storage, network core.Network) *HashicorpVaultStore {
 	return &HashicorpVaultStore{
-		storage	: storage,
-		network	: network,
-		ctx		: ctx,
+		storage: storage,
+		network: network,
+		ctx:     ctx,
+		encoder: legacy.New(),
 	}
 }
 
-// UpdateAccounts creates the HashicorpVaultStore based on the given in-memory store.
-func UpdateAccounts(newStorage *inmemory.InMemStore, existingWallet core.Wallet, hashicorpVaultStore *HashicorpVaultStore) (*HashicorpVaultStore, error) {
-	// Open wallet from new storage to read new accounts
-	newWallet, err := newStorage.OpenWallet()
+// FromInMemoryStoreV2 updates HashicorpVaultStore with new accounts.
+func FromInMemoryStoreV2(ctx context.Context, newStorage *inmemory.InMemStore, existingStorage logical.Storage) (*HashicorpVaultStore, error) {
+
+	// Open newStorage wallet
+	newStorageWallet, err := newStorage.OpenWallet()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to open wallet of new storage")
+		return nil, errors.Wrap(err, "failed to open newStorage wallet")
+	}
+
+	// Get existing hashicorp storage
+	hashicorpStore := NewHashicorpVaultStore(ctx, existingStorage, newStorage.Network())
+	options := vault.KeyVaultOptions{}
+	options.SetStorage(hashicorpStore)
+
+	_, err = vault.OpenKeyVault(&options)
+	// If no existing hashicorp store - use in memory store
+	if err != nil {
+		// Save wallet in hashicorp store
+		err = hashicorpStore.SaveWallet(newStorageWallet)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to save wallet to hashicorp store")
+		}
+	}
+
+	// Open existing wallet
+	existingWallet, err := hashicorpStore.OpenWallet()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to open existing wallet")
 	}
 
 	// Save new accounts
-	for _, newAccount := range newWallet.Accounts() {
+	for _, newAccount := range newStorageWallet.Accounts() {
 		// Check if account already exists and don't change it
 		// TODO: how to handle the same account name with index but different public keys?
 		existingAccount, _ := existingWallet.AccountByPublicKey(string(newAccount.ValidatorPublicKey()))
@@ -64,26 +93,26 @@ func UpdateAccounts(newStorage *inmemory.InMemStore, existingWallet core.Wallet,
 		}
 
 		// Save account in vault
-		if err := hashicorpVaultStore.SaveAccount(newAccount); err != nil {
+		if err := hashicorpStore.SaveAccount(newAccount); err != nil {
 			return nil, errors.Wrap(err, "failed to save account")
 		}
 
 		// Save highest attestation
 		if val := newStorage.RetrieveHighestAttestation(newAccount.ValidatorPublicKey()); val != nil {
-			if err := hashicorpVaultStore.SaveHighestAttestation(newAccount.ValidatorPublicKey(), val); err != nil {
+			if err := hashicorpStore.SaveHighestAttestation(newAccount.ValidatorPublicKey(), val); err != nil {
 				return nil, errors.Wrap(err, "failed to save highest attestation")
 			}
 		}
 
 		// Save highest proposal
 		if val := newStorage.RetrieveHighestProposal(newAccount.ValidatorPublicKey()); val != nil {
-			if err := hashicorpVaultStore.SaveHighestProposal(newAccount.ValidatorPublicKey(), val); err != nil {
+			if err := hashicorpStore.SaveHighestProposal(newAccount.ValidatorPublicKey(), val); err != nil {
 				return nil, errors.Wrap(err, "failed to save highest proposal")
 			}
 		}
 	}
 
-	return hashicorpVaultStore, nil
+	return hashicorpStore, nil
 }
 
 // FromInMemoryStore creates the HashicorpVaultStore based on the given in-memory store.
@@ -269,8 +298,4 @@ func (store *HashicorpVaultStore) freshContext() *core.WalletContext {
 	return &core.WalletContext{
 		Storage: store,
 	}
-}
-
-func (store *HashicorpVaultStore) canEncrypt() bool {
-	return store.encryptor != nil && store.encryptionPassword != nil
 }

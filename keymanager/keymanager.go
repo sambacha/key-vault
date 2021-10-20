@@ -8,22 +8,23 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/bloxapp/key-vault/keymanager/models"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+
+	encoder2 "github.com/bloxapp/key-vault/utils/encoder"
+
 	"github.com/pkg/errors"
 
 	"github.com/bloxapp/key-vault/backend"
 
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
-	"github.com/prysmaticlabs/prysm/shared/bls"
-	"github.com/prysmaticlabs/prysm/validator/keymanager"
+	"github.com/prysmaticlabs/prysm/crypto/bls"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bloxapp/key-vault/utils/bytex"
 	"github.com/bloxapp/key-vault/utils/endpoint"
 	"github.com/bloxapp/key-vault/utils/httpex"
 )
-
-// To make sure V2 implements keymanager.IKeymanager interface
-var _ keymanager.IKeymanager = &KeyManager{}
 
 // Predefined errors
 var (
@@ -34,6 +35,14 @@ var (
 	ErrNoSuchKey          = NewGenericErrorWithMessage("no such key")
 )
 
+// IkeyManager interface contains functions from prysm kv
+type IkeyManager interface {
+	FetchValidatingPublicKeys(_ context.Context) ([][48]byte, error)
+	FetchAllValidatingPublicKeys(_ context.Context) ([][48]byte, error)
+	Sign(_ context.Context, req *models.SignRequest) (bls.Signature, error)
+	sendRequest(method, path string, reqBody interface{}, respBody interface{}) error
+}
+
 // KeyManager is a key manager that accesses a remote vault wallet daemon through HTTP connection.
 type KeyManager struct {
 	remoteAddress string
@@ -42,6 +51,7 @@ type KeyManager struct {
 	pubKey        [48]byte
 	network       string
 	httpClient    *http.Client
+	encoder       encoder2.IEncoder
 
 	log *logrus.Entry
 }
@@ -72,6 +82,7 @@ func NewKeyManager(log *logrus.Entry, opts *Config) (*KeyManager, error) {
 		originPubKey:  opts.PubKey,
 		pubKey:        bytex.ToBytes48(decodedPubKey),
 		network:       opts.Network,
+		encoder:       encoderv2.New(),
 		httpClient: httpex.CreateClient(log, func(resp *http.Response, err error, numTries int) (*http.Response, error) {
 			if err == nil {
 				return resp, nil
@@ -109,12 +120,12 @@ func (km *KeyManager) FetchAllValidatingPublicKeys(_ context.Context) ([][48]byt
 }
 
 // Sign implements IKeymanager interface.
-func (km *KeyManager) Sign(_ context.Context, req *validatorpb.SignRequest) (bls.Signature, error) {
+func (km *KeyManager) Sign(_ context.Context, req *models.SignRequest) (bls.Signature, error) {
 	if bytex.ToBytes48(req.GetPublicKey()) != km.pubKey {
 		return nil, ErrNoSuchKey
 	}
 
-	byts, err := req.Marshal()
+	byts, err := km.encoder.Encode(req)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +133,7 @@ func (km *KeyManager) Sign(_ context.Context, req *validatorpb.SignRequest) (bls
 		"sign_req": hex.EncodeToString(byts),
 	}
 
-	var resp SignResponse
+	var resp models.SignResponse
 	if err := km.sendRequest(http.MethodPost, backend.SignPattern, reqMap, &resp); err != nil {
 		return nil, err
 	}

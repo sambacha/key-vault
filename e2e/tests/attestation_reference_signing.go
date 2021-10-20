@@ -4,8 +4,11 @@ import (
 	"encoding/hex"
 	"testing"
 
-	eth "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
+	"github.com/bloxapp/key-vault/keymanager/models"
+
+	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
+
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bloxapp/eth2-key-manager/core"
@@ -38,9 +41,9 @@ func (test *AttestationReferenceSigning) Run(t *testing.T) {
 	pubKeyBytes := account.ValidatorPublicKey()
 
 	// Decode attestation
-	attestationDataByts := _byteArray("1a203a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b2222122000000000000000000000000000000000000000000000000000000000000000002a24080212203a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b")
+	attestationDataByts := _byteArray("000000000000000000000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b0000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000003a43a4bf26fb5947e809c1f24f7dc6857c8ac007e535d48e6e4eca2122fd776b")
 	att := &eth.AttestationData{}
-	require.NoError(t, att.Unmarshal(attestationDataByts))
+	require.NoError(t, att.UnmarshalSSZ(attestationDataByts))
 	domain := _byteArray32("0100000081509579e35e84020ad8751eca180b44df470332d3ad17fc6fd52459")
 
 	// Send sign attestation request
@@ -53,14 +56,14 @@ func (test *AttestationReferenceSigning) Run(t *testing.T) {
 }
 
 func (test *AttestationReferenceSigning) serializedReq(pk, root, domain []byte, attestation *eth.AttestationData) (map[string]interface{}, error) {
-	req := &validatorpb.SignRequest{
+	req := &models.SignRequest{
 		PublicKey:       pk,
 		SigningRoot:     root,
 		SignatureDomain: domain,
-		Object:          &validatorpb.SignRequest_AttestationData{AttestationData: attestation},
+		Object:          &models.SignRequestAttestationData{AttestationData: attestation},
 	}
 
-	byts, err := req.Marshal()
+	byts, err := encoderv2.New().Encode(req)
 	if err != nil {
 		return nil, err
 	}

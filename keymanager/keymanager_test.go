@@ -7,8 +7,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	validatorpb "github.com/prysmaticlabs/prysm/proto/validator/accounts/v2"
-	"github.com/prysmaticlabs/prysm/shared/bytesutil"
+	"github.com/bloxapp/key-vault/keymanager/models"
+
+	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
@@ -187,7 +188,7 @@ func TestUnknownAccount(t *testing.T) {
 
 	undefinedPk := _byteArray("a3862121db5914d7272b0b705e6e3c5336b79e316735661873566245207329c30f9a33d4fb5f5857fc6fd0a368186971")
 
-	_, err = km.Sign(context.Background(), &validatorpb.SignRequest{
+	_, err = km.Sign(context.Background(), &models.SignRequest{
 		PublicKey: undefinedPk,
 	})
 	require.EqualError(t, err, "{\"error\":\"no such key\"}")

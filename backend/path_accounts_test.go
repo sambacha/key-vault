@@ -38,7 +38,7 @@ func setupBaseStorage(t *testing.T, req *logical.Request) {
 		Network: core.PraterNetwork,
 	})
 	require.NoError(t, err)
-	req.Storage.Put(context.Background(), entry)
+	require.NoError(t, req.Storage.Put(context.Background(), entry))
 }
 
 func TestAccountsList(t *testing.T) {

@@ -71,8 +71,10 @@ func TestImportAndDeleteFromInMem(t *testing.T) {
 	// verify deletion
 	// accounts fetched should no longer match old accounts
 	res, err := oldHashi.OpenAccount(oldInMemAccounts[0].ID())
+	require.NoError(t, err)
 	require.Nil(t, res)
 	res, err = oldHashi.OpenAccount(oldInMemAccounts[1].ID())
+	require.NoError(t, err)
 	require.Nil(t, res)
 
 	// get hasicorp's wallet and accounts

@@ -10,7 +10,7 @@ import (
 
 // HTTPRequestError represents an HTTP request error.
 type HTTPRequestError struct {
-	URL          string `json:"url,required"`
+	URL          string `json:"url"` // TODO add required?
 	StatusCode   int    `json:"status_code,omitempty"`
 	ResponseBody []byte `json:"response_body,omitempty"`
 	Message      string `json:"message,omitempty"`
