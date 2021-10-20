@@ -40,6 +40,8 @@ Run linter:
     - go get -u golang.org/x/lint/golint
     - go get -u golang.org/x/tools/cmd/goimports
     - ./scripts/lint.sh .
+  only:
+    - stage
 
 Security check:
   stage: gosec
@@ -49,6 +51,8 @@ Security check:
   script:
     - curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s v2.5.0
     - ./bin/gosec -exclude-dir e2e -exclude G402 ./...
+  only:
+    - stage
 
 Run tests of the application:
   stage: test
@@ -59,6 +63,8 @@ Run tests of the application:
     - blox-infra-stage
   script:
     - DOCKER_API_VERSION=1.39 go test -tags blst_enabled -timeout 20m -cover -race -p 1 ./...
+  only:
+    - stage
 
 Build stage Docker image:
   stage: build
