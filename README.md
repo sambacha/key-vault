@@ -304,7 +304,7 @@ path "ethereum/+/storage/slashing" {
 There are 2 types of tests in the project: end-to-end and unit ones.
 In order to run all tests including e2e ones you will need to do the following command:
 ```bash
-$ make test
+$ make full-test
 ``` 
 
 New e2e tests should be placed in `./e2e/tests` directory and implement `E2E` interface.

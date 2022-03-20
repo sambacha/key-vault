@@ -20,7 +20,7 @@ type signRequestEncoded struct {
 	ObjectType      string
 }
 
-func encodeSignReuqest(sr *models.SignRequest) ([]byte, error) {
+func encodeSignRequest(sr *models.SignRequest) ([]byte, error) {
 	toEncode := signRequestEncoded{
 		PublicKey:       sr.PublicKey,
 		SigningRoot:     sr.SigningRoot,
@@ -48,6 +48,13 @@ func encodeSignReuqest(sr *models.SignRequest) ([]byte, error) {
 		toEncode.ObjectType = reflect.TypeOf(t).String()
 	case *models.SignRequestBlockV2:
 		byts, err := t.BlockV2.MarshalSSZ()
+		if err != nil {
+			return nil, err
+		}
+		toEncode.Data = byts
+		toEncode.ObjectType = reflect.TypeOf(t).String()
+	case *models.SignRequestBlockV3:
+		byts, err := t.BlockV3.MarshalSSZ()
 		if err != nil {
 			return nil, err
 		}
@@ -136,6 +143,12 @@ func decodeSignRequest(data []byte, sr *models.SignRequest) error {
 			return err
 		}
 		sr.Object = &models.SignRequestBlockV2{BlockV2: data}
+	case "*models.SignRequestBlockV3":
+		data := &eth.BeaconBlockMerge{}
+		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
+			return err
+		}
+		sr.Object = &models.SignRequestBlockV3{BlockV3: data}
 	case "*models.SignRequestSlot":
 		data := types.Slot(1)
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
