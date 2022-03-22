@@ -144,7 +144,7 @@ func decodeSignRequest(data []byte, sr *models.SignRequest) error {
 		}
 		sr.Object = &models.SignRequestBlockV2{BlockV2: data}
 	case "*models.SignRequestBlockV3":
-		data := &eth.BeaconBlockMerge{}
+		data := &eth.BeaconBlockBellatrix{}
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
 			return err
 		}

@@ -98,7 +98,7 @@ func (x *SignRequest) GetEpoch() types.Epoch {
 	return types.Epoch(0)
 }
 
-// GetBlockV2 return an altair block.
+// GetBlockV2 return an Altair block.
 func (x *SignRequest) GetBlockV2() *eth.BeaconBlockAltair {
 	if x, ok := x.GetObject().(*SignRequestBlockV2); ok {
 		return x.BlockV2
@@ -106,8 +106,8 @@ func (x *SignRequest) GetBlockV2() *eth.BeaconBlockAltair {
 	return nil
 }
 
-// GetBlockV3 return a merge block.
-func (x *SignRequest) GetBlockV3() *eth.BeaconBlockMerge {
+// GetBlockV3 return a Bellatrix block.
+func (x *SignRequest) GetBlockV3() *eth.BeaconBlockBellatrix {
 	if x, ok := x.GetObject().(*SignRequestBlockV3); ok {
 		return x.BlockV3
 	}

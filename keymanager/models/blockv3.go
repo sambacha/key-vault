@@ -4,7 +4,7 @@ import eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 // SignRequestBlockV3 struct
 type SignRequestBlockV3 struct {
-	BlockV3 *eth.BeaconBlockMerge
+	BlockV3 *eth.BeaconBlockBellatrix
 }
 
 // isSignRequestObject implement func

@@ -101,11 +101,11 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 				return errors.Wrap(err, "failed to sign beacon block")
 			}
 		case *models.SignRequestBlockV3:
-			mergeBlk, err := wrapper2.WrappedMergeBeaconBlock(t.BlockV3)
+			bellatrixBlk, err := wrapper2.WrappedBellatrixBeaconBlock(t.BlockV3)
 			if err != nil {
-				return errors.Wrap(err, "failed to wrap merge block")
+				return errors.Wrap(err, "failed to wrap bellatrix block")
 			}
-			sig, err = simpleSigner.SignBeaconBlock(mergeBlk, signReq.SignatureDomain, signReq.PublicKey)
+			sig, err = simpleSigner.SignBeaconBlock(bellatrixBlk, signReq.SignatureDomain, signReq.PublicKey)
 			if err != nil {
 				return errors.Wrap(err, "failed to sign beacon block")
 			}
