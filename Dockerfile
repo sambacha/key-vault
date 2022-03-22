@@ -1,11 +1,11 @@
 #
 # STEP 1: Prepare environment
 #
-FROM golang:1.15 AS preparer
+FROM golang:1.17 AS preparer
 
 RUN apt-get update                                                        && \
   DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
-    curl git zip unzip wget g++ python gcc jq                                \
+  curl git zip unzip wget g++ python gcc jq                                \
   && rm -rf /var/lib/apt/lists/*
 
 RUN go version
@@ -33,7 +33,7 @@ FROM vault:1.8.1 AS runner
 
 # Download dependencies
 RUN apk -v --update --no-cache add \
-    bash ca-certificates curl openssl
+  bash ca-certificates curl openssl
 
 WORKDIR /vault/plugins/
 
