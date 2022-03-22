@@ -84,7 +84,7 @@ func (l *Docker) Launch(ctx context.Context, name string) (*Config, error) {
 		&container.Config{
 			Image: l.imageName,
 			Env: []string{
-				"VAULT_EXTERNAL_ADDRESS=172.17.0.1",
+				"VAULT_EXTERNAL_ADDRESS=127.0.0.1",
 				"VAULT_CLIENT_TIMEOUT=30s",
 				"UNSEAL=true",
 			},
@@ -102,21 +102,8 @@ func (l *Docker) Launch(ctx context.Context, name string) (*Config, error) {
 		return nil, errors.Wrap(err, "failed to start container")
 	}
 
-	// Retrieve container config
-	containerConfig, err := l.client.ContainerInspect(ctx, cont.ID)
-	if err != nil {
-		_ = l.Stop(ctx, cont.ID)
-		return nil, errors.Wrapf(err, "failed to inspect container with ID %s", cont.ID)
-	}
-
 	// Retrieve container IP address
-	var ip string
-	for _, network := range containerConfig.NetworkSettings.Networks {
-		if len(network.Gateway) > 0 {
-			ip = network.Gateway
-			break
-		}
-	}
+	ip := "127.0.0.1"
 
 	// Read logs so we can understand the plugin is loaded
 	logsStream, err := l.client.ContainerLogs(ctx, cont.ID, types.ContainerLogsOptions{
