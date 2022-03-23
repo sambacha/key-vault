@@ -40,7 +40,7 @@ type IkeyManager interface {
 	FetchValidatingPublicKeys(_ context.Context) ([][48]byte, error)
 	FetchAllValidatingPublicKeys(_ context.Context) ([][48]byte, error)
 	Sign(_ context.Context, req *models.SignRequest) (bls.Signature, error)
-	sendRequest(method, path string, reqBody interface{}, respBody interface{}) error
+	sendRequest(_ context.Context, method, path string, reqBody interface{}, respBody interface{}) error
 }
 
 // KeyManager is a key manager that accesses a remote vault wallet daemon through HTTP connection.
