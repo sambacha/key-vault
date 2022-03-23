@@ -9,7 +9,6 @@ services:
   - 121827225315.dkr.ecr.us-west-2.amazonaws.com/infra-stage-repo:docker-dind
 
 variables:
-
   #GLOBAL
   IMAGE_NAME: key-vault
   REPLICAS: "1"
@@ -20,7 +19,7 @@ variables:
   DOCKER_REPO_INFRA_STAGE: $ACCOUNT_ID_INFRA_STAGE.dkr.ecr.$AWS_REGION_INFRA_STAGE.amazonaws.com/$IMAGE_NAME
   APP_REPLICAS_INFRA_STAGE: "1"
   ECRLOGIN_INFRA_STAGE: "aws ecr get-login --registry-ids $ACCOUNT_ID_INFRA_STAGE --region $AWS_REGION_INFRA_STAGE --no-include-email"
-  STAGE_GO_IMAGE: 121827225315.dkr.ecr.us-west-2.amazonaws.com/infra-stage-repo:golang-1.15
+  STAGE_GO_IMAGE: golang:1.17-bullseye
 
   #PRODUCTION
   ACCOUNT_ID_INFRA_PROD: 764289642555
@@ -28,7 +27,7 @@ variables:
   DOCKER_REPO_INFRA_PROD: $ACCOUNT_ID_INFRA_PROD.dkr.ecr.$AWS_REGION_INFRA_PROD.amazonaws.com/$IMAGE_NAME
   APP_REPLICAS_INFRA_PROD: "1"
   ECRLOGIN_INFRA_PROD: "aws ecr get-login --registry-ids $ACCOUNT_ID_INFRA_PROD --region $AWS_REGION_INFRA_PROD --no-include-email"
-  PROD_GO_IMAGE: 764289642555.dkr.ecr.us-west-2.amazonaws.com/infra-prod-repo:golang-1.15
+  PROD_GO_IMAGE: golang:1.17-bullseye
 
 #blox-infra-stage
 Run linter:
@@ -92,7 +91,6 @@ Deploy to blox-infra-stage cluster:
   only:
     - stage
 
-
 #blox-infra-prod
 Run prod linter:
   stage: lint
@@ -119,7 +117,7 @@ Prod security check:
 
 Run prod tests of the application:
   stage: test
-  image: golang:1.15
+  image: golang:1.17
   services:
     - docker:dind
   tags:
@@ -139,7 +137,7 @@ Build prod Docker image:
     - docker tag $IMAGE_NAME:$CI_BUILD_REF $DOCKER_REPO_INFRA_PROD:$CI_BUILD_REF
     - $DOCKER_LOGIN_TO_INFRA_PROD_REPO && docker push $DOCKER_REPO_INFRA_PROD:$CI_BUILD_REF
   only:
-    - master 
+    - master
 
 Deploy to blox-infra-prod cluster:
   stage: deploy
