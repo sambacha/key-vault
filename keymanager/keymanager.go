@@ -56,6 +56,8 @@ type KeyManager struct {
 	log *logrus.Entry
 }
 
+var _ IkeyManager = (*KeyManager)(nil)
+
 // NewKeyManager is the constructor of KeyManager.
 func NewKeyManager(log *logrus.Entry, opts *Config) (*KeyManager, error) {
 	if len(opts.Location) == 0 {
