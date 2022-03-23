@@ -97,7 +97,7 @@ func TestSignAttestation(t *testing.T) {
 func TestSignProposal(t *testing.T) {
 	b, _ := getBackend(t)
 
-	t.Run("Successfully Sign Proposal", func(t *testing.T) {
+	withEachBlockVersion(t, "Successfully Sign Proposal", func(t *testing.T, blockVersion int) {
 		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
 		setupBaseStorage(t, req)
 
@@ -105,7 +105,7 @@ func TestSignProposal(t *testing.T) {
 		err := setupStorageWithWalletAndAccounts(req.Storage)
 		require.NoError(t, err)
 
-		data := basicProposalData()
+		data := basicProposalData(blockVersion)
 		req.Data = data
 		res, err := b.HandleRequest(context.Background(), req)
 		require.NoError(t, err)
@@ -119,7 +119,7 @@ func TestSignProposal(t *testing.T) {
 	//	require.EqualError(t, err, "failed to sign: failed to open key vault: wallet not found")
 	//})
 
-	t.Run("Sign Proposal of unknown account", func(t *testing.T) {
+	withEachBlockVersion(t, "Sign Proposal of unknown account", func(t *testing.T, blockVersion int) {
 		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
 		setupBaseStorage(t, req)
 
@@ -127,7 +127,7 @@ func TestSignProposal(t *testing.T) {
 		err := setupStorageWithWalletAndAccounts(req.Storage)
 		require.NoError(t, err)
 
-		req.Data = basicProposalDataWithOps(true, false, false, false)
+		req.Data = basicProposalDataWithOps(blockVersion, true, false, false, false)
 		resp, err := b.HandleRequest(context.Background(), req)
 		require.NotNil(t, err)
 		require.EqualError(t, err, "failed to sign: account not found")

@@ -98,7 +98,9 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 			}
 			sig, err = simpleSigner.SignBeaconBlock(altairBlk, signReq.SignatureDomain, signReq.PublicKey)
 			if err != nil {
-				return errors.Wrap(err, "failed to sign beacon block")
+				// Some tests rely on the error message returned by SignBeaconBlock,
+				// so this error should not be wrapped!
+				return err
 			}
 		case *models.SignRequestBlockV3:
 			bellatrixBlk, err := wrapper2.WrappedBellatrixBeaconBlock(t.BlockV3)
@@ -107,7 +109,9 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 			}
 			sig, err = simpleSigner.SignBeaconBlock(bellatrixBlk, signReq.SignatureDomain, signReq.PublicKey)
 			if err != nil {
-				return errors.Wrap(err, "failed to sign beacon block")
+				// Some tests rely on the error message returned by SignBeaconBlock,
+				// so this error should not be wrapped!
+				return err
 			}
 		case *models.SignRequestAttestationData:
 			sig, err = simpleSigner.SignBeaconAttestation(t.AttestationData, signReq.SignatureDomain, signReq.PublicKey)
