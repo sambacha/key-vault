@@ -120,3 +120,6 @@ replace github.com/json-iterator/go => github.com/prestonvanloon/go v1.1.7-0.201
 replace github.com/grpc-ecosystem/grpc-gateway/v2 => github.com/prysmaticlabs/grpc-gateway/v2 v2.3.1-0.20210702154020-550e1cd83ec1
 
 replace github.com/ferranbt/fastssz => github.com/prysmaticlabs/fastssz v0.0.0-20220110145812-fafb696cae88
+
+// TODO: undo this replacement after eth2-key-manager is merged
+replace github.com/bloxapp/eth2-key-manager => github.com/moshe-blox/eth2-key-manager v1.1.4-0.20220324150845-830036a22ae0
