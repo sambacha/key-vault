@@ -4,9 +4,11 @@ import (
 	"context"
 
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
+	field_params "github.com/prysmaticlabs/prysm/config/fieldparams"
 )
 
 // Endpoints patterns
@@ -17,7 +19,15 @@ const (
 
 // Config contains the configuration for each mount
 type Config struct {
-	Network core.Network `json:"network"`
+	Network       core.Network      `json:"network"`
+	FeeRecipients map[string]string `json:"fee_recipients"`
+}
+
+func (c Config) Map() map[string]interface{} {
+	return map[string]interface{}{
+		"network":        c.Network,
+		"fee_recipients": c.FeeRecipients,
+	}
 }
 
 func configPaths(b *backend) []*framework.Path {
@@ -46,7 +56,12 @@ func configPaths(b *backend) []*framework.Path {
 					AllowedValues: []interface{}{
 						string(core.PraterNetwork),
 						string(core.MainNetwork),
+						"prater2",
 					},
+				},
+				"fee_recipients": {
+					Type:        framework.TypeMap,
+					Description: `Validator pubic keys and their associated fee recipient addresses.`,
 				},
 			},
 		},
@@ -60,8 +75,33 @@ func (b *backend) pathWriteConfig(ctx context.Context, req *logical.Request, dat
 		return nil, errors.New("invalid network provided")
 	}
 
+	normalizedRecipients := make(map[string]string)
+	recipients, _ := data.Get("fee_recipients").(map[string]interface{})
+	for key, value := range recipients {
+		var normalizedKey string
+		switch key {
+		case "default":
+			normalizedKey = "default"
+		default:
+			validatorPubkey, err := hexutil.Decode(key)
+			if err != nil || len(validatorPubkey) != field_params.BLSPubkeyLength {
+				return nil, errors.Wrap(err, "invalid fee_recipients provided")
+			}
+			normalizedKey = hexutil.Encode(validatorPubkey)
+		}
+
+		recipientAddrStr, _ := value.(string)
+		recipientAddr, err := hexutil.Decode(recipientAddrStr)
+		if err != nil || len(recipientAddr) != field_params.FeeRecipientLength {
+			return nil, errors.Wrap(err, "invalid fee_recipients provided")
+		}
+
+		normalizedRecipients[normalizedKey] = hexutil.Encode(recipientAddr)
+	}
+
 	configBundle := Config{
-		Network: network,
+		Network:       network,
+		FeeRecipients: normalizedRecipients,
 	}
 
 	// Create storage entry
@@ -77,9 +117,7 @@ func (b *backend) pathWriteConfig(ctx context.Context, req *logical.Request, dat
 
 	// Return the secret
 	return &logical.Response{
-		Data: map[string]interface{}{
-			"network": configBundle.Network,
-		},
+		Data: configBundle.Map(),
 	}, nil
 }
 
@@ -95,9 +133,7 @@ func (b *backend) pathReadConfig(ctx context.Context, req *logical.Request, data
 	}
 
 	return &logical.Response{
-		Data: map[string]interface{}{
-			"network": configBundle.Network,
-		},
+		Data: configBundle.Map(),
 	}, nil
 }
 
