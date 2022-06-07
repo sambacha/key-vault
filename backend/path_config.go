@@ -56,7 +56,6 @@ func configPaths(b *backend) []*framework.Path {
 					AllowedValues: []interface{}{
 						string(core.PraterNetwork),
 						string(core.MainNetwork),
-						"prater2",
 					},
 				},
 				"fee_recipients": {
