@@ -2,13 +2,14 @@ package backend
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
-	field_params "github.com/prysmaticlabs/prysm/config/fieldparams"
+	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
 )
 
 // Endpoints patterns
@@ -74,33 +75,17 @@ func (b *backend) pathWriteConfig(ctx context.Context, req *logical.Request, dat
 		return nil, errors.New("invalid network provided")
 	}
 
-	normalizedRecipients := make(map[string]string)
-	recipients, _ := data.Get("fee_recipients").(map[string]interface{})
-	for key, value := range recipients {
-		var normalizedKey string
-		switch key {
-		case "default":
-			normalizedKey = "default"
-		default:
-			validatorPubkey, err := hexutil.Decode(key)
-			if err != nil || len(validatorPubkey) != field_params.BLSPubkeyLength {
-				return nil, errors.Wrap(err, "invalid fee_recipients provided")
-			}
-			normalizedKey = hexutil.Encode(validatorPubkey)
-		}
-
-		recipientAddrStr, _ := value.(string)
-		recipientAddr, err := hexutil.Decode(recipientAddrStr)
-		if err != nil || len(recipientAddr) != field_params.FeeRecipientLength {
-			return nil, errors.Wrap(err, "invalid fee_recipients provided")
-		}
-
-		normalizedRecipients[normalizedKey] = hexutil.Encode(recipientAddr)
+	configBundle := Config{
+		Network: network,
 	}
 
-	configBundle := Config{
-		Network:       network,
-		FeeRecipients: normalizedRecipients,
+	// Parse and validate the fee recipients (if given.)
+	if data, ok := data.Get("fee_recipients").(map[string]interface{}); ok {
+		recipients, err := ParseFeeRecipients(data)
+		if err != nil {
+			return nil, err
+		}
+		configBundle.FeeRecipients = recipients
 	}
 
 	// Create storage entry
@@ -153,4 +138,49 @@ func (b *backend) readConfig(ctx context.Context, s logical.Storage) (*Config, e
 	}
 
 	return &result, nil
+}
+
+// FeeRecipients is a map of validator public keys and their associated fee recipient addresses.
+type FeeRecipients map[string]string
+
+// ParseFeeRecipients parses & validates the fee recipients from a map[string]interface{}
+func ParseFeeRecipients(input map[string]interface{}) (FeeRecipients, error) {
+	feeRecipients := FeeRecipients{}
+	for key, value := range input {
+		// Decode and validate the validator key,
+		var normalizedKey string
+		switch key {
+		case "default":
+			normalizedKey = "default"
+		default:
+			validatorPubkey, err := hexutil.Decode(key)
+			if err != nil || len(validatorPubkey) != fieldparams.BLSPubkeyLength {
+				return nil, errors.Wrap(err, "invalid fee_recipients provided")
+			}
+			normalizedKey = hexutil.Encode(validatorPubkey)
+		}
+
+		// Decode and validate the fee recipient address.
+		recipientAddrStr, _ := value.(string)
+		recipientAddr, err := hexutil.Decode(recipientAddrStr)
+		if err != nil || len(recipientAddr) != fieldparams.FeeRecipientLength {
+			return nil, errors.Wrap(err, "invalid fee_recipients provided")
+		}
+
+		feeRecipients[normalizedKey] = hexutil.Encode(recipientAddr)
+	}
+	return feeRecipients, nil
+}
+
+func (f *FeeRecipients) UnmarshalJSON(data []byte) error {
+	var input map[string]interface{}
+	if err := json.Unmarshal(data, &input); err != nil {
+		return err
+	}
+	feeRecipients, err := ParseFeeRecipients(input)
+	if err != nil {
+		return err
+	}
+	*f = feeRecipients
+	return nil
 }
