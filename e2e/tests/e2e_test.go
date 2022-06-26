@@ -41,6 +41,7 @@ var tests = []E2E{
 
 	// Config tests
 	&ConfigRead{},
+	&ConfigUpdate{},
 
 	// Storage tests
 	&SlashingStorageRead{},

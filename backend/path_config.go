@@ -141,9 +141,10 @@ func (b *backend) readConfig(ctx context.Context, s logical.Storage) (*Config, e
 }
 
 // FeeRecipients is a map of validator public keys and their associated fee recipient addresses.
+// Both the public key and the address are 0x-prefixed hex strings.
 type FeeRecipients map[string]string
 
-// ParseFeeRecipients parses & validates the fee recipients from a map[string]interface{}
+// ParseFeeRecipients parses & validates the fee recipients from a given map[string]interface{}
 func ParseFeeRecipients(input map[string]interface{}) (FeeRecipients, error) {
 	feeRecipients := FeeRecipients{}
 	for key, value := range input {
@@ -172,6 +173,7 @@ func ParseFeeRecipients(input map[string]interface{}) (FeeRecipients, error) {
 	return feeRecipients, nil
 }
 
+// UnmarshalJSON decodes JSON-encoded FeeRecipients with validation.
 func (f *FeeRecipients) UnmarshalJSON(data []byte) error {
 	var input map[string]interface{}
 	if err := json.Unmarshal(data, &input); err != nil {

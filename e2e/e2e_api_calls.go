@@ -18,6 +18,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
+	"github.com/bloxapp/key-vault/backend"
 	"github.com/bloxapp/key-vault/e2e/launcher"
 	"github.com/bloxapp/key-vault/e2e/shared"
 )
@@ -171,6 +172,37 @@ func (setup *BaseSetup) ReadConfig(t *testing.T, network core.Network) ([]byte, 
 	// build req
 	targetURL := fmt.Sprintf("%s/v1/ethereum/%s/config", setup.baseURL, network)
 	req, err := http.NewRequest("GET", targetURL, nil)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", "Bearer "+setup.RootKey)
+
+	// Do request
+	httpClient := http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+	resp, err := httpClient.Do(req)
+	require.NoError(t, err)
+
+	// Read response body
+	respBodyByts, err := ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	return respBodyByts, resp.StatusCode
+}
+
+func (setup *BaseSetup) UpdateConfig(t *testing.T, network core.Network, data backend.Config) ([]byte, int) {
+	// body
+	body, err := json.Marshal(data)
+	require.NoError(t, err)
+
+	// build req
+	targetURL := fmt.Sprintf("%s/v1/ethereum/%s/config", setup.baseURL, network)
+	req, err := http.NewRequest("PUT", targetURL, bytes.NewBuffer(body))
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", "Bearer "+setup.RootKey)
