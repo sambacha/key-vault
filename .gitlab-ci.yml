@@ -57,7 +57,7 @@ Run tests of the application:
   stage: test
   image: $STAGE_GO_IMAGE
   services:
-    - 121827225315.dkr.ecr.us-west-2.amazonaws.com/infra-stage-repo:docker-dind
+    - docker:19.03.10-dind
   tags:
     - blox-infra-stage
   script:
