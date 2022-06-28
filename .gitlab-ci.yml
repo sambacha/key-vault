@@ -6,7 +6,7 @@ stages:
   - deploy
 
 services:
-  - 121827225315.dkr.ecr.us-west-2.amazonaws.com/infra-stage-repo:docker-dind
+  - docker:18.09.7-din
 
 variables:
   #GLOBAL
