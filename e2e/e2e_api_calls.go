@@ -195,6 +195,7 @@ func (setup *BaseSetup) ReadConfig(t *testing.T, network core.Network) ([]byte, 
 	return respBodyByts, resp.StatusCode
 }
 
+// UpdateConfig updates config.
 func (setup *BaseSetup) UpdateConfig(t *testing.T, network core.Network, data backend.Config) ([]byte, int) {
 	// body
 	body, err := json.Marshal(data)

@@ -24,6 +24,7 @@ type Config struct {
 	FeeRecipients map[string]string `json:"fee_recipients"`
 }
 
+// Map returns a map representation of the FeeRecipients.
 func (c Config) Map() map[string]interface{} {
 	return map[string]interface{}{
 		"network":        c.Network,
