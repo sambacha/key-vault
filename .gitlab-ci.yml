@@ -61,7 +61,6 @@ Run tests of the application:
   tags:
     - blox-infra-stage
   script:
-    - docker version
     - DOCKER_API_VERSION=1.39 go test -tags blst_enabled -timeout 20m -cover -race -p 1 ./...
   only:
     - stage
