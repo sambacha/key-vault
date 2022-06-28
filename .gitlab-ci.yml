@@ -57,7 +57,7 @@ Run tests of the application:
   stage: test
   image: $STAGE_GO_IMAGE
   services:
-    - docker:19.03.10-dind
+    - docker:18.09.7-dind
   tags:
     - blox-infra-stage
   script:
