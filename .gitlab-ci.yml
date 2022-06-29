@@ -6,7 +6,7 @@ stages:
   - deploy
 
 services:
-  - 121827225315.dkr.ecr.us-west-2.amazonaws.com/infra-stage-repo:docker-dind
+  - 121827225315.dkr.ecr.us-west-2.amazonaws.com/infra-stage-repo:docker-dind-18.09.7
 
 variables:
   #GLOBAL
@@ -57,11 +57,10 @@ Run tests of the application:
   stage: test
   image: $STAGE_GO_IMAGE
   services:
-    - 121827225315.dkr.ecr.us-west-2.amazonaws.com/infra-stage-repo:docker-dind
+    - docker:18.09.7-dind
   tags:
     - blox-infra-stage
   script:
-    - docker version
     - DOCKER_API_VERSION=1.39 go test -tags blst_enabled -timeout 20m -cover -race -p 1 ./...
   only:
     - stage
