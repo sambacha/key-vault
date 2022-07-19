@@ -1,6 +1,6 @@
 package models
 
-import types "github.com/prysmaticlabs/eth2-types"
+import types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
 
 // SignRequestSlot struct fir sign req slot
 type SignRequestSlot struct {

@@ -8,7 +8,7 @@ import (
 
 	"github.com/prysmaticlabs/go-bitfield"
 
-	types "github.com/prysmaticlabs/eth2-types"
+	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
 
 	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 

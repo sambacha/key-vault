@@ -7,7 +7,7 @@ import (
 
 	"github.com/bloxapp/key-vault/keymanager/models"
 
-	types "github.com/prysmaticlabs/eth2-types"
+	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
 
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 )
