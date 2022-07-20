@@ -114,6 +114,14 @@ func (x *SignRequest) GetBlockV3() *eth.BeaconBlockBellatrix {
 	return nil
 }
 
+// GetBlockV3 return a Bellatrix block.
+func (x *SignRequest) GetBlindedBlockV3() *eth.BlindedBeaconBlockBellatrix {
+	if x, ok := x.GetObject().(*SignRequestBlindedBlockV3); ok {
+		return x.BlindedBlockV3
+	}
+	return nil
+}
+
 // GetSyncAggregatorSelectionData return SyncAggregatorSelectionData
 func (x *SignRequest) GetSyncAggregatorSelectionData() *eth.SyncAggregatorSelectionData {
 	if x, ok := x.GetObject().(*SignRequestSyncAggregatorSelectionData); ok {
@@ -134,6 +142,14 @@ func (x *SignRequest) GetContributionAndProof() *eth.ContributionAndProof {
 func (x *SignRequest) GetSyncCommitteeMessage() types.SSZBytes {
 	if x, ok := x.GetObject().(*SignRequestSyncCommitteeMessage); ok {
 		return x.Root
+	}
+	return nil
+}
+
+// GetRegistration return types SSZBytes
+func (x *SignRequest) GetRegistration() *eth.ValidatorRegistrationV1 {
+	if x, ok := x.GetObject().(*SignRequestRegistration); ok {
+		return x.Registration
 	}
 	return nil
 }

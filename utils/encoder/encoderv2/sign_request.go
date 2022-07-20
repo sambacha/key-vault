@@ -60,6 +60,13 @@ func encodeSignRequest(sr *models.SignRequest) ([]byte, error) {
 		}
 		toEncode.Data = byts
 		toEncode.ObjectType = reflect.TypeOf(t).String()
+	case *models.SignRequestBlindedBlockV3:
+		byts, err := t.BlindedBlockV3.MarshalSSZ()
+		if err != nil {
+			return nil, err
+		}
+		toEncode.Data = byts
+		toEncode.ObjectType = reflect.TypeOf(t).String()
 	case *models.SignRequestAggregateAttestationAndProof:
 		byts, err := t.AggregateAttestationAndProof.MarshalSSZ()
 		if err != nil {
@@ -98,6 +105,13 @@ func encodeSignRequest(sr *models.SignRequest) ([]byte, error) {
 		toEncode.ObjectType = reflect.TypeOf(t).String()
 	case *models.SignRequestContributionAndProof:
 		byts, err := t.ContributionAndProof.MarshalSSZ()
+		if err != nil {
+			return nil, err
+		}
+		toEncode.Data = byts
+		toEncode.ObjectType = reflect.TypeOf(t).String()
+	case *models.SignRequestRegistration:
+		byts, err := t.Registration.MarshalSSZ()
 		if err != nil {
 			return nil, err
 		}
@@ -149,6 +163,12 @@ func decodeSignRequest(data []byte, sr *models.SignRequest) error {
 			return err
 		}
 		sr.Object = &models.SignRequestBlockV3{BlockV3: data}
+	case "*models.SignRequestBlindedBlockV3":
+		data := &eth.BlindedBeaconBlockBellatrix{}
+		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
+			return err
+		}
+		sr.Object = &models.SignRequestBlindedBlockV3{BlindedBlockV3: data}
 	case "*models.SignRequestSlot":
 		data := types.Slot(1)
 		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
@@ -181,6 +201,12 @@ func decodeSignRequest(data []byte, sr *models.SignRequest) error {
 			return err
 		}
 		sr.Object = &models.SignRequestContributionAndProof{ContributionAndProof: data}
+	case "*models.SignRequestRegistration":
+		data := &eth.ValidatorRegistrationV1{}
+		if err := data.UnmarshalSSZ(toDecode.Data); err != nil {
+			return err
+		}
+		sr.Object = &models.SignRequestRegistration{Registration: data}
 	default:
 		return errors.New("sign request unknown object type")
 	}

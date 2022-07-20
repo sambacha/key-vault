@@ -122,4 +122,4 @@ replace github.com/grpc-ecosystem/grpc-gateway/v2 => github.com/prysmaticlabs/gr
 replace github.com/ferranbt/fastssz => github.com/prysmaticlabs/fastssz v0.0.0-20220110145812-fafb696cae88
 
 // TODO: undo this replacement after eth2-key-manager is merged
-replace github.com/bloxapp/eth2-key-manager => github.com/moshe-blox/eth2-key-manager v1.1.4-0.20220719134534-4d0168bb06a0
+replace github.com/bloxapp/eth2-key-manager => github.com/moshe-blox/eth2-key-manager v1.1.4-0.20220720105023-e4768352c967
