@@ -69,7 +69,7 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 	}
 
 	var sig []byte
-	if err := b.lock(signReq.GetPublicKey(), func() error {
+	err = b.lock(signReq.GetPublicKey(), func() error {
 		// bring up KeyVault and wallet
 		storage := store.NewHashicorpVaultStore(ctx, req.Storage, config.Network)
 		options := vault.KeyVaultOptions{}
@@ -136,11 +136,10 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 			}
 			feeRecipient, ok := config.FeeRecipients.Get(signReq.PublicKey)
 			if !ok {
-				return errors.Wrap(err, "fee recipient is not configured for public key")
+				return errors.New("refusing to sign: fee recipient is not configured for public key")
 			}
 			if feeRecipient != common.BytesToAddress(t.Registration.FeeRecipient) {
-				return errors.Wrap(err,
-					"registration fee recipient does not match configured fee recipient")
+				return errors.New("refused to sign: registration fee recipient does not match configured fee recipient")
 			}
 
 			// Sign.
@@ -152,7 +151,8 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 		// Some tests rely on the error message returned by SignBeaconBlock,
 		// so this error should not be wrapped!
 		return err
-	}); err != nil {
+	})
+	if err != nil {
 		return nil, errors.Wrap(err, "failed to sign")
 	}
 
