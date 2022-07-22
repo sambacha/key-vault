@@ -190,7 +190,7 @@ func (f *FeeRecipients) UnmarshalJSON(data []byte) error {
 }
 
 func (f FeeRecipients) Default() (common.Address, bool) {
-	if len(f["default"]) != common.AddressLength {
+	if f["default"] == "" {
 		return common.Address{}, false
 	}
 	return common.HexToAddress(f["default"]), true
@@ -198,7 +198,7 @@ func (f FeeRecipients) Default() (common.Address, bool) {
 
 func (f FeeRecipients) Get(pubKey []byte) (common.Address, bool) {
 	pubKeyHex := hexutil.Encode(pubKey)
-	if len(f[pubKeyHex]) != common.AddressLength {
+	if f[pubKeyHex] == "" {
 		return f.Default()
 	}
 	return common.HexToAddress(f[pubKeyHex]), true
