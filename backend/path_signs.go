@@ -6,8 +6,9 @@ import (
 	"sync"
 
 	"github.com/bloxapp/key-vault/keymanager/models"
+	"github.com/ethereum/go-ethereum/common"
 
-	wrapper2 "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
+	"github.com/prysmaticlabs/prysm/consensus-types/wrapper"
 
 	vault "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/signer"
@@ -68,7 +69,7 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 	}
 
 	var sig []byte
-	if err := b.lock(signReq.GetPublicKey(), func() error {
+	err = b.lock(signReq.GetPublicKey(), func() error {
 		// bring up KeyVault and wallet
 		storage := store.NewHashicorpVaultStore(ctx, req.Storage, config.Network)
 		options := vault.KeyVaultOptions{}
@@ -90,29 +91,29 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 
 		switch t := signReq.GetObject().(type) {
 		case *models.SignRequestBlock:
-			sig, err = simpleSigner.SignBeaconBlock(wrapper2.WrappedPhase0BeaconBlock(t.Block), signReq.SignatureDomain, signReq.PublicKey)
+			wrappedBlk, wrapErr := wrapper.WrappedBeaconBlock(t.Block)
+			if err != nil {
+				return errors.Wrap(wrapErr, "failed to wrap Phase0 block")
+			}
+			sig, err = simpleSigner.SignBeaconBlock(wrappedBlk, signReq.SignatureDomain, signReq.PublicKey)
 		case *models.SignRequestBlockV2:
-			altairBlk, err := wrapper2.WrappedAltairBeaconBlock(t.BlockV2)
+			wrappedBlk, wrapErr := wrapper.WrappedBeaconBlock(t.BlockV2)
 			if err != nil {
-				return errors.Wrap(err, "failed to wrap altair block")
+				return errors.Wrap(wrapErr, "failed to wrap Altair block")
 			}
-			sig, err = simpleSigner.SignBeaconBlock(altairBlk, signReq.SignatureDomain, signReq.PublicKey)
-			if err != nil {
-				// Some tests rely on the error message returned by SignBeaconBlock,
-				// so this error should not be wrapped!
-				return err
-			}
+			sig, err = simpleSigner.SignBeaconBlock(wrappedBlk, signReq.SignatureDomain, signReq.PublicKey)
 		case *models.SignRequestBlockV3:
-			bellatrixBlk, err := wrapper2.WrappedBellatrixBeaconBlock(t.BlockV3)
+			wrappedBlk, wrapErr := wrapper.WrappedBeaconBlock(t.BlockV3)
 			if err != nil {
-				return errors.Wrap(err, "failed to wrap bellatrix block")
+				return errors.Wrap(wrapErr, "failed to wrap Bellatrix block")
 			}
-			sig, err = simpleSigner.SignBeaconBlock(bellatrixBlk, signReq.SignatureDomain, signReq.PublicKey)
+			sig, err = simpleSigner.SignBeaconBlock(wrappedBlk, signReq.SignatureDomain, signReq.PublicKey)
+		case *models.SignRequestBlindedBlockV3:
+			wrappedBlk, wrapErr := wrapper.WrappedBeaconBlock(t.BlindedBlockV3)
 			if err != nil {
-				// Some tests rely on the error message returned by SignBeaconBlock,
-				// so this error should not be wrapped!
-				return err
+				return errors.Wrap(wrapErr, "failed to wrap BlindedBellatrix block")
 			}
+			sig, err = simpleSigner.SignBeaconBlock(wrappedBlk, signReq.SignatureDomain, signReq.PublicKey)
 		case *models.SignRequestAttestationData:
 			sig, err = simpleSigner.SignBeaconAttestation(t.AttestationData, signReq.SignatureDomain, signReq.PublicKey)
 		case *models.SignRequestSlot:
@@ -127,12 +128,31 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 			sig, err = simpleSigner.SignSyncCommitteeSelectionData(t.SyncAggregatorSelectionData, signReq.SignatureDomain, signReq.PublicKey)
 		case *models.SignRequestContributionAndProof:
 			sig, err = simpleSigner.SignSyncCommitteeContributionAndProof(t.ContributionAndProof, signReq.SignatureDomain, signReq.PublicKey)
+		case *models.SignRequestRegistration:
+			// Validate registration request.
+			config, err = b.readConfig(ctx, req.Storage)
+			if err != nil {
+				return errors.Wrap(err, "failed to get config")
+			}
+			feeRecipient, ok := config.FeeRecipients.Get(signReq.PublicKey)
+			if !ok {
+				return errors.New("refusing to sign: fee recipient is not configured for public key")
+			}
+			if feeRecipient != common.BytesToAddress(t.Registration.FeeRecipient) {
+				return errors.New("refused to sign: registration fee recipient does not match configured fee recipient")
+			}
+
+			// Sign.
+			sig, err = simpleSigner.SignRegistration(t.Registration, signReq.SignatureDomain, signReq.PublicKey)
 		default:
 			return errors.Errorf("sign request: not supported")
 		}
 
+		// Some tests rely on the error message returned by SignBeaconBlock,
+		// so this error should not be wrapped!
 		return err
-	}); err != nil {
+	})
+	if err != nil {
 		return nil, errors.Wrap(err, "failed to sign")
 	}
 

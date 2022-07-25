@@ -8,7 +8,7 @@ import (
 
 	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
-	types "github.com/prysmaticlabs/eth2-types"
+	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
 
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/bloxapp/eth2-key-manager/signer"

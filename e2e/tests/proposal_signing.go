@@ -8,7 +8,7 @@ import (
 
 	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
-	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
+	"github.com/prysmaticlabs/prysm/consensus-types/wrapper"
 
 	"github.com/bloxapp/eth2-key-manager/signer"
 
@@ -54,7 +54,9 @@ func (test *ProposalSigning) Run(t *testing.T) {
 	protector := slashingprotection.NewNormalProtection(storage)
 	var signer signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
 
-	res, err := signer.SignBeaconBlock(wrapper.WrappedPhase0BeaconBlock(blk), domain, pubKeyBytes)
+	wrappedBlk, err := wrapper.WrappedBeaconBlock(blk)
+	require.NoError(t, err)
+	res, err := signer.SignBeaconBlock(wrappedBlk, domain, pubKeyBytes)
 	require.NoError(t, err)
 
 	// Send sign attestation request
