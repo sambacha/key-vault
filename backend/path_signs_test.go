@@ -9,7 +9,7 @@ import (
 
 	"github.com/prysmaticlabs/go-bitfield"
 
-	types "github.com/prysmaticlabs/eth2-types"
+	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
 
 	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
@@ -171,5 +171,46 @@ func TestSignAggregation(t *testing.T) {
 		require.NotNil(t, err)
 		require.EqualError(t, err, "failed to sign: account not found")
 		require.Nil(t, resp)
+	})
+}
+
+func TestSignRegistration(t *testing.T) {
+	b, _ := getBackend(t)
+
+	//t.Run("Sign Attestation in non existing key vault", func(t *testing.T) {
+	//	req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
+	//	setupBaseStorage(t, req)
+	//	_, err := b.HandleRequest(context.Background(), req)
+	//	require.EqualError(t, err, "failed to sign: failed to open key vault: wallet not found")
+	//})
+
+	t.Run("Sign validator registration", func(t *testing.T) {
+		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
+		setupBaseStorage(t, req)
+
+		// setup storage
+		err := setupStorageWithWalletAndAccounts(req.Storage)
+		require.NoError(t, err)
+
+		byts, err := encoderv2.New().Encode(&models.SignRequest{
+			PublicKey:       _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"),
+			SigningRoot:     nil,
+			SignatureDomain: _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac"),
+			Object: &models.SignRequestRegistration{
+				Registration: &ethpb.ValidatorRegistrationV1{
+					FeeRecipient: _byteArray("9831EeF7A86C19E32bEcDad091c1DbC974cf452a"),
+					GasLimit:     123456,
+					Timestamp:    1658313712,
+					Pubkey:       _byteArray("a27c45f7afe6c63363acf886cdad282539fb2cf58b304f2caa95f2ea53048b65a5d41d926c3562e3f18b8b61871375af"),
+				},
+			},
+		})
+		require.NoError(t, err)
+		req.Data = map[string]interface{}{
+			"sign_req": hex.EncodeToString(byts),
+		}
+		resp, err := b.HandleRequest(context.Background(), req)
+		require.Nil(t, err)
+		t.Logf("resp: %#v", resp)
 	})
 }

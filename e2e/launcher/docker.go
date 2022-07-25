@@ -73,6 +73,14 @@ func (l *Docker) Launch(ctx context.Context, name string) (*Config, error) {
 		return nil, errors.Wrap(err, "unable to get the port")
 	}
 
+	// Check if we're running inside a Docker container.
+	inDocker := false
+	vaultExternalAddr := "127.0.0.1"
+	if _, err := os.Stat("/.dockerenv"); err == nil {
+		inDocker = true
+		vaultExternalAddr = "172.17.0.1"
+	}
+
 	portBinding := nat.PortMap{
 		containerPort: []nat.PortBinding{{
 			HostIP:   "0.0.0.0",
@@ -84,7 +92,7 @@ func (l *Docker) Launch(ctx context.Context, name string) (*Config, error) {
 		&container.Config{
 			Image: l.imageName,
 			Env: []string{
-				"VAULT_EXTERNAL_ADDRESS=127.0.0.1",
+				fmt.Sprintf("VAULT_EXTERNAL_ADDRESS=%s", vaultExternalAddr),
 				"VAULT_CLIENT_TIMEOUT=30s",
 				"UNSEAL=true",
 			},
@@ -102,8 +110,24 @@ func (l *Docker) Launch(ctx context.Context, name string) (*Config, error) {
 		return nil, errors.Wrap(err, "failed to start container")
 	}
 
-	// Retrieve container IP address
+	// Get container IP address.
 	ip := "127.0.0.1"
+	if inDocker {
+		// Retrieve container config.
+		containerConfig, err := l.client.ContainerInspect(ctx, cont.ID)
+		if err != nil {
+			_ = l.Stop(ctx, cont.ID)
+			return nil, errors.Wrapf(err, "failed to inspect container with ID %s", cont.ID)
+		}
+
+		// Retrieve container IP address
+		for _, network := range containerConfig.NetworkSettings.Networks {
+			if len(network.Gateway) > 0 {
+				ip = network.Gateway
+				break
+			}
+		}
+	}
 
 	// Read logs so we can understand the plugin is loaded
 	logsStream, err := l.client.ContainerLogs(ctx, cont.ID, types.ContainerLogsOptions{

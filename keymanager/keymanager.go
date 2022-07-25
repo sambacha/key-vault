@@ -129,7 +129,7 @@ func (km *KeyManager) Sign(ctx context.Context, req *models.SignRequest) (bls.Si
 
 	byts, err := km.encoder.Encode(req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to encode request")
 	}
 	reqMap := map[string]interface{}{
 		"sign_req": hex.EncodeToString(byts),
