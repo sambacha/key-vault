@@ -1,11 +1,13 @@
 package backend
 
 import (
+	"bytes"
 	"context"
 	"encoding/hex"
 	"testing"
 
 	"github.com/bloxapp/key-vault/keymanager/models"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/prysmaticlabs/go-bitfield"
 
@@ -177,13 +179,6 @@ func TestSignAggregation(t *testing.T) {
 func TestSignRegistration(t *testing.T) {
 	b, _ := getBackend(t)
 
-	//t.Run("Sign Attestation in non existing key vault", func(t *testing.T) {
-	//	req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
-	//	setupBaseStorage(t, req)
-	//	_, err := b.HandleRequest(context.Background(), req)
-	//	require.EqualError(t, err, "failed to sign: failed to open key vault: wallet not found")
-	//})
-
 	t.Run("Sign validator registration", func(t *testing.T) {
 		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
 		setupBaseStorage(t, req)
@@ -213,4 +208,101 @@ func TestSignRegistration(t *testing.T) {
 		require.Nil(t, err)
 		t.Logf("resp: %#v", resp)
 	})
+}
+
+func TestValidateRequestedFeeRecipient(t *testing.T) {
+	recipient := func(lastByte byte) string { return hexutil.Encode(append(bytes.Repeat([]byte{0}, 19), lastByte)) }
+	pubKey := func(lastByte byte) string { return hexutil.Encode(append(bytes.Repeat([]byte{0}, 95), lastByte)) }
+
+	tests := []struct {
+		name               string
+		configured         FeeRecipients
+		requestedValidator string
+		requestedRecipient string
+		expectedErr        error
+	}{
+		{
+			name: "Good",
+			configured: FeeRecipients{
+				pubKey(1): recipient(1),
+				pubKey(2): recipient(2),
+				"default": recipient(3),
+			},
+			requestedValidator: pubKey(1),
+			requestedRecipient: recipient(1),
+			expectedErr:        nil,
+		},
+		{
+			name: "Default",
+			configured: FeeRecipients{
+				pubKey(1): recipient(1),
+				pubKey(2): recipient(2),
+				"default": recipient(3),
+			},
+			requestedValidator: pubKey(3),
+			requestedRecipient: recipient(3),
+			expectedErr:        nil,
+		},
+		{
+			name: "Wrong default",
+			configured: FeeRecipients{
+				pubKey(1): recipient(1),
+				pubKey(2): recipient(2),
+				"default": recipient(3),
+			},
+			requestedValidator: pubKey(3),
+			requestedRecipient: recipient(4),
+			expectedErr:        ErrFeeRecipientDiffers,
+		},
+		{
+			name: "Differs from configuration",
+			configured: FeeRecipients{
+				pubKey(1): recipient(1),
+				pubKey(2): recipient(2),
+				"default": recipient(3),
+			},
+			requestedValidator: pubKey(1),
+			requestedRecipient: recipient(2),
+			expectedErr:        ErrFeeRecipientDiffers,
+		},
+		{
+			name: "No such validator",
+			configured: FeeRecipients{
+				pubKey(1): recipient(1),
+				pubKey(2): recipient(2),
+			},
+			requestedValidator: pubKey(3),
+			requestedRecipient: recipient(2),
+			expectedErr:        ErrFeeRecipientNotSet,
+		},
+		{
+			name: "No such recipient",
+			configured: FeeRecipients{
+				pubKey(1): recipient(1),
+				pubKey(2): recipient(2),
+				"default": recipient(3),
+			},
+			requestedValidator: pubKey(1),
+			requestedRecipient: recipient(4),
+			expectedErr:        ErrFeeRecipientDiffers,
+		},
+		{
+			name: "Other validator's recipient",
+			configured: FeeRecipients{
+				pubKey(1): recipient(1),
+				pubKey(2): recipient(2),
+				"default": recipient(3),
+			},
+			requestedValidator: pubKey(1),
+			requestedRecipient: recipient(2),
+			expectedErr:        ErrFeeRecipientDiffers,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := validateRequestedFeeRecipient(hexutil.MustDecode(test.requestedValidator), test.configured, hexutil.MustDecode(test.requestedRecipient))
+			require.Equal(t, test.expectedErr, err)
+		})
+	}
 }
