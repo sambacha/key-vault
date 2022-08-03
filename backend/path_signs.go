@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/bloxapp/key-vault/keymanager/models"
+	"github.com/ethereum/go-ethereum/common"
 
 	wrapper2 "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
 
@@ -103,6 +104,10 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 				return err
 			}
 		case *models.SignRequestBlockV3:
+			err := validateRequestedFeeRecipient(signReq.PublicKey, config.FeeRecipients, t.BlockV3.Body.ExecutionPayload.FeeRecipient)
+			if err != nil {
+				return errors.Wrap(err, "refused to sign")
+			}
 			bellatrixBlk, err := wrapper2.WrappedBellatrixBeaconBlock(t.BlockV3)
 			if err != nil {
 				return errors.Wrap(err, "failed to wrap bellatrix block")
@@ -157,4 +162,20 @@ func (b *backend) lock(pubKeyBytes []byte, cb func() error) error {
 	lock.Unlock()
 
 	return err
+}
+
+var (
+	ErrFeeRecipientNotSet  = errors.New("fee recipient is not configured for public key")
+	ErrFeeRecipientDiffers = errors.New("requested fee recipient does not match configured fee recipient")
+)
+
+func validateRequestedFeeRecipient(pubKey []byte, configFeeRecipients FeeRecipients, requestedFeeRecipient []byte) error {
+	feeRecipient, ok := configFeeRecipients.Get(pubKey)
+	if !ok {
+		return ErrFeeRecipientNotSet
+	}
+	if feeRecipient != common.BytesToAddress(requestedFeeRecipient) {
+		return ErrFeeRecipientDiffers
+	}
+	return nil
 }
