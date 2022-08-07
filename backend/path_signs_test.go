@@ -190,7 +190,7 @@ func TestSignRegistration(t *testing.T) {
 		byts, err := encoderv2.New().Encode(&models.SignRequest{
 			PublicKey:       _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"),
 			SigningRoot:     nil,
-			SignatureDomain: _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac"),
+			SignatureDomain: _byteArray32("00000001d7a9bca8823e555db65bb772e1496a26e1a8c5b1c0c7def9c9eaf7f6"),
 			Object: &models.SignRequestRegistration{
 				Registration: &ethpb.ValidatorRegistrationV1{
 					FeeRecipient: _byteArray("9831EeF7A86C19E32bEcDad091c1DbC974cf452a"),
@@ -206,7 +206,9 @@ func TestSignRegistration(t *testing.T) {
 		}
 		resp, err := b.HandleRequest(context.Background(), req)
 		require.Nil(t, err)
-		t.Logf("resp: %#v", resp)
+		t.Logf("%#v", resp)
+		return
+		require.Equal(t, resp.Data["sig"], "b088d9d27c783f3d5eb57a0df1e99f030e035ebcfdeb745da95400ab46a0c461f05f61533379d3bc56c5e94dfdf8560d0a31cfb9162f11ba9a82522f4043764a02008f6fef3b0167cbf2db9a749095343412a38568fe39d14c3ebcdddad7ee36")
 	})
 }
 
