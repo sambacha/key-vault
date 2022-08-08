@@ -123,7 +123,9 @@ func TestSignProposal(t *testing.T) {
 
 	withEachBlockVersion(t, "Sign Proposal of unknown account", func(t *testing.T, blockVersion int) {
 		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
-		setupBaseStorage(t, req)
+		setupBaseStorage(t, req, func(c *Config) {
+			c.FeeRecipients["0x95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcd"] = "0x6a3f3ee924a940ce0d795c5a41a817607e520520"
+		})
 
 		// setup storage
 		err := setupStorageWithWalletAndAccounts(req.Storage)

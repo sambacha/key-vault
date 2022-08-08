@@ -8,8 +8,6 @@ import (
 
 	"github.com/bloxapp/key-vault/utils/encoder/encoderv2"
 
-	"github.com/prysmaticlabs/prysm/consensus-types/wrapper"
-
 	"github.com/bloxapp/eth2-key-manager/signer"
 
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
@@ -20,6 +18,7 @@ import (
 
 	"github.com/bloxapp/key-vault/e2e"
 	"github.com/bloxapp/key-vault/e2e/shared"
+	consensusblocks "github.com/prysmaticlabs/prysm/consensus-types/blocks"
 )
 
 // ProposalSigning tests sign proposal endpoint.
@@ -54,7 +53,7 @@ func (test *ProposalSigning) Run(t *testing.T) {
 	protector := slashingprotection.NewNormalProtection(storage)
 	var signer signer.ValidatorSigner = signer.NewSimpleSigner(wallet, protector, storage.Network())
 
-	wrappedBlk, err := wrapper.WrappedBeaconBlock(blk)
+	wrappedBlk, err := consensusblocks.NewBeaconBlock(blk)
 	require.NoError(t, err)
 	res, err := signer.SignBeaconBlock(wrappedBlk, domain, pubKeyBytes)
 	require.NoError(t, err)

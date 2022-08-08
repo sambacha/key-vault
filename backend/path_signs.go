@@ -8,14 +8,13 @@ import (
 	"github.com/bloxapp/key-vault/keymanager/models"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/prysmaticlabs/prysm/consensus-types/wrapper"
-
 	vault "github.com/bloxapp/eth2-key-manager"
 	"github.com/bloxapp/eth2-key-manager/signer"
 	slashingprotection "github.com/bloxapp/eth2-key-manager/slashing_protection"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
+	consensusblocks "github.com/prysmaticlabs/prysm/consensus-types/blocks"
 
 	"github.com/bloxapp/key-vault/backend/store"
 )
@@ -94,13 +93,13 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 
 		switch t := signReq.GetObject().(type) {
 		case *models.SignRequestBlock:
-			wrappedBlk, wrapErr := wrapper.WrappedBeaconBlock(t.Block)
+			wrappedBlk, wrapErr := consensusblocks.NewBeaconBlock(t.Block)
 			if err != nil {
 				return errors.Wrap(wrapErr, "failed to wrap Phase0 block")
 			}
 			sig, sigErr = simpleSigner.SignBeaconBlock(wrappedBlk, signReq.SignatureDomain, signReq.PublicKey)
 		case *models.SignRequestBlockV2:
-			wrappedBlk, wrapErr := wrapper.WrappedBeaconBlock(t.BlockV2)
+			wrappedBlk, wrapErr := consensusblocks.NewBeaconBlock(t.BlockV2)
 			if err != nil {
 				return errors.Wrap(wrapErr, "failed to wrap Altair block")
 			}
@@ -110,13 +109,13 @@ func (b *backend) pathSign(ctx context.Context, req *logical.Request, data *fram
 			if validateErr != nil {
 				return errors.Wrap(validateErr, "refused to sign")
 			}
-			wrappedBlk, wrapErr := wrapper.WrappedBeaconBlock(t.BlockV3)
+			wrappedBlk, wrapErr := consensusblocks.NewBeaconBlock(t.BlockV3)
 			if err != nil {
 				return errors.Wrap(wrapErr, "failed to wrap Bellatrix block")
 			}
 			sig, sigErr = simpleSigner.SignBeaconBlock(wrappedBlk, signReq.SignatureDomain, signReq.PublicKey)
 		case *models.SignRequestBlindedBlockV3:
-			wrappedBlk, wrapErr := wrapper.WrappedBeaconBlock(t.BlindedBlockV3)
+			wrappedBlk, wrapErr := consensusblocks.NewBeaconBlock(t.BlindedBlockV3)
 			if err != nil {
 				return errors.Wrap(wrapErr, "failed to wrap BlindedBellatrix block")
 			}

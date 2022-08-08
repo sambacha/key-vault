@@ -20,11 +20,22 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func basicProposalData(blockVersion int) map[string]interface{} {
-	return basicProposalDataWithOps(blockVersion, false, false, false, false)
+type signRequestModifier func(block *models.SignRequest)
+
+func signRequestWithFeeRecipient(feeRecipient []byte) signRequestModifier {
+	return func(req *models.SignRequest) {
+		switch obj := req.Object.(type) {
+		case *models.SignRequestBlockV3:
+			obj.BlockV3.Body.ExecutionPayload.FeeRecipient = feeRecipient
+		}
+	}
 }
 
-func basicProposalDataWithOps(blockVersion int, undefinedPubKey bool, differentStateRoot bool, differentParentRoot bool, differentBodyRoot bool) map[string]interface{} {
+func basicProposalData(blockVersion int, mods ...signRequestModifier) map[string]interface{} {
+	return basicProposalDataWithOps(blockVersion, false, false, false, false, mods...)
+}
+
+func basicProposalDataWithOps(blockVersion int, undefinedPubKey bool, differentStateRoot bool, differentParentRoot bool, differentBodyRoot bool, mods ...signRequestModifier) map[string]interface{} {
 	req := &models.SignRequest{
 		PublicKey:       _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"),
 		SigningRoot:     nil,
@@ -34,6 +45,10 @@ func basicProposalDataWithOps(blockVersion int, undefinedPubKey bool, differentS
 
 	if undefinedPubKey {
 		req.PublicKey = _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcd")
+	}
+
+	for _, mod := range mods {
+		mod(req)
 	}
 
 	byts, _ := encoderv2.New().Encode(req)
@@ -80,6 +95,8 @@ func basicSignRequestBlock(blockVersion int, differentStateRoot, differentParent
 			block.Body.Graffiti = bytesutil2.Bytes32(10)
 		}
 
+		block.Body.ExecutionPayload.FeeRecipient = _byteArray("6a3f3eE924A940ce0d795C5A41A817607e520520")
+
 		return &models.SignRequestBlockV3{BlockV3: block}
 	}
 
@@ -119,7 +136,9 @@ func TestProposalSlashing(t *testing.T) {
 
 	withEachBlockVersion(t, "Sign proposal with undefined account", func(t *testing.T, blockVersion int) {
 		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
-		setupBaseStorage(t, req)
+		setupBaseStorage(t, req, func(c *Config) {
+			c.FeeRecipients["0x95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcd"] = "0x6a3f3ee924a940ce0d795c5a41a817607e520520"
+		})
 
 		// setup storage
 		err := setupStorageWithWalletAndAccounts(req.Storage)
