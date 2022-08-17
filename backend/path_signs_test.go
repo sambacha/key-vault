@@ -182,23 +182,28 @@ func TestSignRegistration(t *testing.T) {
 	b, _ := getBackend(t)
 
 	t.Run("Sign validator registration", func(t *testing.T) {
+		pubKey := _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf")
+		feeRecipient := _byteArray("9831EeF7A86C19E32bEcDad091c1DbC974cf452a")
+
 		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
-		setupBaseStorage(t, req)
+		setupBaseStorage(t, req, func(c *Config) {
+			c.FeeRecipients = FeeRecipients{hexutil.Encode(pubKey): hexutil.Encode(feeRecipient)}
+		})
 
 		// setup storage
 		err := setupStorageWithWalletAndAccounts(req.Storage)
 		require.NoError(t, err)
 
 		byts, err := encoderv2.New().Encode(&models.SignRequest{
-			PublicKey:       _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"),
+			PublicKey:       pubKey,
 			SigningRoot:     nil,
-			SignatureDomain: _byteArray32("00000001d7a9bca8823e555db65bb772e1496a26e1a8c5b1c0c7def9c9eaf7f6"),
+			SignatureDomain: _byteArray32("00000001f5a5fd42d16a20302798ef6ed309979b43003d2320d9f0e8ea9831a9"),
 			Object: &models.SignRequestRegistration{
 				Registration: &ethpb.ValidatorRegistrationV1{
-					FeeRecipient: _byteArray("9831EeF7A86C19E32bEcDad091c1DbC974cf452a"),
+					FeeRecipient: feeRecipient,
 					GasLimit:     123456,
 					Timestamp:    1658313712,
-					Pubkey:       _byteArray("a27c45f7afe6c63363acf886cdad282539fb2cf58b304f2caa95f2ea53048b65a5d41d926c3562e3f18b8b61871375af"),
+					Pubkey:       pubKey,
 				},
 			},
 		})
@@ -208,9 +213,7 @@ func TestSignRegistration(t *testing.T) {
 		}
 		resp, err := b.HandleRequest(context.Background(), req)
 		require.Nil(t, err)
-		t.Logf("%#v", resp)
-		return
-		require.Equal(t, resp.Data["sig"], "b088d9d27c783f3d5eb57a0df1e99f030e035ebcfdeb745da95400ab46a0c461f05f61533379d3bc56c5e94dfdf8560d0a31cfb9162f11ba9a82522f4043764a02008f6fef3b0167cbf2db9a749095343412a38568fe39d14c3ebcdddad7ee36")
+		require.Equal(t, resp.Data["signature"], "ac1694a323372f7e40e5366d5ceb5167f23557c6415bdbab6e26f62f10de42b7e979238c6c00124846af6fd3d804961e084ba1ccd5280521fb75d81baf9ccac2450df00c7c749b711cdeb0dd5b9ffa0d7738369d25196ea839557377f3a7b356")
 	})
 }
 
