@@ -1,7 +1,7 @@
 #
 # STEP 1: Prepare environment
 #
-FROM golang:1.17 AS preparer
+FROM golang:1.18 AS preparer
 
 RUN apt-get update                                                        && \
   DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
@@ -29,7 +29,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflag
 #
 # STEP 3: Get vault image and copy the plugin
 #
-FROM vault:1.8.11 AS runner
+FROM vault:1.8.12 AS runner
 
 # Download dependencies
 RUN apk -v --update --no-cache add \

@@ -98,7 +98,7 @@ func (setup *BaseSetup) Sign(endpoint string, data map[string]interface{}, netwo
 	targetURL := fmt.Sprintf("%s/v1/ethereum/%s/accounts/%s", setup.baseURL, network, endpoint)
 	req, err := http.NewRequest(http.MethodPost, targetURL, bytes.NewBuffer(body))
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 	req.Header.Set("Authorization", "Bearer "+setup.RootKey)
 

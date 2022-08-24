@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -20,11 +21,22 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func basicProposalData(blockVersion int) map[string]interface{} {
-	return basicProposalDataWithOps(blockVersion, false, false, false, false)
+type signRequestModifier func(block *models.SignRequest)
+
+func signRequestWithFeeRecipient(feeRecipient []byte) signRequestModifier {
+	return func(req *models.SignRequest) {
+		switch obj := req.Object.(type) {
+		case *models.SignRequestBlockV3:
+			obj.BlockV3.Body.ExecutionPayload.FeeRecipient = feeRecipient
+		}
+	}
 }
 
-func basicProposalDataWithOps(blockVersion int, undefinedPubKey bool, differentStateRoot bool, differentParentRoot bool, differentBodyRoot bool) map[string]interface{} {
+func basicProposalData(blockVersion int, mods ...signRequestModifier) map[string]interface{} {
+	return basicProposalDataWithOps(blockVersion, false, false, false, false, mods...)
+}
+
+func basicProposalDataWithOps(blockVersion int, undefinedPubKey bool, differentStateRoot bool, differentParentRoot bool, differentBodyRoot bool, mods ...signRequestModifier) map[string]interface{} {
 	req := &models.SignRequest{
 		PublicKey:       _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcf"),
 		SigningRoot:     nil,
@@ -34,6 +46,10 @@ func basicProposalDataWithOps(blockVersion int, undefinedPubKey bool, differentS
 
 	if undefinedPubKey {
 		req.PublicKey = _byteArray("95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcd")
+	}
+
+	for _, mod := range mods {
+		mod(req)
 	}
 
 	byts, _ := encoderv2.New().Encode(req)
@@ -80,7 +96,32 @@ func basicSignRequestBlock(blockVersion int, differentStateRoot, differentParent
 			block.Body.Graffiti = bytesutil2.Bytes32(10)
 		}
 
+		block.Body.ExecutionPayload.FeeRecipient = _byteArray("6a3f3eE924A940ce0d795C5A41A817607e520520")
+
 		return &models.SignRequestBlockV3{BlockV3: block}
+
+	case version.BellatrixBlind:
+		block := &eth.BlindedBeaconBlockBellatrix{}
+		sszData, err := base64.StdEncoding.DecodeString("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")
+		if err != nil {
+			panic(err)
+		}
+		if err := block.UnmarshalSSZ(sszData); err != nil {
+			panic(err)
+		}
+
+		if differentStateRoot {
+			block.StateRoot = _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
+		}
+		if differentParentRoot {
+			block.ParentRoot = _byteArray32("01000000f071c66c6561d0b939feb15f513a019d99a84bd85635221e3ad42dac")
+		}
+		if differentBodyRoot {
+			block.Body.Graffiti = bytesutil2.Bytes32(10)
+		}
+
+		block.Body.ExecutionPayloadHeader.FeeRecipient = _byteArray("6a3f3eE924A940ce0d795C5A41A817607e520520")
+		return &models.SignRequestBlindedBlockV3{BlindedBlockV3: block}
 	}
 
 	panic("block version not supported")
@@ -89,6 +130,7 @@ func basicSignRequestBlock(blockVersion int, differentStateRoot, differentParent
 var testableBlockVersions = []int{
 	version.Phase0,
 	version.Bellatrix,
+	version.BellatrixBlind,
 }
 
 // withEachBlockVersion runs the given subtest for each block version.
@@ -119,7 +161,9 @@ func TestProposalSlashing(t *testing.T) {
 
 	withEachBlockVersion(t, "Sign proposal with undefined account", func(t *testing.T, blockVersion int) {
 		req := logical.TestRequest(t, logical.CreateOperation, "accounts/sign")
-		setupBaseStorage(t, req)
+		setupBaseStorage(t, req, func(c *Config) {
+			c.FeeRecipients["0x95087182937f6982ae99f9b06bd116f463f414513032e33a3d175d9662eddf162101fcf6ca2a9fedaded74b8047c5dcd"] = "0x6a3f3ee924a940ce0d795c5a41a817607e520520"
+		})
 
 		// setup storage
 		err := setupStorageWithWalletAndAccounts(req.Storage)

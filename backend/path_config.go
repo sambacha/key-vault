@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
@@ -20,8 +21,8 @@ const (
 
 // Config contains the configuration for each mount
 type Config struct {
-	Network       core.Network      `json:"network"`
-	FeeRecipients map[string]string `json:"fee_recipients"`
+	Network       core.Network  `json:"network"`
+	FeeRecipients FeeRecipients `json:"fee_recipients"`
 }
 
 // Map returns a map representation of the FeeRecipients.
@@ -90,7 +91,7 @@ func (b *backend) pathWriteConfig(ctx context.Context, req *logical.Request, dat
 	}
 
 	// Create storage entry
-	entry, err := logical.StorageEntryJSON("config", configBundle)
+	entry, err := logical.StorageEntryJSON("config", configBundle.Map())
 	if err != nil {
 		return nil, err
 	}
@@ -186,4 +187,19 @@ func (f *FeeRecipients) UnmarshalJSON(data []byte) error {
 	}
 	*f = feeRecipients
 	return nil
+}
+
+func (f FeeRecipients) Default() (common.Address, bool) {
+	if f["default"] == "" {
+		return common.Address{}, false
+	}
+	return common.HexToAddress(f["default"]), true
+}
+
+func (f FeeRecipients) Get(pubKey []byte) (common.Address, bool) {
+	pubKeyHex := hexutil.Encode(pubKey)
+	if f[pubKeyHex] == "" {
+		return f.Default()
+	}
+	return common.HexToAddress(f[pubKeyHex]), true
 }

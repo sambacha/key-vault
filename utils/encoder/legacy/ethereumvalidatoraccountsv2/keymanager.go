@@ -37,28 +37,3 @@ func NewSignRequestFromNewPrysm(newPrysm *validatorpb.SignRequest) (*SignRequest
 
 	return ret, nil
 }
-
-//func (m *SignRequest) toNewPrysm() (*validatorpb.SignRequest, error) {
-//	ret := &validatorpb.SignRequest{
-//		PublicKey:       m.PublicKey,
-//		SigningRoot:     m.SigningRoot,
-//		SignatureDomain: m.SignatureDomain,
-//	}
-//
-//	switch t := m.Object.(type) {
-//	case *SignRequest_AttestationData:
-//		ret.Object = &validatorpb.SignRequest_AttestationData{AttestationData: t.AttestationData.ToNewPrysm()}
-//	case *SignRequest_Block:
-//		ret.Object = &validatorpb.SignRequest_Block{Block: t.Block.ToNewPrysm()}
-//	case *SignRequest_Slot:
-//		ret.Object = &validatorpb.SignRequest_Slot{Slot: types.Slot(t.Slot)}
-//	case *SignRequest_Epoch:
-//		ret.Object = &validatorpb.SignRequest_Epoch{Epoch: types.Epoch(t.Epoch)}
-//	case *SignRequest_AggregateAttestationAndProof:
-//		ret.Object = &validatorpb.SignRequest_AggregateAttestationAndProof{AggregateAttestationAndProof: t.AggregateAttestationAndProof.ToNewPrysm()}
-//	default:
-//		return nil, errors.New("legacy sign request type not supported")
-//	}
-//
-//	return ret, nil
-//}

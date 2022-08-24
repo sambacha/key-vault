@@ -1,6 +1,6 @@
 package models
 
-import types "github.com/prysmaticlabs/eth2-types"
+import types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
 
 // SignRequestSyncCommitteeMessage struct for sign req committiee msg
 type SignRequestSyncCommitteeMessage struct {
