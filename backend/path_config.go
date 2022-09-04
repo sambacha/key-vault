@@ -189,6 +189,7 @@ func (f *FeeRecipients) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// Default returns the default fee recipient.
 func (f FeeRecipients) Default() (common.Address, bool) {
 	if f["default"] == "" {
 		return common.Address{}, false
@@ -196,6 +197,7 @@ func (f FeeRecipients) Default() (common.Address, bool) {
 	return common.HexToAddress(f["default"]), true
 }
 
+// Get returns the fee recipient for the given public key.
 func (f FeeRecipients) Get(pubKey []byte) (common.Address, bool) {
 	pubKeyHex := hexutil.Encode(pubKey)
 	if f[pubKeyHex] == "" {

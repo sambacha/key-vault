@@ -178,7 +178,10 @@ func (b *backend) lock(pubKeyBytes []byte, cb func() error) error {
 }
 
 var (
-	ErrFeeRecipientNotSet  = errors.New("fee recipient is not configured for public key")
+	// ErrFeeRecipientNotSet is returned when the fee recipient isn't set.
+	ErrFeeRecipientNotSet = errors.New("fee recipient is not configured for public key")
+
+	// ErrFeeRecipientDiffers is returned when the fee recipient does not match the requested one.
 	ErrFeeRecipientDiffers = errors.New("requested fee recipient does not match configured fee recipient")
 )
 
