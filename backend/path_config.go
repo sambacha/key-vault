@@ -2,11 +2,15 @@ package backend
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/bloxapp/eth2-key-manager/core"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
+	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
 )
 
 // Endpoints patterns
@@ -17,7 +21,16 @@ const (
 
 // Config contains the configuration for each mount
 type Config struct {
-	Network core.Network `json:"network"`
+	Network       core.Network  `json:"network"`
+	FeeRecipients FeeRecipients `json:"fee_recipients"`
+}
+
+// Map returns a map representation of the FeeRecipients.
+func (c Config) Map() map[string]interface{} {
+	return map[string]interface{}{
+		"network":        c.Network,
+		"fee_recipients": c.FeeRecipients,
+	}
 }
 
 func configPaths(b *backend) []*framework.Path {
@@ -48,6 +61,10 @@ func configPaths(b *backend) []*framework.Path {
 						string(core.MainNetwork),
 					},
 				},
+				"fee_recipients": {
+					Type:        framework.TypeMap,
+					Description: `Validator pubic keys and their associated fee recipient addresses.`,
+				},
 			},
 		},
 	}
@@ -64,8 +81,17 @@ func (b *backend) pathWriteConfig(ctx context.Context, req *logical.Request, dat
 		Network: network,
 	}
 
+	// Parse and validate the fee recipients (if given.)
+	if data, ok := data.Get("fee_recipients").(map[string]interface{}); ok {
+		recipients, err := ParseFeeRecipients(data)
+		if err != nil {
+			return nil, err
+		}
+		configBundle.FeeRecipients = recipients
+	}
+
 	// Create storage entry
-	entry, err := logical.StorageEntryJSON("config", configBundle)
+	entry, err := logical.StorageEntryJSON("config", configBundle.Map())
 	if err != nil {
 		return nil, err
 	}
@@ -77,9 +103,7 @@ func (b *backend) pathWriteConfig(ctx context.Context, req *logical.Request, dat
 
 	// Return the secret
 	return &logical.Response{
-		Data: map[string]interface{}{
-			"network": configBundle.Network,
-		},
+		Data: configBundle.Map(),
 	}, nil
 }
 
@@ -95,9 +119,7 @@ func (b *backend) pathReadConfig(ctx context.Context, req *logical.Request, data
 	}
 
 	return &logical.Response{
-		Data: map[string]interface{}{
-			"network": configBundle.Network,
-		},
+		Data: configBundle.Map(),
 	}, nil
 }
 
@@ -118,4 +140,66 @@ func (b *backend) readConfig(ctx context.Context, s logical.Storage) (*Config, e
 	}
 
 	return &result, nil
+}
+
+// FeeRecipients is a map of validator public keys and their associated fee recipient addresses.
+// Both the public key and the address are 0x-prefixed hex strings.
+type FeeRecipients map[string]string
+
+// ParseFeeRecipients parses & validates the fee recipients from a given map[string]interface{}
+func ParseFeeRecipients(input map[string]interface{}) (FeeRecipients, error) {
+	feeRecipients := FeeRecipients{}
+	for key, value := range input {
+		// Decode and validate the validator key,
+		var normalizedKey string
+		switch key {
+		case "default":
+			normalizedKey = "default"
+		default:
+			validatorPubkey, err := hexutil.Decode(key)
+			if err != nil || len(validatorPubkey) != fieldparams.BLSPubkeyLength {
+				return nil, errors.Wrap(err, "invalid fee_recipients provided")
+			}
+			normalizedKey = hexutil.Encode(validatorPubkey)
+		}
+
+		// Decode and validate the fee recipient address.
+		recipientAddrStr, _ := value.(string)
+		recipientAddr, err := hexutil.Decode(recipientAddrStr)
+		if err != nil || len(recipientAddr) != fieldparams.FeeRecipientLength {
+			return nil, errors.Wrap(err, "invalid fee_recipients provided")
+		}
+
+		feeRecipients[normalizedKey] = hexutil.Encode(recipientAddr)
+	}
+	return feeRecipients, nil
+}
+
+// UnmarshalJSON decodes JSON-encoded FeeRecipients with validation.
+func (f *FeeRecipients) UnmarshalJSON(data []byte) error {
+	var input map[string]interface{}
+	if err := json.Unmarshal(data, &input); err != nil {
+		return err
+	}
+	feeRecipients, err := ParseFeeRecipients(input)
+	if err != nil {
+		return err
+	}
+	*f = feeRecipients
+	return nil
+}
+
+func (f FeeRecipients) Default() (common.Address, bool) {
+	if f["default"] == "" {
+		return common.Address{}, false
+	}
+	return common.HexToAddress(f["default"]), true
+}
+
+func (f FeeRecipients) Get(pubKey []byte) (common.Address, bool) {
+	pubKeyHex := hexutil.Encode(pubKey)
+	if f[pubKeyHex] == "" {
+		return f.Default()
+	}
+	return common.HexToAddress(f[pubKeyHex]), true
 }

@@ -6,11 +6,11 @@
 
 Latest verified image digest hosted on Docker Hub.
 <!-- /TAG_START_MARKER/ -->
-```bloxstaking/key-vault:v1.4.0,bloxstaking/key-vault:latest```
+```bloxstaking/key-vault-rc:v1.5.0,bloxstaking/key-vault-rc:latest```
 <!-- /TAG_END_MARKER/ -->
 Use this hash when you `docker run` the image.
 <!-- /DIGEST_START_MARKER/ -->
-```sha256:9fdc47e294b1031cf8bb0ec1528f162631cdc4318c5d61882f096e67aed83dac```
+```sha256:c4f7dd9d424704f0272bb716e13b9f730c73c51e0f85b01e0ae80a7bf54a4817```
 <!-- /DIGEST_END_MARKER/ -->
 
 ## How to run?
@@ -21,7 +21,7 @@ Use docker run with the latest verified image digest:
 ֿֿ$ docker run -d --restart unless-stopped --cap-add=IPC_LOCK --name=key_vault\ 
   -v $(pwd)/data:/data -v $(pwd)/policies:/policies -p 8200:8200\ 
   -e VAULT_ADDR='http://127.0.0.1:8200/' -e VAULT_API_ADDR='http://127.0.0.1:8200/'\ 
-  -e VAULT_CLIENT_TIMEOUT='30s' -e UNSEAL=true bloxstaking/key-vault@sha256:9fdc47e294b1031cf8bb0ec1528f162631cdc4318c5d61882f096e67aed83dac
+  -e VAULT_CLIENT_TIMEOUT='30s' -e UNSEAL=true bloxstaking/key-vault@sha256:c4f7dd9d424704f0272bb716e13b9f730c73c51e0f85b01e0ae80a7bf54a4817
 ```
 <!-- /CMD_END_MARKER/ -->
 
@@ -304,7 +304,7 @@ path "ethereum/+/storage/slashing" {
 There are 2 types of tests in the project: end-to-end and unit ones.
 In order to run all tests including e2e ones you will need to do the following command:
 ```bash
-$ make test
+$ make full-test
 ``` 
 
 New e2e tests should be placed in `./e2e/tests` directory and implement `E2E` interface.

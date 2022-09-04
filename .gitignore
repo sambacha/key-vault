@@ -6,3 +6,4 @@ logs/*
 .idea
 keys
 .env
+.vscode/

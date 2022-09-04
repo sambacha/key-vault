@@ -1,11 +1,11 @@
 #
 # STEP 1: Prepare environment
 #
-FROM golang:1.15 AS preparer
+FROM golang:1.18 AS preparer
 
 RUN apt-get update                                                        && \
   DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
-    curl git zip unzip wget g++ python gcc jq                                \
+  curl git zip unzip wget g++ python gcc jq                                \
   && rm -rf /var/lib/apt/lists/*
 
 RUN go version
@@ -24,16 +24,16 @@ FROM preparer AS builder
 # Copy files and install app
 COPY . .
 RUN go get -d -v ./...
-RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags \"-static -lm\" -X main.Version=$(git describe --tags $(git rev-list --tags --max-count=1))" -o ethsign .
+RUN CGO_CFLAGS="-O -D__BLST_PORTABLE__" CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags \"-static -lm\" -X main.Version=$(git describe --tags $(git rev-list --tags --max-count=1))" -o ethsign .
 
 #
 # STEP 3: Get vault image and copy the plugin
 #
-FROM vault:1.8.1 AS runner
+FROM vault:1.8.12 AS runner
 
 # Download dependencies
 RUN apk -v --update --no-cache add \
-    bash ca-certificates curl openssl
+  bash ca-certificates curl openssl
 
 WORKDIR /vault/plugins/
 

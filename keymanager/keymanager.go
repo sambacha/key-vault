@@ -40,7 +40,7 @@ type IkeyManager interface {
 	FetchValidatingPublicKeys(_ context.Context) ([][48]byte, error)
 	FetchAllValidatingPublicKeys(_ context.Context) ([][48]byte, error)
 	Sign(_ context.Context, req *models.SignRequest) (bls.Signature, error)
-	sendRequest(method, path string, reqBody interface{}, respBody interface{}) error
+	sendRequest(_ context.Context, method, path string, reqBody interface{}, respBody interface{}) error
 }
 
 // KeyManager is a key manager that accesses a remote vault wallet daemon through HTTP connection.
@@ -55,6 +55,8 @@ type KeyManager struct {
 
 	log *logrus.Entry
 }
+
+var _ IkeyManager = (*KeyManager)(nil)
 
 // NewKeyManager is the constructor of KeyManager.
 func NewKeyManager(log *logrus.Entry, opts *Config) (*KeyManager, error) {
@@ -120,21 +122,21 @@ func (km *KeyManager) FetchAllValidatingPublicKeys(_ context.Context) ([][48]byt
 }
 
 // Sign implements IKeymanager interface.
-func (km *KeyManager) Sign(_ context.Context, req *models.SignRequest) (bls.Signature, error) {
+func (km *KeyManager) Sign(ctx context.Context, req *models.SignRequest) (bls.Signature, error) {
 	if bytex.ToBytes48(req.GetPublicKey()) != km.pubKey {
 		return nil, ErrNoSuchKey
 	}
 
 	byts, err := km.encoder.Encode(req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to encode request")
 	}
 	reqMap := map[string]interface{}{
 		"sign_req": hex.EncodeToString(byts),
 	}
 
 	var resp models.SignResponse
-	if err := km.sendRequest(http.MethodPost, backend.SignPattern, reqMap, &resp); err != nil {
+	if err := km.sendRequest(ctx, http.MethodPost, backend.SignPattern, reqMap, &resp); err != nil {
 		return nil, err
 	}
 
@@ -153,7 +155,7 @@ func (km *KeyManager) Sign(_ context.Context, req *models.SignRequest) (bls.Sign
 }
 
 // sendRequest implements the logic to work with HTTP requests.
-func (km *KeyManager) sendRequest(method, path string, reqBody interface{}, respBody interface{}) error {
+func (km *KeyManager) sendRequest(ctx context.Context, method, path string, reqBody interface{}, respBody interface{}) error {
 	networkPath, err := endpoint.Build(km.network, path)
 	if err != nil {
 		return NewGenericError(err, "could not build network path")
@@ -166,7 +168,7 @@ func (km *KeyManager) sendRequest(method, path string, reqBody interface{}, resp
 	}
 
 	// Prepare a new request
-	req, err := http.NewRequest(method, endpointStr, bytes.NewBuffer(payloadByts))
+	req, err := http.NewRequestWithContext(ctx, method, endpointStr, bytes.NewBuffer(payloadByts))
 	if err != nil {
 		return NewGenericError(err, "failed to create HTTP request")
 	}

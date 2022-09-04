@@ -8,13 +8,12 @@ import (
 	"github.com/bloxapp/eth2-key-manager/core"
 	"github.com/stretchr/testify/require"
 
+	"github.com/bloxapp/key-vault/backend"
 	"github.com/bloxapp/key-vault/e2e"
 )
 
 type configModel struct {
-	Data struct {
-		Network string `json:"network"`
-	} `json:"data"`
+	Data backend.Config `json:"data"`
 }
 
 // ConfigRead tests read config endpoint.
@@ -30,7 +29,7 @@ func (test *ConfigRead) Name() string {
 func (test *ConfigRead) Run(t *testing.T) {
 	setup := e2e.Setup(t)
 
-	// sign and save the valid aggregation
+	// read the config
 	configBytes, statusCode := setup.ReadConfig(t, core.PraterNetwork)
 	require.Equal(t, http.StatusOK, statusCode)
 

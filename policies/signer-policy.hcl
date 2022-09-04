@@ -17,3 +17,8 @@ path "ethereum/+/accounts/sign" {
 path "ethereum/+/version" {
   capabilities = ["read"]
 }
+
+# Ability to get config ("read")
+path "ethereum/+/config" {
+  capabilities = ["read"]
+}

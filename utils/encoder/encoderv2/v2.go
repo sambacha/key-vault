@@ -25,7 +25,7 @@ func (l *V2) Encode(obj interface{}) ([]byte, error) {
 	case *newPrysm.BeaconBlock:
 		return t.MarshalSSZ()
 	case *models.SignRequest:
-		return encodeSignReuqest(t)
+		return encodeSignRequest(t)
 	}
 	return nil, errors.New("type not supported")
 }

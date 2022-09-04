@@ -1,7 +1,7 @@
 package models
 
 import (
-	types "github.com/prysmaticlabs/eth2-types"
+	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 )
 
@@ -98,10 +98,26 @@ func (x *SignRequest) GetEpoch() types.Epoch {
 	return types.Epoch(0)
 }
 
-// GetBlockV2 return altair block
+// GetBlockV2 return an Altair block.
 func (x *SignRequest) GetBlockV2() *eth.BeaconBlockAltair {
 	if x, ok := x.GetObject().(*SignRequestBlockV2); ok {
 		return x.BlockV2
+	}
+	return nil
+}
+
+// GetBlockV3 return a Bellatrix block.
+func (x *SignRequest) GetBlockV3() *eth.BeaconBlockBellatrix {
+	if x, ok := x.GetObject().(*SignRequestBlockV3); ok {
+		return x.BlockV3
+	}
+	return nil
+}
+
+// GetBlockV3 return a Bellatrix block.
+func (x *SignRequest) GetBlindedBlockV3() *eth.BlindedBeaconBlockBellatrix {
+	if x, ok := x.GetObject().(*SignRequestBlindedBlockV3); ok {
+		return x.BlindedBlockV3
 	}
 	return nil
 }
@@ -126,6 +142,14 @@ func (x *SignRequest) GetContributionAndProof() *eth.ContributionAndProof {
 func (x *SignRequest) GetSyncCommitteeMessage() types.SSZBytes {
 	if x, ok := x.GetObject().(*SignRequestSyncCommitteeMessage); ok {
 		return x.Root
+	}
+	return nil
+}
+
+// GetRegistration return types SSZBytes
+func (x *SignRequest) GetRegistration() *eth.ValidatorRegistrationV1 {
+	if x, ok := x.GetObject().(*SignRequestRegistration); ok {
+		return x.Registration
 	}
 	return nil
 }

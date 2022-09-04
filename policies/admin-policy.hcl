@@ -27,3 +27,8 @@ path "ethereum/+/storage" {
 path "ethereum/+/storage/slashing" {
   capabilities = ["read"]
 }
+
+# Ability to create/update/read config
+path "ethereum/+/config" {
+  capabilities = ["create", "update", "read"]
+}
