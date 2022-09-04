@@ -36,8 +36,8 @@ Run linter:
   tags:
     - blox-infra-stage
   script:
-    - go get -u golang.org/x/lint/golint
-    - go get -u golang.org/x/tools/cmd/goimports
+    - go install golang.org/x/lint/golint@latest
+    - go install golang.org/x/tools/cmd/goimports@latest
     - ./scripts/lint.sh .
   only:
     - stage
@@ -48,7 +48,7 @@ Security check:
   tags:
     - blox-infra-stage
   script:
-    - curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s v2.5.0
+    - curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s v2.13.1
     - ./bin/gosec -exclude-dir e2e -exclude G402 ./...
   only:
     - stage
@@ -98,8 +98,8 @@ Run prod linter:
   tags:
     - blox-infra-prod
   script:
-    - go get -u golang.org/x/lint/golint
-    - go get -u golang.org/x/tools/cmd/goimports
+    - go install golang.org/x/lint/golint@latest
+    - go install golang.org/x/tools/cmd/goimports@latest
     - ./scripts/lint.sh .
   only:
     - master
@@ -110,7 +110,7 @@ Prod security check:
   tags:
     - blox-infra-stage
   script:
-    - curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s v2.5.0
+    - curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s v2.13.1
     - ./bin/gosec -exclude-dir e2e -exclude G402 ./...
   only:
     - master
