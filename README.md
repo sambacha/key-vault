@@ -10,7 +10,7 @@ Latest verified image digest hosted on Docker Hub.
 <!-- /TAG_END_MARKER/ -->
 Use this hash when you `docker run` the image.
 <!-- /DIGEST_START_MARKER/ -->
-```sha256:c1e5978b7eceb102ee6681490df68ddb21b77f153c5541bed76908022b27327f```
+```sha256:c4f7dd9d424704f0272bb716e13b9f730c73c51e0f85b01e0ae80a7bf54a4817```
 <!-- /DIGEST_END_MARKER/ -->
 
 ## How to run?
@@ -21,7 +21,7 @@ Use docker run with the latest verified image digest:
 ֿֿ$ docker run -d --restart unless-stopped --cap-add=IPC_LOCK --name=key_vault\ 
   -v $(pwd)/data:/data -v $(pwd)/policies:/policies -p 8200:8200\ 
   -e VAULT_ADDR='http://127.0.0.1:8200/' -e VAULT_API_ADDR='http://127.0.0.1:8200/'\ 
-  -e VAULT_CLIENT_TIMEOUT='30s' -e UNSEAL=true bloxstaking/key-vault@sha256:c1e5978b7eceb102ee6681490df68ddb21b77f153c5541bed76908022b27327f
+  -e VAULT_CLIENT_TIMEOUT='30s' -e UNSEAL=true bloxstaking/key-vault@sha256:c4f7dd9d424704f0272bb716e13b9f730c73c51e0f85b01e0ae80a7bf54a4817
 ```
 <!-- /CMD_END_MARKER/ -->
 
