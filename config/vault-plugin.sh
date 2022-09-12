@@ -36,15 +36,23 @@ else
 fi
 
 # Configuring networks
-echo "Configuring Prater Test network..."
-vault write ethereum/prater/config \
-    network="prater"
-echo "Configured Prater Test network"
+if vault read ethereum/prater/config; then
+  echo "ethereum/prater/config already exists"
+else
+  echo "Configuring Prater Test network..."
+  vault write ethereum/prater/config \
+      network="prater"
+  echo "Configured Prater Test network"
+fi
 
-echo "Configuring MainNet network..."
-vault write ethereum/mainnet/config \
-    network="mainnet"
-echo "Configured MainNet network"
+if vault read ethereum/mainnet/config; then
+  echo "ethereum/mainnet/config already exists"
+else
+  echo "Configuring MainNet network..."
+  vault write ethereum/mainnet/config \
+      network="mainnet"
+  echo "Configured MainNet network"
+fi
 
 TOKEN=$(cat /data/keys/vault.root.token)
 

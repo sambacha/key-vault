@@ -114,7 +114,7 @@ func (x *SignRequest) GetBlockV3() *eth.BeaconBlockBellatrix {
 	return nil
 }
 
-// GetBlockV3 return a Bellatrix block.
+// GetBlindedBlockV3 return a Bellatrix block.
 func (x *SignRequest) GetBlindedBlockV3() *eth.BlindedBeaconBlockBellatrix {
 	if x, ok := x.GetObject().(*SignRequestBlindedBlockV3); ok {
 		return x.BlindedBlockV3
