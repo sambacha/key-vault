@@ -27,7 +27,7 @@ jobs:
           if [[ $VERSION == *-rc ]]; then
             DOCKER_REPOSITORY="${DOCKER_REPOSITORY}-rc"
             VERSION=${VERSION%-*}
-            BRANCH=stage
+            BRANCH=os/capella-support
           fi
           DOCKER_IMAGE="${DOCKER_REPOSITORY}:${VERSION}"
           TAGS="$DOCKER_IMAGE"
