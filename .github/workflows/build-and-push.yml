@@ -24,7 +24,7 @@ jobs:
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
           fi
-          if [[ $VERSION == *-rc ]]; then
+          if [[ $VERSION == *-rc* ]]; then
             DOCKER_REPOSITORY="${DOCKER_REPOSITORY}-rc"
             VERSION=${VERSION%-*}
             BRANCH=os/capella-support-tag
