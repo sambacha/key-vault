@@ -21,5 +21,12 @@ lint:
 #Test
 .PHONY: full-test
 full-test:
-	@echo "Running the full test..."
+	@echo "Running the full tests"
 	@go test -tags blst_enabled -timeout 20m ${COV_CMD} -race -p 1 -v ./...
+
+#Gosec
+.PHONY: gosec
+gosec:
+	@echo "Running the gosec check"
+	curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s v2.15.0
+	./bin/gosec -exclude-dir e2e -exclude G402 ./...
