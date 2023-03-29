@@ -27,6 +27,7 @@ type SlashingHistory struct {
 	HighestProposal    *HighestProposal
 }
 
+// HighestProposal contains highest proposal data.
 type HighestProposal struct {
 	Slot phase0.Slot
 }
@@ -121,6 +122,11 @@ func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey []byt
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		defer func() {
+			if r := recover(); r != nil {
+				errs[0] = errors.New("panic: failed to retrieve highest attestation")
+			}
+		}()
 
 		var err error
 		highestAttestation, found, err := storage.RetrieveHighestAttestation(pubKey)
@@ -143,6 +149,11 @@ func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey []byt
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		defer func() {
+			if r := recover(); r != nil {
+				errs[1] = errors.New("panic: failed to retrieve highest proposal")
+			}
+		}()
 
 		proposal, found, err := storage.RetrieveHighestProposal(pubKey)
 		if err != nil {
