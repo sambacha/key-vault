@@ -6,11 +6,11 @@ import (
 	"encoding/json"
 	"sync"
 
+	"github.com/attestantio/go-eth2-client/spec/phase0"
 	vault "github.com/bloxapp/eth2-key-manager"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/pkg/errors"
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 
 	"github.com/bloxapp/key-vault/backend/store"
 )
@@ -23,8 +23,13 @@ const (
 
 // SlashingHistory contains slashing history data.
 type SlashingHistory struct {
-	HighestAttestation *eth.AttestationData
-	HighestProposal    *eth.BeaconBlock
+	HighestAttestation *phase0.AttestationData
+	HighestProposal    *HighestProposal
+}
+
+// HighestProposal contains highest proposal data.
+type HighestProposal struct {
+	Slot phase0.Slot
 }
 
 func storageSlashingDataPaths(b *backend) []*framework.Path {
@@ -113,27 +118,58 @@ func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey []byt
 	var wg sync.WaitGroup
 
 	// Fetch attestations
-	var highestAtt *eth.AttestationData
+	var highestAtt *phase0.AttestationData
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		defer func() {
+			if r := recover(); r != nil {
+				errs[0] = errors.New("panic: failed to retrieve highest attestation")
+			}
+		}()
 
-		highestAtt = storage.RetrieveHighestAttestation(pubKey)
-		if highestAtt == nil {
-			errs[0] = errors.Errorf("highest attestation is nil")
+		var err error
+		highestAttestation, found, err := storage.RetrieveHighestAttestation(pubKey)
+		if err != nil {
+			errs[0] = errors.Wrap(err, "failed to retrieve highest attestation")
+			return
 		}
+		if !found {
+			errs[0] = errors.New("highest attestation not found")
+			return
+		}
+		if highestAttestation == nil {
+			errs[0] = errors.New("highest attestation is nil")
+		}
+		highestAtt = highestAttestation
 	}()
 
 	// Fetch proposals
-	var proposal *eth.BeaconBlock
+	var highestProposal *HighestProposal
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		defer func() {
+			if r := recover(); r != nil {
+				errs[1] = errors.New("panic: failed to retrieve highest proposal")
+			}
+		}()
 
-		var err error
-		proposal = storage.RetrieveHighestProposal(pubKey)
-		if proposal == nil {
-			errs[1] = errors.Wrap(err, "highest proposal is nil")
+		proposal, found, err := storage.RetrieveHighestProposal(pubKey)
+		if err != nil {
+			errs[1] = errors.Wrap(err, "failed to retrieve highest proposal")
+			return
+		}
+		if !found {
+			errs[1] = errors.New("highest proposal not found")
+			return
+		}
+		if proposal == 0 {
+			errs[1] = errors.Wrap(err, "highest proposal is 0")
+		} else {
+			highestProposal = &HighestProposal{
+				Slot: proposal,
+			}
 		}
 	}()
 
@@ -147,7 +183,7 @@ func loadAccountSlashingHistory(storage *store.HashicorpVaultStore, pubKey []byt
 
 	slashingHistoryEncoded, err := json.Marshal(SlashingHistory{
 		HighestAttestation: highestAtt,
-		HighestProposal:    proposal,
+		HighestProposal:    highestProposal,
 	})
 	if err != nil {
 		return "", errors.Wrap(err, "failed to marshal slashing history")
