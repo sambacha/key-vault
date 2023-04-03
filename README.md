@@ -6,11 +6,11 @@
 
 Latest verified image digest hosted on Docker Hub.
 <!-- /TAG_START_MARKER/ -->
-```bloxstaking/key-vault:v1.6.0,bloxstaking/key-vault:latest```
+```bloxstaking/key-vault-rc:v1.6.1,bloxstaking/key-vault-rc:latest```
 <!-- /TAG_END_MARKER/ -->
 Use this hash when you `docker run` the image.
 <!-- /DIGEST_START_MARKER/ -->
-```sha256:2b73f3527789ef2d2556f9bf17dca6e2f731731b1d8cb6164b02d7899ef81660```
+```sha256:f075a11b03dfd7e60ac018d7c89e35079c1aaad2ee1692a16ab718e1494e1d0d```
 <!-- /DIGEST_END_MARKER/ -->
 
 ## How to run?
@@ -21,7 +21,7 @@ Use docker run with the latest verified image digest:
 ֿֿ$ docker run -d --restart unless-stopped --cap-add=IPC_LOCK --name=key_vault\ 
   -v $(pwd)/data:/data -v $(pwd)/policies:/policies -p 8200:8200\ 
   -e VAULT_ADDR='http://127.0.0.1:8200/' -e VAULT_API_ADDR='http://127.0.0.1:8200/'\ 
-  -e VAULT_CLIENT_TIMEOUT='30s' -e UNSEAL=true bloxstaking/key-vault@sha256:2b73f3527789ef2d2556f9bf17dca6e2f731731b1d8cb6164b02d7899ef81660
+  -e VAULT_CLIENT_TIMEOUT='30s' -e UNSEAL=true bloxstaking/key-vault@sha256:f075a11b03dfd7e60ac018d7c89e35079c1aaad2ee1692a16ab718e1494e1d0d
 ```
 <!-- /CMD_END_MARKER/ -->
 
